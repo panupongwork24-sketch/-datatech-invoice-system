@@ -13,7 +13,8 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, v); } catch { /* private mode */ } },
 };
 
-const content = await fetch('content.json').then((r) => r.json());
+// Single-file build embeds the content as window.__SF_CONTENT; otherwise load content.json.
+const content = window.__SF_CONTENT || await fetch('content.json').then((r) => r.json());
 let lang = store.get('sf-lang') || content.meta.defaultLang || 'en';
 
 /* ---------------- renderer / scene ---------------- */

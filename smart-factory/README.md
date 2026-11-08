@@ -16,6 +16,19 @@ It can also be deployed as-is to any static host (Netlify, GitHub Pages, S3, an 
 Three.js and GSAP are vendored in `vendor/`, so the presentation works offline at a customer site
 (only the Google Fonts request needs internet; system fonts are used as a fallback).
 
+### Single HTML file (double-click, no server)
+
+`dist/smart-factory.html` is the whole presentation in **one file** (≈4 MB): code, Three.js, GSAP,
+content and all photos are embedded. Open it directly in Chrome / Edge / Safari or send it to a customer.
+
+After editing `content.json` or adding photos, rebuild it:
+
+```bash
+cd smart-factory
+npm install          # once
+npm run build:html   # → dist/smart-factory.html
+```
+
 URL options: `?autoplay=1` starts in Auto-play mode, `?fps` shows a frame-rate counter.
 
 ## Controls

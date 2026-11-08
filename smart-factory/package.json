@@ -1,0 +1,11 @@
+{
+  "name": "smart-factory-walkthrough",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:html": "node tools/build-html.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.0"
+  }
+}
