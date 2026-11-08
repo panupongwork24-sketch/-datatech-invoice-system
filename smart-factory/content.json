@@ -1,0 +1,917 @@
+{
+  "meta": {
+    "title": {
+      "en": "Smart Factory Walkthrough",
+      "th": "Smart Factory Walkthrough"
+    },
+    "defaultLang": "en",
+    "customer": "Automotive OEM"
+  },
+  "ui": {
+    "en": {
+      "title": "Smart Factory Walkthrough",
+      "present": "Auto-play",
+      "explore": "Free explore",
+      "showAll": "Show all devices",
+      "hideAll": "Hide labels",
+      "xray": "X-ray",
+      "zones": "Zones",
+      "scene": "Scene",
+      "hint": "Hover or tap a device to see details. Drag to orbit, pinch / scroll to zoom.",
+      "howItWorks": "How it works",
+      "problem": "Problem",
+      "result": "Result",
+      "imagePlaceholder": "Image placeholder — add file:",
+      "photo": "Photo",
+      "play": "Play",
+      "pause": "Pause"
+    },
+    "th": {
+      "title": "Smart Factory Walkthrough",
+      "present": "เล่นอัตโนมัติ",
+      "explore": "สำรวจเอง",
+      "showAll": "แสดงทั้งหมด",
+      "hideAll": "ซ่อนป้าย",
+      "xray": "X-ray",
+      "zones": "โซน",
+      "scene": "ฉาก",
+      "hint": "ชี้หรือแตะที่อุปกรณ์เพื่อดูรายละเอียด ลากเพื่อหมุน ถ่างนิ้ว / เลื่อนเพื่อซูม",
+      "howItWorks": "วิธีการทำงาน",
+      "problem": "ปัญหา",
+      "result": "ผลลัพธ์",
+      "imagePlaceholder": "ยังไม่มีรูป — ใส่ไฟล์:",
+      "photo": "ภาพ",
+      "play": "เล่น",
+      "pause": "หยุด"
+    }
+  },
+  "zones": {
+    "gate": {
+      "en": "Gate",
+      "th": "ประตูทางเข้า"
+    },
+    "dock": {
+      "en": "Dock",
+      "th": "Dock รับสินค้า"
+    },
+    "warehouse": {
+      "en": "Warehouse",
+      "th": "คลังสินค้า"
+    },
+    "amr": {
+      "en": "Intralogistics",
+      "th": "ขนส่งภายใน"
+    },
+    "production": {
+      "en": "Production Line",
+      "th": "ไลน์ผลิต"
+    },
+    "office": {
+      "en": "Office",
+      "th": "สำนักงาน"
+    },
+    "infra": {
+      "en": "Server Room",
+      "th": "ห้อง Server"
+    }
+  },
+  "scenes": {
+    "overview": {
+      "en": {
+        "title": "Overview",
+        "caption": "A connected factory for an Automotive OEM supplier: from the gate to finished goods, every device shares live data on one network."
+      },
+      "th": {
+        "title": "ภาพรวมโรงงาน",
+        "caption": "โรงงานที่เชื่อมต่อกันทั้งระบบสำหรับซัพพลายเออร์ Automotive OEM ตั้งแต่ประตูทางเข้าจนถึงสินค้าสำเร็จรูป ทุกอุปกรณ์แชร์ข้อมูลสดบนเครือข่ายเดียว"
+      }
+    },
+    "gate": {
+      "en": {
+        "title": "Gate · Visitor Management",
+        "caption": "Visitors check in at the kiosk and get a badge, while vehicles pass the automatic barrier after plate recognition."
+      },
+      "th": {
+        "title": "ประตู · ระบบจัดการผู้มาติดต่อ",
+        "caption": "ผู้มาติดต่อลงทะเบียนที่ตู้ Kiosk และรับบัตรผ่าน ส่วนรถผ่านไม้กั้นอัตโนมัติหลังอ่านป้ายทะเบียน"
+      }
+    },
+    "dock": {
+      "en": {
+        "title": "Dock · RFID Receiving",
+        "caption": "A forklift carries a tagged pallet through the RFID portal, the tags are read in a second and the status turns green."
+      },
+      "th": {
+        "title": "Dock · รับสินค้าด้วย RFID",
+        "caption": "Forklift ขนพาเลทที่ติดแท็กผ่านประตู RFID ระบบอ่านแท็กภายใน 1 วินาที และสถานะเปลี่ยนเป็นสีเขียว"
+      }
+    },
+    "warehouse": {
+      "en": {
+        "title": "Warehouse · Hybrid RTLS, ESL, Pick-to-Light",
+        "caption": "RFID anchors and AI Vision track every asset live. ESL labels show live stock and Pick-to-Light guides each pick."
+      },
+      "th": {
+        "title": "คลังสินค้า · Hybrid RTLS, ESL, Pick-to-Light",
+        "caption": "RFID Anchor และ AI Vision ติดตามทรัพย์สินทุกชิ้นแบบสด ป้าย ESL แสดงสต็อกจริง และ Pick-to-Light นำทางการหยิบ"
+      }
+    },
+    "intralogistics": {
+      "en": {
+        "title": "Intralogistics · AMR",
+        "caption": "AMRs take material from the warehouse to the line and hand it over to the conveyor automatically."
+      },
+      "th": {
+        "title": "ขนส่งภายใน · AMR",
+        "caption": "AMR ขนวัตถุดิบจากคลังไปที่ไลน์และส่งต่อเข้าสายพานโดยอัตโนมัติ"
+      }
+    },
+    "production": {
+      "en": {
+        "title": "Production Line · MES",
+        "caption": "MES connects every station: Digital WI, mold QR traceability, AI Vision OK/NG, auto-labelling of OK parts only, line-side ESL and RFID Kanban."
+      },
+      "th": {
+        "title": "ไลน์ผลิต · MES",
+        "caption": "MES เชื่อมทุกสถานี: Digital WI, QR Traceability ของแม่พิมพ์, AI Vision OK/NG, ติดฉลากเฉพาะชิ้น OK, ESL ข้างไลน์ และ RFID Kanban"
+      }
+    },
+    "office": {
+      "en": {
+        "title": "Office · CMMS, PR→PO, Workforce",
+        "caption": "Back-office systems send work orders, purchase status and staff assignments straight to the line (beams of light)."
+      },
+      "th": {
+        "title": "สำนักงาน · CMMS, PR→PO, บริหารพนักงาน",
+        "caption": "ระบบสำนักงานส่งใบงาน สถานะการสั่งซื้อ และการมอบหมายงานตรงไปที่ไลน์ (เส้นแสง)"
+      }
+    },
+    "infra": {
+      "en": {
+        "title": "Infrastructure · X-ray",
+        "caption": "Looking through the floor: the fiber backbone (teal) links every zone to the core, and LAN (amber) connects each device."
+      },
+      "th": {
+        "title": "โครงสร้างพื้นฐาน · โหมด X-ray",
+        "caption": "มองทะลุพื้น: Fiber Backbone (สีเขียวอมฟ้า) เชื่อมทุกโซนเข้ากับศูนย์กลาง และ LAN (สีเหลืองอำพัน) เชื่อมแต่ละอุปกรณ์"
+      }
+    },
+    "highlight": {
+      "en": {
+        "title": "Everything Connected",
+        "caption": "One event, five systems: watch a low-stock signal travel through the factory and resolve itself.",
+        "steps": [
+          "Line-side ESL turns red – material is low",
+          "MES receives the signal and issues a replenishment order",
+          "Pick-to-Light lights up in the warehouse",
+          "AMR delivers the material to the line",
+          "ESL turns green again – no line stop"
+        ]
+      },
+      "th": {
+        "title": "ทุกระบบเชื่อมกัน",
+        "caption": "เหตุการณ์เดียว ห้าระบบ: ดูสัญญาณของใกล้หมดวิ่งผ่านโรงงานและแก้ปัญหาได้เอง",
+        "steps": [
+          "ESL ข้างไลน์เปลี่ยนเป็นสีแดง – วัตถุดิบใกล้หมด",
+          "MES รับสัญญาณและออกคำสั่งเติมของ",
+          "Pick-to-Light ในคลังติดไฟ",
+          "AMR ส่งวัตถุดิบไปที่ไลน์",
+          "ESL กลับเป็นสีเขียว – ไลน์ไม่หยุด"
+        ]
+      }
+    }
+  },
+  "devices": {
+    "visitor-kiosk": {
+      "zone": "gate",
+      "image": "assets/img/visitor-kiosk.jpg",
+      "credit": "",
+      "en": {
+        "name": "Visitor Kiosk",
+        "function": "Self-service check-in for visitors and contractors at the main gate.",
+        "how": [
+          "Visitor scans ID card or pre-registration QR code",
+          "Kiosk takes a photo and checks the visitor list / safety briefing",
+          "Badge is printed and the host is notified automatically"
+        ],
+        "problem": "Paper logbooks, long queues at the guard house and no real-time list of who is on site.",
+        "result": "Check-in in under 1 minute, a digital visitor log and an accurate headcount for emergencies."
+      },
+      "th": {
+        "name": "ตู้ลงทะเบียนผู้มาติดต่อ (Visitor Kiosk)",
+        "function": "ให้ผู้มาติดต่อและผู้รับเหมาลงทะเบียนด้วยตนเองที่ประตูหน้า",
+        "how": [
+          "ผู้มาติดต่อสแกนบัตรประชาชนหรือ QR ที่ลงทะเบียนล่วงหน้า",
+          "ตู้ถ่ายรูปและตรวจรายชื่อ / การอบรมความปลอดภัย",
+          "พิมพ์บัตรผ่านและแจ้งผู้ที่นัดหมายโดยอัตโนมัติ"
+        ],
+        "problem": "ใช้สมุดลงชื่อแบบกระดาษ ต่อคิวนานที่ป้อม และไม่รู้แบบ real-time ว่าใครอยู่ในโรงงาน",
+        "result": "ลงทะเบียนเสร็จภายใน 1 นาที มีประวัติแบบดิจิทัล และนับจำนวนคนได้แม่นยำเมื่อเกิดเหตุฉุกเฉิน"
+      }
+    },
+    "boom-barrier": {
+      "zone": "gate",
+      "image": "assets/img/boom-barrier.jpg",
+      "credit": "",
+      "en": {
+        "name": "Automatic Boom Barrier",
+        "function": "Controls vehicle access with plate recognition / badge reading.",
+        "how": [
+          "Camera reads the licence plate or the driver taps a badge",
+          "System checks the booking / whitelist",
+          "Barrier opens, entry time is logged, and it closes after the vehicle passes"
+        ],
+        "problem": "Guards check every vehicle by hand; no record of truck arrival times.",
+        "result": "Faster gate flow, every entry logged, and truck arrival data linked to dock scheduling."
+      },
+      "th": {
+        "name": "ไม้กั้นอัตโนมัติ (Boom Barrier)",
+        "function": "ควบคุมการเข้า-ออกของยานพาหนะด้วยการอ่านป้ายทะเบียน / บัตร",
+        "how": [
+          "กล้องอ่านป้ายทะเบียน หรือผู้ขับแตะบัตร",
+          "ระบบตรวจสอบการจองคิว / รายชื่อที่อนุญาต",
+          "ไม้กั้นยกขึ้น บันทึกเวลาเข้า และปิดเองเมื่อรถผ่าน"
+        ],
+        "problem": "รปภ. ต้องตรวจทุกคันด้วยมือ ไม่มีบันทึกเวลารถบรรทุกเข้า",
+        "result": "รถผ่านประตูเร็วขึ้น บันทึกทุกการเข้า-ออก และเชื่อมข้อมูลเวลามาถึงกับตารางคิว Dock"
+      }
+    },
+    "visitor-badge": {
+      "zone": "gate",
+      "image": "assets/img/visitor-badge.jpg",
+      "credit": "",
+      "en": {
+        "name": "Visitor Badge (QR / RFID)",
+        "function": "Temporary pass that defines where a visitor may go and for how long.",
+        "how": [
+          "Badge is printed with photo, host and allowed zones",
+          "Visitor taps the badge at doors and turnstiles",
+          "Badge expires automatically at the end of the visit"
+        ],
+        "problem": "Visitors wander into restricted areas; badges are never returned.",
+        "result": "Zone-based access, automatic expiry and a full trail of where each visitor went."
+      },
+      "th": {
+        "name": "บัตรผ่านผู้มาติดต่อ (QR / RFID)",
+        "function": "บัตรชั่วคราวที่กำหนดว่าผู้มาติดต่อเข้าโซนไหนได้และนานแค่ไหน",
+        "how": [
+          "พิมพ์บัตรพร้อมรูป ชื่อผู้นัดหมาย และโซนที่อนุญาต",
+          "ผู้มาติดต่อแตะบัตรที่ประตูหรือ turnstile",
+          "บัตรหมดอายุเองเมื่อสิ้นสุดการเยี่ยมชม"
+        ],
+        "problem": "ผู้มาติดต่อเดินเข้าพื้นที่หวงห้าม และไม่คืนบัตร",
+        "result": "ควบคุมสิทธิ์ตามโซน บัตรหมดอายุอัตโนมัติ และตรวจย้อนได้ว่าแต่ละคนไปที่ไหน"
+      }
+    },
+    "rfid-dock-portal": {
+      "zone": "dock",
+      "image": "assets/img/rfid-dock-portal.jpg",
+      "credit": "",
+      "en": {
+        "name": "RFID Dock Gate",
+        "function": "Reads every tagged pallet that passes the dock door — no scanning by hand.",
+        "how": [
+          "Forklift carries pallets through the antenna portal",
+          "All RFID tags are read at once in about a second",
+          "Goods receipt is posted to the WMS / ERP and the status turns green"
+        ],
+        "problem": "Receiving staff scan each carton barcode; counting mistakes and slow unloading.",
+        "result": "Hands-free receiving, accurate quantities against the ASN, and unloading up to 3× faster."
+      },
+      "th": {
+        "name": "ประตูอ่าน RFID ที่ Dock (RFID Dock Gate)",
+        "function": "อ่านพาเลทที่ติดแท็กทุกพาเลทเมื่อผ่านประตู Dock โดยไม่ต้องยิงบาร์โค้ด",
+        "how": [
+          "Forklift ขนพาเลทผ่านเสาเสาอากาศ",
+          "อ่านแท็ก RFID ทั้งหมดพร้อมกันในเวลาประมาณ 1 วินาที",
+          "ระบบบันทึกรับสินค้าเข้า WMS / ERP และสถานะเปลี่ยนเป็นสีเขียว"
+        ],
+        "problem": "พนักงานต้องยิงบาร์โค้ดทีละกล่อง นับผิด และขนถ่ายช้า",
+        "result": "รับสินค้าโดยไม่ต้องใช้มือ จำนวนตรงกับ ASN และขนถ่ายเร็วขึ้นสูงสุด 3 เท่า"
+      }
+    },
+    "pallet-rfid-tag": {
+      "zone": "dock",
+      "image": "assets/img/pallet-rfid-tag.jpg",
+      "credit": "",
+      "en": {
+        "name": "Pallet RFID Tag",
+        "function": "Passive UHF tag that gives every pallet a unique digital identity.",
+        "how": [
+          "Tag is encoded and applied at the supplier or at receiving",
+          "Readers at doors and in the warehouse detect it automatically",
+          "Pallet history (lot, location, time) is kept in the system"
+        ],
+        "problem": "Pallet labels get damaged or unreadable; pallets are lost inside the warehouse.",
+        "result": "Every pallet is traceable end-to-end and found in seconds."
+      },
+      "th": {
+        "name": "แท็ก RFID ติดพาเลท",
+        "function": "แท็ก UHF แบบ passive ที่ทำให้ทุกพาเลทมีตัวตนดิจิทัลไม่ซ้ำกัน",
+        "how": [
+          "เขียนข้อมูลและติดแท็กที่ซัพพลายเออร์หรือตอนรับสินค้า",
+          "เครื่องอ่านที่ประตูและในคลังตรวจจับได้เอง",
+          "ระบบเก็บประวัติพาเลท (Lot, ตำแหน่ง, เวลา)"
+        ],
+        "problem": "ฉลากพาเลทชำรุดอ่านไม่ได้ และหาพาเลทในคลังไม่เจอ",
+        "result": "ตรวจย้อนกลับได้ทุกพาเลทตั้งแต่ต้นจนจบ และหาเจอได้ในไม่กี่วินาที"
+      }
+    },
+    "dock-status-light": {
+      "zone": "dock",
+      "image": "assets/img/dock-status-light.jpg",
+      "credit": "",
+      "en": {
+        "name": "Dock Status Light & Board",
+        "function": "Shows the dock team the live receiving status at a glance.",
+        "how": [
+          "Light turns amber when a pallet approaches the portal",
+          "Turns green when all tags are read and match the ASN",
+          "Board shows received vs expected pallets in real time"
+        ],
+        "problem": "Staff walk back and forth to a PC to check whether a delivery is complete.",
+        "result": "Instant visual confirmation and fewer receiving errors."
+      },
+      "th": {
+        "name": "ไฟสถานะและจอแสดงผล Dock",
+        "function": "แสดงสถานะการรับสินค้าแบบ real-time ให้ทีม Dock เห็นได้ทันที",
+        "how": [
+          "ไฟเปลี่ยนเป็นสีเหลืองเมื่อมีพาเลทเข้าใกล้ประตู",
+          "เปลี่ยนเป็นสีเขียวเมื่ออ่านแท็กครบและตรงกับ ASN",
+          "จอแสดงจำนวนพาเลทที่รับแล้วเทียบกับที่คาดไว้"
+        ],
+        "problem": "พนักงานต้องเดินไปเช็กที่คอมพิวเตอร์ว่ารับของครบหรือยัง",
+        "result": "เห็นผลยืนยันทันที และลดข้อผิดพลาดในการรับสินค้า"
+      }
+    },
+    "rfid-label-printer": {
+      "zone": "dock",
+      "image": "assets/img/rfid-label-printer.jpg",
+      "credit": "",
+      "brand": "SATO",
+      "en": {
+        "name": "RFID Label Printer",
+        "function": "Prints barcode labels and encodes RFID tags in a single pass.",
+        "how": [
+          "System sends pallet / lot data to the printer",
+          "Printer encodes the RFID chip and prints the human-readable label",
+          "Printer checks the encoding and rejects any bad tag"
+        ],
+        "problem": "Separate printing and encoding steps; bad tags are found only at the dock.",
+        "result": "Verified tags on every pallet, ready for hands-free receiving and tracking."
+      },
+      "th": {
+        "name": "เครื่องพิมพ์ฉลาก RFID",
+        "function": "พิมพ์ฉลากบาร์โค้ดและเขียนข้อมูลลงแท็ก RFID ได้ในขั้นตอนเดียว",
+        "how": [
+          "ระบบส่งข้อมูลพาเลท / Lot ไปที่เครื่องพิมพ์",
+          "เครื่องเขียนข้อมูลลงชิป RFID และพิมพ์ฉลากที่คนอ่านได้",
+          "เครื่องตรวจสอบการเขียน และคัดแท็กที่เสียออก"
+        ],
+        "problem": "พิมพ์และเขียนแท็กแยกกัน แท็กเสียจะรู้ก็ตอนถึง Dock แล้ว",
+        "result": "ทุกพาเลทมีแท็กที่ผ่านการตรวจสอบ พร้อมรับสินค้าและติดตามแบบไม่ต้องใช้มือ"
+      }
+    },
+    "rtls-rfid-anchor": {
+      "zone": "warehouse",
+      "image": "assets/img/rtls-rfid-anchor.jpg",
+      "credit": "",
+      "en": {
+        "name": "Hybrid RTLS – RFID Anchor",
+        "function": "Ceiling readers that locate tagged pallets, forklifts and people in real time.",
+        "how": [
+          "Anchors continuously read tags in their area",
+          "Location is calculated from several anchors (trilateration)",
+          "Position is fused with AI Vision and shown on the live map"
+        ],
+        "problem": "Nobody knows exactly where a pallet or forklift is; time is wasted searching.",
+        "result": "Live location of assets to within about 1 m and search time cut by up to 80%."
+      },
+      "th": {
+        "name": "Hybrid RTLS – เสาอากาศ RFID",
+        "function": "เครื่องอ่านบนเพดานที่ระบุตำแหน่งพาเลท, Forklift และคนแบบ real-time",
+        "how": [
+          "Anchor อ่านแท็กในพื้นที่ของตัวเองตลอดเวลา",
+          "คำนวณตำแหน่งจาก Anchor หลายตัว (Trilateration)",
+          "รวมกับข้อมูล AI Vision แล้วแสดงบนแผนที่สด"
+        ],
+        "problem": "ไม่รู้ว่าพาเลทหรือ Forklift อยู่ตรงไหน เสียเวลาค้นหา",
+        "result": "รู้ตำแหน่งทรัพย์สินแบบสดๆ แม่นยำราว 1 เมตร และลดเวลาค้นหาได้ถึง 80%"
+      }
+    },
+    "ai-vision-camera-wh": {
+      "zone": "warehouse",
+      "image": "assets/img/ai-vision-camera-wh.jpg",
+      "credit": "",
+      "en": {
+        "name": "Hybrid RTLS – AI Vision Camera",
+        "function": "Camera with AI that recognises forklifts, pallets and people to refine positions.",
+        "how": [
+          "Camera streams video to an edge AI box",
+          "AI detects objects and draws bounding boxes",
+          "Detections are matched with RFID reads for precise, confirmed location"
+        ],
+        "problem": "RFID alone can be blocked by metal or liquids; blind spots in the warehouse.",
+        "result": "Higher accuracy, safety alerts (people near forklifts) and visual proof of each move."
+      },
+      "th": {
+        "name": "Hybrid RTLS – กล้อง AI Vision",
+        "function": "กล้องที่มี AI จดจำ Forklift, พาเลท และคน เพื่อเพิ่มความแม่นยำของตำแหน่ง",
+        "how": [
+          "กล้องส่งภาพไปที่กล่อง Edge AI",
+          "AI ตรวจจับวัตถุและตีกรอบ",
+          "จับคู่กับข้อมูล RFID เพื่อยืนยันตำแหน่งที่แม่นยำ"
+        ],
+        "problem": "RFID อย่างเดียวอาจถูกบังด้วยโลหะหรือของเหลว ทำให้มีจุดบอดในคลัง",
+        "result": "แม่นยำขึ้น มีการแจ้งเตือนความปลอดภัย (คนเข้าใกล้ Forklift) และมีภาพยืนยันทุกการเคลื่อนย้าย"
+      }
+    },
+    "esl-shelf": {
+      "zone": "warehouse",
+      "image": "assets/img/esl-shelf.jpg",
+      "credit": "",
+      "en": {
+        "name": "Electronic Shelf Label (ESL)",
+        "function": "E-paper labels on racks that show live item, quantity and location data.",
+        "how": [
+          "WMS sends updates over the wireless ESL network",
+          "Label refreshes in seconds (and can flash an LED)",
+          "Staff see the correct SKU and stock without a printed label"
+        ],
+        "problem": "Paper rack labels are outdated; stock on the label never matches the system.",
+        "result": "Always-correct location labels, no reprinting and faster put-away / picking."
+      },
+      "th": {
+        "name": "ป้ายราคาอิเล็กทรอนิกส์ (ESL) บนชั้นวาง",
+        "function": "ป้าย e-paper บนชั้นวางที่แสดงรหัสสินค้า จำนวน และตำแหน่งแบบ real-time",
+        "how": [
+          "WMS ส่งข้อมูลผ่านเครือข่ายไร้สายของ ESL",
+          "ป้ายอัปเดตภายในไม่กี่วินาที (และกระพริบไฟได้)",
+          "พนักงานเห็น SKU และจำนวนที่ถูกต้องโดยไม่ต้องพิมพ์ฉลาก"
+        ],
+        "problem": "ฉลากกระดาษไม่อัปเดต จำนวนบนฉลากไม่ตรงกับระบบ",
+        "result": "ฉลากถูกต้องเสมอ ไม่ต้องพิมพ์ใหม่ และจัดเก็บ / หยิบสินค้าได้เร็วขึ้น"
+      }
+    },
+    "pick-to-light": {
+      "zone": "warehouse",
+      "image": "assets/img/pick-to-light.jpg",
+      "credit": "",
+      "en": {
+        "name": "Pick-to-Light",
+        "function": "Lights and displays on each slot that guide the picker to the right item and quantity.",
+        "how": [
+          "Order is released from the WMS / MES",
+          "The light on the correct slot turns on and shows the quantity",
+          "Picker takes the items and presses the button to confirm"
+        ],
+        "problem": "Paper pick lists, wrong items and slow training of new staff.",
+        "result": "Up to 99.9% pick accuracy, faster picking and almost no training needed."
+      },
+      "th": {
+        "name": "Pick-to-Light",
+        "function": "ไฟและตัวเลขที่ช่องเก็บสินค้า นำทางผู้หยิบให้หยิบถูกชิ้นและถูกจำนวน",
+        "how": [
+          "WMS / MES ปล่อยคำสั่งหยิบ",
+          "ไฟที่ช่องที่ถูกต้องติดและแสดงจำนวน",
+          "ผู้หยิบหยิบสินค้าและกดปุ่มยืนยัน"
+        ],
+        "problem": "ใช้ใบหยิบกระดาษ หยิบผิด และพนักงานใหม่ต้องฝึกนาน",
+        "result": "หยิบถูกต้องสูงถึง 99.9% หยิบเร็วขึ้น และแทบไม่ต้องฝึกพนักงาน"
+      }
+    },
+    "amr": {
+      "zone": "amr",
+      "image": "assets/img/amr.jpg",
+      "credit": "",
+      "en": {
+        "name": "AMR (Autonomous Mobile Robot)",
+        "function": "Self-driving robot that moves totes and carts between the warehouse and the line.",
+        "how": [
+          "Fleet manager receives a transport task from WMS / MES",
+          "AMR plans its own route and avoids people and obstacles with LiDAR",
+          "It docks at the station, transfers the load and confirms delivery"
+        ],
+        "problem": "Operators leave the line to fetch material; forklift traffic in narrow aisles.",
+        "result": "Material arrives just in time, fewer forklifts on the floor, and a safer workplace."
+      },
+      "th": {
+        "name": "หุ่นยนต์ AMR (Autonomous Mobile Robot)",
+        "function": "หุ่นยนต์ขับเคลื่อนอัตโนมัติ ขนกล่องและรถเข็นระหว่างคลังกับไลน์ผลิต",
+        "how": [
+          "ระบบบริหาร AMR รับงานขนส่งจาก WMS / MES",
+          "AMR วางเส้นทางเองและหลบคน / สิ่งกีดขวางด้วย LiDAR",
+          "เข้าเทียบสถานี ถ่ายโอนสินค้า และยืนยันการส่ง"
+        ],
+        "problem": "พนักงานต้องออกจากไลน์ไปเบิกของ และมี Forklift วิ่งในทางเดินแคบ",
+        "result": "ของมาถึงทันเวลา Forklift ในพื้นที่น้อยลง และที่ทำงานปลอดภัยขึ้น"
+      }
+    },
+    "amr-charging": {
+      "zone": "amr",
+      "image": "assets/img/amr-charging.jpg",
+      "credit": "",
+      "en": {
+        "name": "AMR Charging Station",
+        "function": "Automatic charging dock that keeps the AMR fleet running 24/7.",
+        "how": [
+          "Fleet manager sends an AMR to charge when its battery is low or it is idle",
+          "AMR docks itself onto the charging contacts",
+          "When charged, it goes back to the task queue automatically"
+        ],
+        "problem": "Manual battery swaps and robots stopping mid-task.",
+        "result": "Continuous operation with no manual charging."
+      },
+      "th": {
+        "name": "สถานีชาร์จ AMR",
+        "function": "แท่นชาร์จอัตโนมัติที่ทำให้ AMR ทำงานได้ 24/7",
+        "how": [
+          "ระบบสั่ง AMR ไปชาร์จเมื่อแบตต่ำหรือว่างงาน",
+          "AMR เข้าเทียบขั้วชาร์จเอง",
+          "ชาร์จเต็มแล้วกลับเข้าคิวงานเองอัตโนมัติ"
+        ],
+        "problem": "ต้องเปลี่ยนแบตด้วยมือ และหุ่นยนต์หยุดกลางงาน",
+        "result": "ทำงานต่อเนื่องโดยไม่ต้องชาร์จด้วยมือ"
+      }
+    },
+    "conveyor-dock": {
+      "zone": "amr",
+      "image": "assets/img/conveyor-dock.jpg",
+      "credit": "",
+      "en": {
+        "name": "AMR–Conveyor Transfer Station",
+        "function": "Roller station where the AMR hands material over to the production conveyor.",
+        "how": [
+          "AMR docks and aligns with the station",
+          "Rollers on the AMR and the station run together to transfer the tote",
+          "Conveyor carries the tote into the line and the AMR leaves"
+        ],
+        "problem": "Totes are lifted by hand from carts onto the line.",
+        "result": "Zero manual handling and a smooth flow from warehouse to line."
+      },
+      "th": {
+        "name": "สถานีถ่ายโอน AMR–สายพาน",
+        "function": "สถานีลูกกลิ้งที่ AMR ส่งต่อวัตถุดิบเข้าสู่สายพานการผลิต",
+        "how": [
+          "AMR เข้าเทียบและจัดตำแหน่งกับสถานี",
+          "ลูกกลิ้งบน AMR และสถานีหมุนพร้อมกันเพื่อถ่ายโอนกล่อง",
+          "สายพานพากล่องเข้าไลน์ และ AMR ออกไปทำงานต่อ"
+        ],
+        "problem": "ต้องยกกล่องจากรถเข็นขึ้นไลน์ด้วยมือ",
+        "result": "ไม่ต้องยกของด้วยมือ และวัตถุดิบไหลจากคลังถึงไลน์ได้ต่อเนื่อง"
+      }
+    },
+    "mes-dashboard": {
+      "zone": "production",
+      "image": "assets/img/mes-dashboard.jpg",
+      "credit": "",
+      "en": {
+        "name": "MES Dashboard",
+        "function": "Live view of the line: output, OEE, quality and status of every station.",
+        "how": [
+          "Machines and devices send data to MES automatically",
+          "MES calculates OEE, yield and progress against the plan",
+          "Dashboard and alerts show problems and trigger actions (e.g. replenishment)"
+        ],
+        "problem": "Production reports are typed in Excel at the end of the shift — problems are seen too late.",
+        "result": "Real-time decisions, up to 15% higher OEE and paperless reporting."
+      },
+      "th": {
+        "name": "MES Dashboard",
+        "function": "มุมมองสดของไลน์ผลิต: ยอดผลิต, OEE, คุณภาพ และสถานะของทุกสถานี",
+        "how": [
+          "เครื่องจักรและอุปกรณ์ส่งข้อมูลเข้า MES อัตโนมัติ",
+          "MES คำนวณ OEE, Yield และความคืบหน้าเทียบแผน",
+          "Dashboard และการแจ้งเตือนชี้ปัญหาและสั่งงานต่อ (เช่น เติมของ)"
+        ],
+        "problem": "รายงานผลิตพิมพ์ใน Excel ตอนจบกะ เห็นปัญหาช้าเกินไป",
+        "result": "ตัดสินใจได้แบบ real-time, OEE เพิ่มขึ้นสูงสุด 15% และรายงานไม่ใช้กระดาษ"
+      }
+    },
+    "digital-wi": {
+      "zone": "production",
+      "image": "assets/img/digital-wi.jpg",
+      "credit": "",
+      "en": {
+        "name": "Digital Work Instruction",
+        "function": "Step-by-step instructions with pictures on a tablet at each workstation.",
+        "how": [
+          "MES pushes the right WI version for the current model",
+          "Operator follows each step and confirms on screen",
+          "Checks and results are recorded against the lot automatically"
+        ],
+        "problem": "Outdated paper WI, wrong revision on the line and inconsistent work.",
+        "result": "Always the latest revision, fewer defects and faster training of new operators."
+      },
+      "th": {
+        "name": "คู่มือการทำงานดิจิทัล (Digital WI)",
+        "function": "ขั้นตอนการทำงานพร้อมรูปภาพบนแท็บเล็ตที่ทุกสถานีงาน",
+        "how": [
+          "MES ส่ง WI ที่ถูกเวอร์ชันตามรุ่นที่ผลิตอยู่",
+          "พนักงานทำตามทีละขั้นและกดยืนยันบนจอ",
+          "ระบบบันทึกผลการตรวจกับ Lot อัตโนมัติ"
+        ],
+        "problem": "WI กระดาษไม่อัปเดต ใช้ผิดเวอร์ชัน และทำงานไม่สม่ำเสมอ",
+        "result": "ใช้เวอร์ชันล่าสุดเสมอ ของเสียลดลง และฝึกพนักงานใหม่ได้เร็วขึ้น"
+      }
+    },
+    "mold-qr": {
+      "zone": "production",
+      "image": "assets/img/mold-qr.jpg",
+      "credit": "",
+      "en": {
+        "name": "Mold QR Traceability",
+        "function": "QR code on each mold links every shot to the mold, the lot and its maintenance.",
+        "how": [
+          "Operator or fixed scanner reads the mold QR at set-up",
+          "MES counts shots and links them to the production lot",
+          "CMMS raises preventive maintenance when the shot limit is reached"
+        ],
+        "problem": "No record of which mold made which lot; maintenance is done too late.",
+        "result": "Full mold-to-part traceability and PM done on time, based on real shot counts."
+      },
+      "th": {
+        "name": "QR Traceability ของแม่พิมพ์",
+        "function": "QR Code บนแม่พิมพ์ที่เชื่อมทุก shot เข้ากับแม่พิมพ์ Lot และงานซ่อมบำรุง",
+        "how": [
+          "พนักงานหรือเครื่องสแกนอ่าน QR ของแม่พิมพ์ตอน set-up",
+          "MES นับจำนวน shot และผูกกับ Lot การผลิต",
+          "CMMS เปิดงาน PM เมื่อถึงจำนวน shot ที่กำหนด"
+        ],
+        "problem": "ไม่รู้ว่าแม่พิมพ์ไหนผลิต Lot ไหน และซ่อมบำรุงช้าเกินไป",
+        "result": "ตรวจย้อนจากแม่พิมพ์ถึงชิ้นงานได้ครบ และทำ PM ตรงเวลาตามจำนวน shot จริง"
+      }
+    },
+    "ai-vision-inspection": {
+      "zone": "production",
+      "image": "assets/img/ai-vision-inspection.jpg",
+      "credit": "",
+      "en": {
+        "name": "AI Vision Inspection & Counting",
+        "function": "Camera with AI that inspects and counts every tray (OK / NG).",
+        "how": [
+          "Camera captures each tray as it passes under the ring light",
+          "AI checks for defects and counts the parts",
+          "OK goes on to labelling; NG is rejected and logged with an image"
+        ],
+        "problem": "Manual visual checks are tiring and inconsistent; counts are wrong.",
+        "result": "100% inspection, accurate counts and image evidence for every NG."
+      },
+      "th": {
+        "name": "AI Vision ตรวจและนับถาด",
+        "function": "กล้องพร้อม AI ที่ตรวจและนับทุกถาด (OK / NG)",
+        "how": [
+          "กล้องถ่ายภาพถาดเมื่อผ่านใต้ไฟวงแหวน",
+          "AI ตรวจหาจุดบกพร่องและนับจำนวนชิ้นงาน",
+          "ชิ้น OK ไปติดฉลากต่อ ชิ้น NG ถูกคัดออกและบันทึกพร้อมภาพ"
+        ],
+        "problem": "การตรวจด้วยสายตาทำให้เหนื่อยและไม่สม่ำเสมอ นับจำนวนผิด",
+        "result": "ตรวจ 100% นับแม่นยำ และมีภาพเป็นหลักฐานของชิ้น NG ทุกชิ้น"
+      }
+    },
+    "auto-label": {
+      "zone": "production",
+      "image": "assets/img/auto-label.jpg",
+      "credit": "",
+      "brand": "SATO",
+      "en": {
+        "name": "Auto Label Printer & Applicator",
+        "function": "Prints and applies a traceability label — only on parts that passed inspection.",
+        "how": [
+          "AI Vision sends the OK result and serial to the printer",
+          "Printer prints the label (barcode / QR / RFID)",
+          "Applicator places the label on the tray automatically"
+        ],
+        "problem": "Labels are applied by hand, sometimes on NG parts or in the wrong place.",
+        "result": "Only OK parts are labelled, every label is traceable, and no manual work."
+      },
+      "th": {
+        "name": "เครื่องพิมพ์และติดฉลากอัตโนมัติ",
+        "function": "พิมพ์และติดฉลาก traceability เฉพาะชิ้นงานที่ตรวจผ่านเท่านั้น",
+        "how": [
+          "AI Vision ส่งผล OK และ Serial ไปที่เครื่องพิมพ์",
+          "เครื่องพิมพ์ฉลาก (บาร์โค้ด / QR / RFID)",
+          "หัวติดฉลากวางฉลากบนถาดอัตโนมัติ"
+        ],
+        "problem": "ติดฉลากด้วยมือ บางครั้งติดบนชิ้น NG หรือติดผิดตำแหน่ง",
+        "result": "ติดฉลากเฉพาะชิ้น OK ทุกฉลากตรวจย้อนได้ และไม่ต้องใช้แรงงาน"
+      }
+    },
+    "esl-lineside": {
+      "zone": "production",
+      "image": "assets/img/esl-lineside.jpg",
+      "credit": "",
+      "en": {
+        "name": "Line-side ESL",
+        "function": "Electronic labels on the line-side rack that show live material levels.",
+        "how": [
+          "Consumption is reported by MES as parts are produced",
+          "ESL shows the live quantity and turns red below the minimum",
+          "Replenishment order is sent to the warehouse automatically"
+        ],
+        "problem": "Lines stop because material runs out; operators call the warehouse by phone.",
+        "result": "No line stops from missing parts and replenishment without phone calls."
+      },
+      "th": {
+        "name": "ESL ข้างไลน์ผลิต (Line-side)",
+        "function": "ป้ายอิเล็กทรอนิกส์บนชั้นวางข้างไลน์ แสดงระดับวัตถุดิบแบบ real-time",
+        "how": [
+          "MES รายงานการใช้วัตถุดิบตามจำนวนที่ผลิต",
+          "ESL แสดงจำนวนสดและเปลี่ยนเป็นสีแดงเมื่อต่ำกว่าขั้นต่ำ",
+          "ระบบส่งคำสั่งเติมของไปที่คลังอัตโนมัติ"
+        ],
+        "problem": "ไลน์หยุดเพราะของหมด พนักงานต้องโทรตามคลัง",
+        "result": "ไม่มีไลน์หยุดเพราะขาดของ และเติมของได้โดยไม่ต้องโทร"
+      }
+    },
+    "rfid-kanban": {
+      "zone": "production",
+      "image": "assets/img/rfid-kanban.jpg",
+      "credit": "",
+      "en": {
+        "name": "RFID Kanban (FG Packing)",
+        "function": "RFID cards that signal finished goods and trigger the next movement.",
+        "how": [
+          "Packer completes an FG box and taps the RFID kanban card",
+          "Reader posts the FG quantity to WMS / MES",
+          "Kanban signals pick-up and next production automatically"
+        ],
+        "problem": "Kanban cards get lost; FG stock in the system lags behind reality.",
+        "result": "Real-time FG stock, no lost cards and pull production that runs itself."
+      },
+      "th": {
+        "name": "RFID Kanban (ไลน์แพ็ก FG)",
+        "function": "การ์ด RFID ที่แจ้งยอดสินค้าสำเร็จรูปและกระตุ้นการเคลื่อนย้ายถัดไป",
+        "how": [
+          "พนักงานแพ็กกล่อง FG เสร็จแล้วแตะการ์ด Kanban RFID",
+          "เครื่องอ่านส่งยอด FG เข้า WMS / MES",
+          "Kanban แจ้งให้มารับของและสั่งผลิตรอบถัดไปอัตโนมัติ"
+        ],
+        "problem": "การ์ด Kanban หาย และยอด FG ในระบบช้ากว่าความจริง",
+        "result": "ยอด FG แบบ real-time ไม่มีการ์ดหาย และระบบดึงการผลิต (Pull) ทำงานเอง"
+      }
+    },
+    "cmms": {
+      "zone": "office",
+      "image": "assets/img/cmms.jpg",
+      "credit": "",
+      "en": {
+        "name": "CMMS (Maintenance Management)",
+        "function": "Plans and tracks preventive and breakdown maintenance for every machine.",
+        "how": [
+          "Machine data and mold shot counts create work orders automatically",
+          "Technician receives the work order on a mobile device",
+          "Repair, spare parts and time are recorded; history updates MTBF"
+        ],
+        "problem": "Maintenance on paper and memory; breakdowns repeat and spare parts run out.",
+        "result": "More planned maintenance, less downtime and a full history for every asset."
+      },
+      "th": {
+        "name": "CMMS (ระบบบริหารงานซ่อมบำรุง)",
+        "function": "วางแผนและติดตามงานซ่อมบำรุงเชิงป้องกันและงานเสียของเครื่องจักรทุกเครื่อง",
+        "how": [
+          "ข้อมูลเครื่องจักรและจำนวน shot แม่พิมพ์สร้างใบงานอัตโนมัติ",
+          "ช่างรับใบงานบนมือถือ",
+          "บันทึกการซ่อม อะไหล่ และเวลา ประวัติอัปเดต MTBF"
+        ],
+        "problem": "งานซ่อมอยู่บนกระดาษและความจำ เครื่องเสียซ้ำ และอะไหล่หมด",
+        "result": "งานซ่อมตามแผนมากขึ้น downtime ลดลง และมีประวัติครบทุกเครื่อง"
+      }
+    },
+    "paperless-pr-po": {
+      "zone": "office",
+      "image": "assets/img/paperless-pr-po.jpg",
+      "credit": "",
+      "en": {
+        "name": "Paperless PR → PO",
+        "function": "Digital purchase requests and approvals from request to purchase order.",
+        "how": [
+          "User raises a PR (or MES / WMS raises it from a minimum level)",
+          "Approvers approve on mobile according to the approval matrix",
+          "PO is issued to the supplier and the status is visible to everyone"
+        ],
+        "problem": "Paper PRs wait on desks for days; nobody knows where the document is.",
+        "result": "Approval in hours instead of days, full audit trail and no lost documents."
+      },
+      "th": {
+        "name": "Paperless PR → PO",
+        "function": "ขอซื้อและอนุมัติแบบดิจิทัล ตั้งแต่ใบขอซื้อจนถึงใบสั่งซื้อ",
+        "how": [
+          "ผู้ใช้เปิด PR (หรือ MES / WMS เปิดให้เองเมื่อของต่ำกว่าขั้นต่ำ)",
+          "ผู้อนุมัติอนุมัติผ่านมือถือตามสายการอนุมัติ",
+          "ออก PO ให้ซัพพลายเออร์ และทุกคนเห็นสถานะ"
+        ],
+        "problem": "PR กระดาษค้างบนโต๊ะหลายวัน ไม่มีใครรู้ว่าเอกสารอยู่ที่ไหน",
+        "result": "อนุมัติในไม่กี่ชั่วโมงแทนหลายวัน ตรวจสอบย้อนหลังได้ และเอกสารไม่หาย"
+      }
+    },
+    "hr-system": {
+      "zone": "office",
+      "image": "assets/img/hr-system.jpg",
+      "credit": "",
+      "en": {
+        "name": "Workforce Management",
+        "function": "Attendance, shifts and skill matrix linked to the production line.",
+        "how": [
+          "Employees clock in (face / card); attendance updates live",
+          "System checks the skill matrix for each station",
+          "Assignments are sent to the line and Digital WI"
+        ],
+        "problem": "Manual attendance sheets; uncertified people are assigned to critical stations.",
+        "result": "Right person at the right station, live headcount and simpler payroll."
+      },
+      "th": {
+        "name": "ระบบบริหารพนักงาน",
+        "function": "การลงเวลา กะงาน และ Skill Matrix ที่เชื่อมกับไลน์ผลิต",
+        "how": [
+          "พนักงานลงเวลา (ใบหน้า / บัตร) ข้อมูลอัปเดตทันที",
+          "ระบบตรวจ Skill Matrix ของแต่ละสถานี",
+          "ส่งการมอบหมายงานไปที่ไลน์และ Digital WI"
+        ],
+        "problem": "เช็กชื่อด้วยกระดาษ และให้คนที่ไม่ผ่านการรับรองทำสถานีสำคัญ",
+        "result": "คนที่ใช่อยู่ถูกสถานี รู้จำนวนคนแบบสด และคิดค่าแรงง่ายขึ้น"
+      }
+    },
+    "fiber-backbone": {
+      "zone": "infra",
+      "image": "assets/img/fiber-backbone.jpg",
+      "credit": "",
+      "en": {
+        "name": "Fiber Optic Backbone",
+        "function": "High-speed fiber network that connects every zone to the core.",
+        "how": [
+          "Fiber runs from the server room to a switch in every zone",
+          "LAN cables connect each device to the zone switch",
+          "All systems share one reliable, secure network"
+        ],
+        "problem": "Separate small networks per building; slow links and frequent outages.",
+        "result": "One converged network with high bandwidth, redundancy and central monitoring."
+      },
+      "th": {
+        "name": "โครงข่ายใยแก้วนำแสง (Fiber Backbone)",
+        "function": "เครือข่ายไฟเบอร์ความเร็วสูงที่เชื่อมทุกโซนเข้ากับศูนย์กลาง",
+        "how": [
+          "เดินไฟเบอร์จากห้อง Server ไปยัง Switch ของทุกโซน",
+          "สาย LAN เชื่อมแต่ละอุปกรณ์เข้ากับ Switch ของโซน",
+          "ทุกระบบใช้เครือข่ายเดียวที่เสถียรและปลอดภัย"
+        ],
+        "problem": "แต่ละอาคารมีเครือข่ายแยกกัน ลิงก์ช้า และล่มบ่อย",
+        "result": "เครือข่ายเดียวแบนด์วิดท์สูง มีระบบสำรอง และดูแลจากศูนย์กลางได้"
+      }
+    },
+    "network-rack": {
+      "zone": "infra",
+      "image": "assets/img/network-rack.jpg",
+      "credit": "",
+      "en": {
+        "name": "Core Network & Server Rack",
+        "function": "Core switches and servers that host the factory systems.",
+        "how": [
+          "Core switch routes traffic between all zones",
+          "Servers / edge computers run MES, WMS, RTLS and AI",
+          "Monitoring and backup keep the systems available"
+        ],
+        "problem": "Servers under desks, no redundancy and no monitoring.",
+        "result": "Higher uptime, central security and room to add new systems."
+      },
+      "th": {
+        "name": "ตู้ Rack Network และ Server หลัก",
+        "function": "Core Switch และ Server ที่รันระบบต่างๆ ของโรงงาน",
+        "how": [
+          "Core Switch ส่งต่อข้อมูลระหว่างทุกโซน",
+          "Server / Edge Computer รัน MES, WMS, RTLS และ AI",
+          "ระบบ Monitoring และ Backup ทำให้ระบบพร้อมใช้งาน"
+        ],
+        "problem": "Server วางใต้โต๊ะ ไม่มีระบบสำรอง และไม่มีการเฝ้าระวัง",
+        "result": "ระบบพร้อมใช้งานสูงขึ้น ความปลอดภัยรวมศูนย์ และรองรับการเพิ่มระบบใหม่"
+      }
+    },
+    "lan-access": {
+      "zone": "infra",
+      "image": "assets/img/lan-access.jpg",
+      "credit": "",
+      "en": {
+        "name": "Wi-Fi / LAN Access Point",
+        "function": "Industrial wireless coverage for AMRs, tablets, scanners and ESL.",
+        "how": [
+          "Access points are placed for full coverage in each zone",
+          "Devices roam between access points without dropping",
+          "Traffic is separated by VLAN for security and quality"
+        ],
+        "problem": "Wi-Fi dead spots; AMRs and scanners disconnect.",
+        "result": "Seamless coverage for every mobile device in the factory."
+      },
+      "th": {
+        "name": "Access Point Wi-Fi / LAN",
+        "function": "สัญญาณไร้สายเกรดอุตสาหกรรมสำหรับ AMR, แท็บเล็ต, เครื่องสแกน และ ESL",
+        "how": [
+          "ติดตั้ง Access Point ให้ครอบคลุมทุกโซน",
+          "อุปกรณ์ย้ายระหว่าง Access Point ได้โดยไม่หลุด",
+          "แยกข้อมูลด้วย VLAN เพื่อความปลอดภัยและคุณภาพ"
+        ],
+        "problem": "มีจุดอับสัญญาณ AMR และเครื่องสแกนหลุดการเชื่อมต่อ",
+        "result": "สัญญาณครอบคลุมอุปกรณ์เคลื่อนที่ทุกชิ้นในโรงงาน"
+      }
+    }
+  }
+}
