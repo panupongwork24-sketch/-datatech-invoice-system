@@ -375,7 +375,7 @@
     "rtls-rfid-anchor": {
       "zone": "warehouse",
       "image": "assets/img/rtls-rfid-anchor.jpg",
-      "credit": "",
+      "credit": "User:z22 · CC BY-SA 3.0 · Wikimedia Commons",
       "en": {
         "name": "Hybrid RTLS – RFID Anchor",
         "function": "Ceiling readers that locate tagged pallets, forklifts and people in real time.",
