@@ -16,6 +16,7 @@ CC BY-SA images: the modified versions in `assets/img/` are shared under the sam
 | `amr` | `assets/img/amr.jpg` | [Vector3DHD autonomous mobile robot and EnZone wireless charging.jpg](https://commons.wikimedia.org/wiki/File:Vector3DHD_autonomous_mobile_robot_and_EnZone_wireless_charging.jpg) | PattyK33 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | logo/brand marks removed |
 | `amr-charging` | `assets/img/amr-charging.jpg` | [Vector3DHD autonomous mobile robot and EnZone wireless charging.jpg](https://commons.wikimedia.org/wiki/File:Vector3DHD_autonomous_mobile_robot_and_EnZone_wireless_charging.jpg) | PattyK33 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | cropped, logo/brand marks removed |
 | `conveyor-dock` | `assets/img/conveyor-dock.jpg` | [Conveyor system in a factory.jpg](https://commons.wikimedia.org/wiki/File:Conveyor_system_in_a_factory.jpg) | falco | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | resized |
+| `mold-qr` | `assets/img/mold-qr.jpg` | [Injection mold - (2).jpg](https://commons.wikimedia.org/wiki/File:Injection_mold_-_(2).jpg) | Bricetofly | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | cropped, logo/brand marks removed |
 
 ## Placeholders – images still needed
 
@@ -28,7 +29,6 @@ Add a file with exactly this name and the popup will show it automatically (then
 - `assets/img/esl-shelf.jpg`
 - `assets/img/mes-dashboard.jpg`
 - `assets/img/digital-wi.jpg`
-- `assets/img/mold-qr.jpg`
 - `assets/img/ai-vision-inspection.jpg`
 - `assets/img/auto-label.jpg`
 - `assets/img/esl-lineside.jpg`

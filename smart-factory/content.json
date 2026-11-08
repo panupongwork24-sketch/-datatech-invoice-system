@@ -618,7 +618,7 @@
     "mold-qr": {
       "zone": "production",
       "image": "assets/img/mold-qr.jpg",
-      "credit": "",
+      "credit": "Bricetofly · CC0 · Wikimedia Commons",
       "en": {
         "name": "Mold QR Traceability",
         "function": "QR code on each mold links every shot to the mold, the lot and its maintenance.",
