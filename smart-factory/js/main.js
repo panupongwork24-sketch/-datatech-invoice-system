@@ -2,6 +2,11 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/OrbitControls.js';
 import { CSS2DRenderer } from 'three/addons/CSS2DRenderer.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { gsap, ZONES, hex, screens, flows, WavePool } from './core.js';
 import { buildWorld } from './world.js';
 import { buildDevices, Registry, visibleChain } from './devices.js';
@@ -25,9 +30,9 @@ let pixelRatio = Math.min(devicePixelRatio || 1, coarse || small ? 1.6 : 2);
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(pixelRatio);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 0.82;
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFShadowMap;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 stage.appendChild(renderer.domElement);
 
 const labelRenderer = new CSS2DRenderer();
@@ -36,19 +41,25 @@ stage.appendChild(labelRenderer.domElement);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b1020);
-scene.fog = new THREE.Fog(0x0b1020, 170, 420);
+scene.fog = new THREE.Fog(0x0b1020, 180, 460);
+// Image-based lighting: a procedural studio room gives metals and plastics realistic reflections.
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+scene.environmentIntensity = 0.4;
 
 const camera = new THREE.PerspectiveCamera(32, 1, 0.5, 900);
 camera.position.set(110, 100, 140);
 
-scene.add(new THREE.HemisphereLight(0xc7d7ff, 0x0b1020, 1.0));
-const sun = new THREE.DirectionalLight(0xffffff, 1.7);
+scene.add(new THREE.HemisphereLight(0xdbe7ff, 0x1a1f2b, 0.35));
+const sun = new THREE.DirectionalLight(0xfff4e0, 2.0);
 sun.position.set(45, 90, 40);
 sun.castShadow = true;
-sun.shadow.mapSize.set(coarse || small ? 1024 : 2048, coarse || small ? 1024 : 2048);
+const SH = coarse || small ? 2048 : 4096;
+sun.shadow.mapSize.set(SH, SH);
+sun.shadow.radius = 3;
 Object.assign(sun.shadow.camera, { left: -80, right: 80, top: 70, bottom: -70, near: 10, far: 220 });
-sun.shadow.bias = -0.0006;
-sun.shadow.normalBias = 0.03;
+sun.shadow.bias = -0.0004;
+sun.shadow.normalBias = 0.04;
 scene.add(sun);
 const fill = new THREE.DirectionalLight(0x93c5fd, 0.35);
 fill.position.set(-60, 40, -50);
@@ -62,6 +73,14 @@ controls.minDistance = 6;
 controls.maxDistance = 280;
 controls.autoRotateSpeed = 0.55;
 controls.screenSpacePanning = false;
+
+// Post-processing: soft bloom on emissive parts (screens, status lights, RF waves).
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.35, 0.4, 0.96);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+let bloomOn = !(coarse && small);
 
 /* ---------------- build factory ---------------- */
 const root = new THREE.Group();
@@ -355,6 +374,8 @@ function resize() {
   else camera.setViewOffset(w, h, 0, h > w ? h * 0.17 : h * 0.06, w, h); // lift above the caption sheet
   camera.updateProjectionMatrix();
   renderer.setSize(w, h, false);
+  composer.setPixelRatio(pixelRatio);
+  composer.setSize(w, h);
   labelRenderer.setSize(w, h);
 }
 new ResizeObserver(resize).observe(stage);
@@ -364,6 +385,7 @@ resize();
 const clock = new THREE.Clock();
 let screenAcc = 0, fpsFrames = 0, fpsAcc = 0, quality = 0;
 const fpsEl = new URLSearchParams(location.search).has('fps') ? $('#fps') : null;
+const HQ = new URLSearchParams(location.search).has('hq'); // keep full quality (no auto-downgrade)
 if (fpsEl) fpsEl.hidden = false;
 renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.05);
@@ -383,7 +405,7 @@ renderer.setAnimationLoop(() => {
   }
   controls.update();
   syncLabels();
-  renderer.render(scene, camera);
+  if (bloomOn) composer.render(); else renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
 
   // Adaptive quality: keep the frame rate up on weaker GPUs
@@ -391,10 +413,12 @@ renderer.setAnimationLoop(() => {
   if (fpsAcc > 2.5) {
     const fps = fpsFrames / fpsAcc;
     if (fpsEl) fpsEl.textContent = `${fps.toFixed(0)} fps · q${quality} · pr ${pixelRatio}`;
-    if (fps < 45 && quality < 3 && t > 4) {
+    if (fps < 45 && quality < 4 && t > 4 && !HQ) {
       quality++;
-      if (quality === 1 && pixelRatio > 1.25) { pixelRatio = Math.max(1, pixelRatio - 0.5); renderer.setPixelRatio(pixelRatio); resize(); }
-      else if (quality <= 2) { sun.castShadow = false; quality = 2; }
+      // Degrade in order of cost/benefit: bloom → pixel ratio → shadows → pixel ratio again
+      if (quality === 1 && bloomOn) bloomOn = false;
+      else if (quality <= 2 && pixelRatio > 1.25) { pixelRatio = Math.max(1, pixelRatio - 0.5); renderer.setPixelRatio(pixelRatio); resize(); quality = 2; }
+      else if (quality <= 3) { sun.castShadow = false; quality = 3; }
       else { pixelRatio = Math.max(0.75, pixelRatio - 0.25); renderer.setPixelRatio(pixelRatio); resize(); }
     }
     fpsFrames = 0; fpsAcc = 0;

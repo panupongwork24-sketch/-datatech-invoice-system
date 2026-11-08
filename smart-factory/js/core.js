@@ -1,5 +1,6 @@
 // Shared helpers: materials, primitives, canvas screens, RF waves, data flows, path movers.
 import * as THREE from 'three';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
 export const gsap = window.gsap;
 export const FLOOR = 0.34; // top of the factory floor tiles
@@ -22,9 +23,20 @@ const matCache = new Map();
 export function mat(color, o = {}) {
   const k = color + JSON.stringify(o);
   if (!matCache.has(k)) {
-    matCache.set(k, new THREE.MeshStandardMaterial({ color, roughness: 0.72, metalness: 0.12, flatShading: true, ...o }));
+    // Realistic defaults: smooth shading, PBR values picked from the colour family (see pbrFor)
+    matCache.set(k, new THREE.MeshStandardMaterial({ color, ...pbrFor(color), ...o }));
   }
   return matCache.get(k);
+}
+/** Rough PBR guess per colour so plain colour calls still look like real materials. */
+function pbrFor(color) {
+  const c = new THREE.Color(color);
+  const hsl = {}; c.getHSL(hsl);
+  if (hsl.h > 0.04 && hsl.h < 0.13 && hsl.s > 0.25 && hsl.l < 0.72) return { roughness: 0.92, metalness: 0 }; // cardboard / wood
+  if (hsl.s < 0.12 && hsl.l > 0.45) return { roughness: 0.38, metalness: 0.55 };   // brushed steel / aluminium
+  if (hsl.s < 0.12 && hsl.l < 0.12) return { roughness: 0.55, metalness: 0.25 };   // black powder-coat / rubber
+  if (hsl.s < 0.15) return { roughness: 0.5, metalness: 0.35 };                     // grey painted metal
+  return { roughness: 0.45, metalness: 0.15 };                                       // painted / plastic parts
 }
 export function basic(color, o = {}) {
   const k = 'b' + color + JSON.stringify(o);
@@ -33,7 +45,7 @@ export function basic(color, o = {}) {
 }
 /** Unique (non-cached) emissive material for parts that animate (lights, LEDs). */
 export function glowMat(color, intensity = 1) {
-  return new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: intensity, roughness: 0.4, flatShading: true });
+  return new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: intensity, roughness: 0.35 });
 }
 
 const geoCache = new Map();
@@ -42,19 +54,21 @@ function cachedGeo(key, make) {
   return geoCache.get(key);
 }
 export function box(w, h, d, color, o) {
-  const g = cachedGeo(`b${w},${h},${d}`, () => new THREE.BoxGeometry(w, h, d));
+  // Bevelled edges catch highlights and read as manufactured parts instead of flat blocks
+  const r = Math.min(w, h, d) * 0.12;
+  const g = cachedGeo(`b${w},${h},${d}`, () => (r > 0.012 ? new RoundedBoxGeometry(w, h, d, 2, Math.min(r, 0.06)) : new THREE.BoxGeometry(w, h, d)));
   const m = new THREE.Mesh(g, color instanceof THREE.Material ? color : mat(color, o));
   m.castShadow = m.receiveShadow = true;
   return m;
 }
 export function cyl(rt, rb, h, seg, color, o) {
-  const g = cachedGeo(`c${rt},${rb},${h},${seg}`, () => new THREE.CylinderGeometry(rt, rb, h, seg));
+  const g = cachedGeo(`c${rt},${rb},${h},${seg}`, () => new THREE.CylinderGeometry(rt, rb, h, Math.max(seg, 16)));
   const m = new THREE.Mesh(g, color instanceof THREE.Material ? color : mat(color, o));
   m.castShadow = m.receiveShadow = true;
   return m;
 }
 export function sphere(r, color, seg = 10) {
-  const g = cachedGeo(`s${r},${seg}`, () => new THREE.SphereGeometry(r, seg, Math.max(6, seg - 2)));
+  const g = cachedGeo(`s${r},${seg}`, () => new THREE.SphereGeometry(r, Math.max(seg, 16), 12));
   const m = new THREE.Mesh(g, color instanceof THREE.Material ? color : mat(color));
   m.castShadow = true;
   return m;
@@ -256,4 +270,32 @@ export function placeOn(obj, curve, u, reverse = false) {
   curve.getTangentAt(u, _t);
   if (reverse) _t.negate();
   obj.rotation.y = Math.atan2(_t.x, _t.z);
+}
+
+/* ---------- procedural surface textures (no image files needed) ---------- */
+const texCache = new Map();
+/** Concrete / epoxy floor: base colour + fine noise + soft stains + optional slab joints. */
+export function floorTexture(base = '#6b7280', { size = 512, joints = true, noise = 18, stains = 26 } = {}) {
+  const key = base + joints + noise + stains;
+  if (texCache.has(key)) return texCache.get(key);
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const x = c.getContext('2d');
+  x.fillStyle = base; x.fillRect(0, 0, size, size);
+  const img = x.getImageData(0, 0, size, size), d = img.data;
+  let seed = 1234;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  for (let i = 0; i < d.length; i += 4) { const n = (rnd() - 0.5) * noise; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
+  x.putImageData(img, 0, 0);
+  for (let i = 0; i < stains; i++) {
+    const r = 20 + rnd() * 90, px = rnd() * size, py = rnd() * size;
+    const g = x.createRadialGradient(px, py, 0, px, py, r);
+    const a = 0.04 + rnd() * 0.06, dark = rnd() < 0.6;
+    g.addColorStop(0, dark ? `rgba(0,0,0,${a})` : `rgba(255,255,255,${a * 0.6})`); g.addColorStop(1, 'rgba(0,0,0,0)');
+    x.fillStyle = g; x.fillRect(px - r, py - r, r * 2, r * 2);
+  }
+  if (joints) { x.strokeStyle = 'rgba(0,0,0,0.22)'; x.lineWidth = 2; x.strokeRect(1, 1, size - 2, size - 2); }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8;
+  texCache.set(key, t);
+  return t;
 }
