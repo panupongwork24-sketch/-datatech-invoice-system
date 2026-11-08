@@ -1,4 +1,4 @@
-// Real 3D models (CC0, Poly Haven) — loaded once, then cloned or instanced.
+// Real 3D models (CC0 Poly Haven + CC-BY Sketchfab, see credits.md) — loaded once, then cloned or instanced.
 // Dev mode loads assets/models/<name>.glb; the single-file build embeds them as base64 in window.__SF_MODELS.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -9,6 +9,8 @@ export const MODEL_NAMES = [
   'metal_office_desk', 'potted_plant_01', 'potted_plant_02', 'overhead_crane', 'industrial_storage_cart',
   'tool_cart', 'drill_press_01', 'hand_truck', 'power_box_01', 'utility_box_01', 'exterior_aircon_unit',
   'concrete_road_barrier', 'WetFloorSign_01', 'steel_frame_shelves_03', 'worn_metal_rack', 'rollershutter_door',
+  // Sketchfab (CC-BY) vehicles — passenger_cars holds one child node per car: car_sedan, car_hatchback, …
+  'forklift_truck', 'box_truck', 'passenger_cars',
 ];
 
 const lib = new Map();

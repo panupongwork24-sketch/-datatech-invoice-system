@@ -438,4 +438,4 @@ goTo(0);
 setPlaying(new URLSearchParams(location.search).get('autoplay') === '1');
 $('#loading').classList.add('done');
 setTimeout(() => $('#loading').remove(), 800);
-window.__sf = { ctx: Object.assign(ctx, { renderer }), goTo, openModal, closeModal, setXray, get current() { return current; } };
+window.__sf = { ctx: Object.assign(ctx, { renderer, controls }), goTo, openModal, closeModal, setXray, get current() { return current; } };

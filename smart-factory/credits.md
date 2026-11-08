@@ -42,7 +42,7 @@ Add a file with exactly this name and the popup will show it automatically (then
 
 ## 3D models
 
-All 3D models are from [Poly Haven](https://polyhaven.com) under **CC0** (public domain, no attribution required; credited here as courtesy).
+The props and equipment models are from [Poly Haven](https://polyhaven.com) under **CC0** (public domain, no attribution required; credited here as courtesy).
 Optimised for the web (GLB, meshopt, 512 px WebP textures). Every model was rendered and checked for logos; models with brand-like marks were not used.
 
 | Model | Source | Licence |
@@ -68,3 +68,15 @@ Optimised for the web (GLB, meshopt, 512 px WebP textures). Every model was rend
 | `assets/models/tool_cart.glb` | [polyhaven.com/a/tool_cart](https://polyhaven.com/a/tool_cart) | CC0 |
 | `assets/models/utility_box_01.glb` | [polyhaven.com/a/utility_box_01](https://polyhaven.com/a/utility_box_01) | CC0 |
 | `assets/models/worn_metal_rack.glb` | [polyhaven.com/a/worn_metal_rack](https://polyhaven.com/a/worn_metal_rack) | CC0 |
+
+## Sketchfab models (CC-BY)
+
+These vehicle models are from [Sketchfab](https://sketchfab.com) under **Creative Commons Attribution 4.0** ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)), which requires the credit below.
+Changes: converted/optimised for the web (GLB, meshopt, 512 px WebP textures); the car pack was split into separate cars (6 of the 10 kept) and re-oriented to face +Z.
+Every model was rendered and checked for brand names or logos; a forklift candidate with a visible brand name was not used.
+
+| Model file | Title | Author | Source | Licence | Changes |
+|---|---|---|---|---|---|
+| `assets/models/forklift_truck.glb` | Forklift Truck | [louis-muir](https://sketchfab.com/louir-muir) | [sketchfab.com/3d-models/forklift-truck-060f3f8bc7de4e6ca2f348d414702e9d](https://sketchfab.com/3d-models/forklift-truck-060f3f8bc7de4e6ca2f348d414702e9d) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | optimised |
+| `assets/models/box_truck.glb` | Box-truck | [CristianRus](https://sketchfab.com/CristianRus) | [sketchfab.com/3d-models/box-truck-b0e8788b6b774fe3a18eda1895a2b8fe](https://sketchfab.com/3d-models/box-truck-b0e8788b6b774fe3a18eda1895a2b8fe) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | optimised |
+| `assets/models/passenger_cars.glb` | Generic passenger car pack | [Comrade1280](https://sketchfab.com/comrade1280) | [sketchfab.com/3d-models/generic-passenger-car-pack-20f9af9b8a404d5cb022ac6fe87f21f5](https://sketchfab.com/3d-models/generic-passenger-car-pack-20f9af9b8a404d5cb022ac6fe87f21f5) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | split into sedan, hatchback, compact, minivan, coupe, pickup; optimised |

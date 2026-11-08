@@ -1,5 +1,6 @@
 // Static environment (site, zones, roads, walls) + ambient actors (people, cars, trucks).
 import * as THREE from 'three';
+import { model, hasModel } from './models.js';
 import { ZONES, FLOOR, gsap, mat, basic, box, cyl, sphere, at, v3, Batcher, Screen, txt, hex, pathCurve, placeOn, floorTexture } from './core.js';
 
 export function buildWorld(ctx) {
@@ -138,11 +139,13 @@ export function buildWorld(ctx) {
   }
 
   // Trucks: one docked, one driving along the road
+  // Rear of the cargo box sits against the dock (z ≈ 24.35) whatever the truck length
+  const dockZ = hasModel('box_truck') ? 24.4 + TRUCK_LEN / 2 : 29.8;
   const docked = truck(0xe2e8f0);
-  at(docked, -40, FLOOR - 0.04, 29.8, root);
+  at(docked, -40, FLOOR - 0.04, dockZ, root);
   docked.rotation.y = 0; // trailer rear toward the dock (-z)
   const docked2 = truck(0xcbd5e1);
-  at(docked2, -56, FLOOR - 0.04, 29.8, root);
+  at(docked2, -56, FLOOR - 0.04, dockZ, root);
 
   const updaters = [];
 
@@ -243,7 +246,12 @@ export function person(color = 0x22c55e, { seated = false, helmet = true } = {})
   return g;
 }
 
-export function car(color) {
+// Sketchfab car pack (CC-BY): native scale in metres, front faces +Z. Falls back to primitives.
+const CAR_KINDS = ['sedan', 'hatchback', 'compact', 'minivan', 'coupe', 'pickup'];
+let carSeq = 0;
+export function car(color, kind) {
+  const m = model('passenger_cars', { node: 'car_' + (kind || CAR_KINDS[carSeq++ % CAR_KINDS.length]) });
+  if (m) return m;
   const g = new THREE.Group();
   at(box(1.8, 0.6, 3.8, color), 0, 0.55, 0, g);
   at(box(1.6, 0.55, 2.0, 0x0f172a), 0, 1.1, -0.2, g);
@@ -258,7 +266,10 @@ export function car(color) {
   return g;
 }
 
+export const TRUCK_LEN = 5.7; // box-truck model length after scaling (m)
 export function truck(color) {
+  const m = model('box_truck', { width: 2.3 }); // front faces +Z, box at the rear (-Z)
+  if (m) return m;
   const g = new THREE.Group();
   at(box(2.5, 2.7, 8.5, color), 0, 1.95, -1.2, g);
   at(box(2.4, 2.0, 2.2, 0x1e3a8a), 0, 1.4, 4.4, g);

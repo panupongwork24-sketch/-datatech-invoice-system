@@ -9,6 +9,9 @@ import { person, car } from './world.js';
 import { model, instanced, hasModel } from './models.js';
 /** Real model if loaded, otherwise the primitive fallback. */
 const M = (name, opts, fallback) => model(name, opts) || fallback();
+// Forklift model (width 1.25 m, turned to face +Z): driver seat [y, z] and pallet centre z on its forks
+const FK_SEAT = [0.55, -0.35];
+const FK_PALLET_Z = 1.3;
 
 /* =====================================================================
    Registry: maps meshes → device ids, builds outline hulls + labels.
@@ -243,20 +246,31 @@ export function buildDevices(ctx) {
     // Forklift with RFID-tagged pallet
     const fk = new THREE.Group();
     root.add(fk);
-    at(box(1.2, 0.75, 1.6, 0xf59e0b), 0, 0.6, -0.1, fk);
-    at(box(1.22, 0.7, 0.5, 0x1f2937), 0, 0.65, -0.95, fk);
-    for (const [x, z] of [[-0.5, -0.5], [0.5, -0.5], [-0.5, 0.45], [0.5, 0.45]]) at(box(0.06, 1.25, 0.06, 0x111827), x, 1.6, z, fk);
-    at(box(1.12, 0.06, 1.05, 0x111827), 0, 2.24, 0, fk);
-    const drv = at(person(0x0ea5e9, { seated: true }), 0, 0.45, -0.2, fk);
-    drv.scale.setScalar(0.9);
-    for (const x of [-0.4, 0.4]) at(box(0.09, 2.3, 0.12, 0x374151), x, 1.3, 0.78, fk);
-    for (const [x, z] of [[-0.62, 0.45], [0.62, 0.45], [-0.62, -0.75], [0.62, -0.75]]) {
-      const w = cyl(0.25, 0.25, 0.2, 8, 0x0b0f19); w.rotation.z = Math.PI / 2; at(w, x, 0.25, z, fk);
+    // Sketchfab forklift (CC-BY): its forks point -Z, so turn it to face +Z like the rest of this rig.
+    // Its forks are part of the body mesh, so with the model the pallet sits on them and is not lifted.
+    const fkModel = model('forklift_truck', { width: 1.25 });
+    const LIFT = fkModel ? 0 : 0.35;
+    if (fkModel) {
+      fkModel.rotation.y = Math.PI;
+      fk.add(fkModel);
+    } else {
+      at(box(1.2, 0.75, 1.6, 0xf59e0b), 0, 0.6, -0.1, fk);
+      at(box(1.22, 0.7, 0.5, 0x1f2937), 0, 0.65, -0.95, fk);
+      for (const [x, z] of [[-0.5, -0.5], [0.5, -0.5], [-0.5, 0.45], [0.5, 0.45]]) at(box(0.06, 1.25, 0.06, 0x111827), x, 1.6, z, fk);
+      at(box(1.12, 0.06, 1.05, 0x111827), 0, 2.24, 0, fk);
+      for (const x of [-0.4, 0.4]) at(box(0.09, 2.3, 0.12, 0x374151), x, 1.3, 0.78, fk);
+      for (const [x, z] of [[-0.62, 0.45], [0.62, 0.45], [-0.62, -0.75], [0.62, -0.75]]) {
+        const w = cyl(0.25, 0.25, 0.2, 8, 0x0b0f19); w.rotation.z = Math.PI / 2; at(w, x, 0.25, z, fk);
+      }
     }
-    const carriage = at(new THREE.Group(), 0, 0.15, 0, fk);
-    at(box(1.0, 0.5, 0.06, 0x111827), 0, 0.3, 0.88, carriage);
-    for (const x of [-0.3, 0.3]) at(box(0.12, 0.05, 1.15, 0x111827), x, 0.06, 1.45, carriage);
-    const pallet = at(new THREE.Group(), 0, 0, 1.45, carriage);
+    const drv = at(person(0x0ea5e9, { seated: true }), 0, fkModel ? FK_SEAT[0] : 0.45, fkModel ? FK_SEAT[1] : -0.2, fk);
+    drv.scale.setScalar(0.9);
+    const carriage = at(new THREE.Group(), 0, fkModel ? 0 : 0.15, 0, fk);
+    if (!fkModel) {
+      at(box(1.0, 0.5, 0.06, 0x111827), 0, 0.3, 0.88, carriage);
+      for (const x of [-0.3, 0.3]) at(box(0.12, 0.05, 1.15, 0x111827), x, 0.06, 1.45, carriage);
+    }
+    const pallet = at(new THREE.Group(), 0, 0, fkModel ? FK_PALLET_Z : 1.45, carriage);
     at(box(1.2, 0.14, 1.2, 0x92400e), 0, 0.15, 0, pallet);
     at(M('cardboard_box_01', { fit: [1.1, 0.9, 1.1] }, () => box(1.1, 0.9, 1.1, 0xc8a26b)), 0, hasModel('cardboard_box_01') ? 0.23 : 0.68, 0, pallet);
     at(box(1.12, 0.1, 1.12, 0xa16207), 0, 0.9, 0, pallet);
@@ -265,6 +279,7 @@ export function buildDevices(ctx) {
     at(box(0.32, 0.2, 0.03, tagMat), 0, 0, 0, tagG);
     at(pickProxy(0.9, 0.9, 0.4), 0, 0, 0, tagG);
     reg.add('pallet-rfid-tag', tagG, { zone: Z, label: [0, 1.6, 0] });
+    carriage.userData.y0 = carriage.position.y;
     refs.forklift = fk;
 
     // Dock status: stack light + board
@@ -309,9 +324,9 @@ export function buildDevices(ctx) {
     placeFk();
     gsap.timeline({ repeat: -1 })
       .call(() => { carrying = true; read = false; pallet.visible = true; tagMat.color.set(0xef4444); tagMat.emissive.set(0xef4444); setLights('idle'); })
-      .to(carriage.position, { y: 0.35, duration: 0.6 })
-      .to(fo, { z: 2.6 + 1.45, duration: 6, ease: 'power1.inOut', onUpdate: placeFk })
-      .to(carriage.position, { y: 0.0, duration: 0.6 })
+      .to(carriage.position, { y: LIFT, duration: 0.6 })
+      .to(fo, { z: 2.6 + pallet.position.z, duration: 6, ease: 'power1.inOut', onUpdate: placeFk })
+      .to(carriage.position, { y: carriage.userData.y0, duration: 0.6 })
       .call(() => { pallet.visible = false; carrying = false; staged.visible = true; })
       .to(fo, { z: 22.6, duration: 4.6, ease: 'power1.inOut', onUpdate: placeFk })
       .call(() => { staged.visible = false; })
