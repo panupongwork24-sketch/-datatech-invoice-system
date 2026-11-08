@@ -22,6 +22,7 @@ Crops of the presentation owner's own AI-generated illustrations (no third-party
 | Device | File | Source | Licence |
 |---|---|---|---|
 | `digital-wi` | `assets/img/digital-wi.jpg` | Own Digital WI overview (AI-generated illustration) | owned by the presentation owner |
+| `hr-system` | `assets/img/hr-system.jpg` | Own Skill Management overview (supplied by the presentation owner), cropped | owned by the presentation owner |
 | `ai-vision-camera-wh` | `assets/img/ai-vision-camera-wh.jpg` | Own AI Vision zoning concept (AI-generated illustration) | owned by the presentation owner |
 
 ## AI-generated images (Canva)
@@ -47,12 +48,9 @@ Generated with Canva's AI image generator for this presentation; prompts asked f
 | `visitor-badge` | `assets/img/visitor-badge.jpg` | Canva AI image generator | AI-generated, owned by the presentation owner |
 | `visitor-kiosk` | `assets/img/visitor-kiosk.jpg` | Canva AI image generator | AI-generated, owned by the presentation owner |
 
-## Placeholders – images still needed
+## Placeholders
 
-No suitable logo-free, freely licensed photo was found for these devices.
-Add a file with exactly this name and the popup will show it automatically (then add its credit here and in `content.json`).
-
-- `assets/img/hr-system.jpg`
+None – every device has an image. To replace one, overwrite `assets/img/<device-id>.jpg` and update its credit here and in `content.json`.
 
 ## Lighting
 

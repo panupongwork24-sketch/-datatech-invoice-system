@@ -1178,12 +1178,17 @@ export function buildDevices(ctx) {
     }, [v3(16, FLOOR + 2.6, -15), v3(-40, FLOOR + 3.6, 12)]);
     const hr = desk(-14, -36, 'hr-system', (c, W, H, s) => {
       c.save(); const k = W / 600; c.scale(k, k);
-      office(c, 600, 334, 'Workforce Management');
-      txt(c, 'Shift A · Line 01', 26, 82, 20, '#f8fafc', 700);
-      txt(c, `${40 + s.i}/45`, 26, 140, 52, '#f8fafc', 800);
-      txt(c, 'present', 170, 146, 20, '#94a3b8', 600);
-      for (let i = 0; i < 15; i++) { c.fillStyle = i < 13 + (s.i % 3) ? '#db2777' : '#334155'; c.beginPath(); c.arc(330 + (i % 8) * 32, 120 + Math.floor(i / 8) * 34, 11, 0, 7); c.fill(); }
-      txt(c, 'Skill matrix', 26, 210, 18, '#94a3b8'); txt(c, 'ST-02 → certified operator ✓', 26, 244, 22, '#4ade80', 700);
+      office(c, 600, 334, 'Skill Management');
+      txt(c, 'Skill matrix · Line 01 · Shift A', 26, 76, 18, '#f8fafc', 700);
+      // Mini skill matrix: 5 operators × 4 stations, colour = skill level
+      const LV = ['#22c55e', '#3b82f6', '#facc15', '#334155'];
+      ['ST-01', 'ST-02', 'ST-03', 'ST-04'].forEach((n, j) => txt(c, n, 132 + j * 64, 104, 13, '#94a3b8', 700, 'center'));
+      for (let r = 0; r < 5; r++) {
+        txt(c, 'OP-' + (r + 1), 26, 130 + r * 22, 13, '#cbd5e1', 600);
+        for (let j = 0; j < 4; j++) { c.fillStyle = LV[(r * 3 + j * 2 + (r === s.i ? 1 : 0)) % 4]; rr(c, 106 + j * 64, 120 + r * 22, 52, 16, 4); c.fill(); }
+      }
+      txt(c, 'ST-02 → certified operator ✓', 380, 150, 18, '#4ade80', 700);
+      txt(c, 'Cross-training: 3 due', 380, 182, 16, '#facc15', 600);
       txt(c, '→ Assignment synced to Digital WI', 26, 290, 18, '#f9a8d4', 600);
       c.restore();
     }, [v3(14, FLOOR + 2.4, 5.7)]);

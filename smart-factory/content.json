@@ -138,12 +138,12 @@
     },
     "office": {
       "en": {
-        "title": "Office · CMMS, PR→PO, Workforce",
-        "caption": "Back-office systems send work orders, purchase status and staff assignments straight to the line (beams of light)."
+        "title": "Office · CMMS, PR→PO, Skill Management",
+        "caption": "Back-office systems send work orders, purchase status and skill-based staff assignments straight to the line (beams of light)."
       },
       "th": {
-        "title": "สำนักงาน · CMMS, PR→PO, บริหารพนักงาน",
-        "caption": "ระบบสำนักงานส่งใบงาน สถานะการสั่งซื้อ และการมอบหมายงานตรงไปที่ไลน์ (เส้นแสง)"
+        "title": "สำนักงาน · CMMS, PR→PO, บริหารทักษะ",
+        "caption": "ระบบสำนักงานส่งใบงาน สถานะการสั่งซื้อ และการจัดคนตามทักษะตรงไปที่ไลน์ (เส้นแสง)"
       }
     },
     "infra": {
@@ -810,26 +810,26 @@
       "image": "assets/img/hr-system.jpg",
       "credit": "",
       "en": {
-        "name": "Workforce Management",
-        "function": "Attendance, shifts and skill matrix linked to the production line.",
+        "name": "Skill Management",
+        "function": "Skill matrix and manpower planning: the right people with the right skills on every station and shift.",
         "how": [
-          "Employees clock in (face / card); attendance updates live",
-          "System checks the skill matrix for each station",
-          "Assignments are sent to the line and Digital WI"
+          "Each operator's skill level per station is kept in a live skill matrix (beginner → expert)",
+          "Supervisors plan each shift and assign people to stations that match their certified skills",
+          "Training and cross-training needs are flagged; assignments sync to the line and Digital WI"
         ],
-        "problem": "Manual attendance sheets; uncertified people are assigned to critical stations.",
-        "result": "Right person at the right station, live headcount and simpler payroll."
+        "problem": "Skills tracked on paper or Excel; uncertified people end up on critical stations and absences leave gaps.",
+        "result": "Right person on the right station, flexible cross-trained teams and clear training plans."
       },
       "th": {
-        "name": "ระบบบริหารพนักงาน",
-        "function": "การลงเวลา กะงาน และ Skill Matrix ที่เชื่อมกับไลน์ผลิต",
+        "name": "ระบบบริหารทักษะ (Skill Management)",
+        "function": "Skill Matrix และการวางแผนกำลังคน ให้คนที่มีทักษะถูกต้องอยู่ทุกสถานีและทุกกะ",
         "how": [
-          "พนักงานลงเวลา (ใบหน้า / บัตร) ข้อมูลอัปเดตทันที",
-          "ระบบตรวจ Skill Matrix ของแต่ละสถานี",
-          "ส่งการมอบหมายงานไปที่ไลน์และ Digital WI"
+          "เก็บระดับทักษะของพนักงานแต่ละคนในแต่ละสถานีไว้ใน Skill Matrix แบบสด (เริ่มต้น → ผู้เชี่ยวชาญ)",
+          "หัวหน้างานวางแผนแต่ละกะ และจัดคนลงสถานีที่ตรงกับทักษะที่ผ่านการรับรอง",
+          "ระบบแจ้งความต้องการอบรมและ Cross-training และส่งการมอบหมายงานไปที่ไลน์และ Digital WI"
         ],
-        "problem": "เช็กชื่อด้วยกระดาษ และให้คนที่ไม่ผ่านการรับรองทำสถานีสำคัญ",
-        "result": "คนที่ใช่อยู่ถูกสถานี รู้จำนวนคนแบบสด และคิดค่าแรงง่ายขึ้น"
+        "problem": "เก็บทักษะในกระดาษหรือ Excel คนที่ไม่ผ่านการรับรองไปอยู่สถานีสำคัญ และเมื่อมีคนขาดก็หาคนแทนไม่ได้",
+        "result": "คนที่ใช่อยู่ถูกสถานี ทีมทำงานแทนกันได้ และมีแผนอบรมชัดเจน"
       }
     },
     "fiber-backbone": {
