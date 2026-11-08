@@ -5,7 +5,7 @@
 // Usage:  npm install   (once)
 //         npm run build:html
 import { build } from 'esbuild';
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync } from 'node:fs';
 import { resolve, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -52,7 +52,14 @@ for (const [id, d] of Object.entries(content.devices)) {
 const LS = String.fromCharCode(0x2028), PS = String.fromCharCode(0x2029);
 const contentJs = 'window.__SF_CONTENT=' + JSON.stringify(content).replace(/<\//g, '<\\/').split(LS).join('\\u2028').split(PS).join('\\u2029') + ';';
 
-// 3. Assemble the HTML from index.html
+// 2b. 3D models (GLB) embedded as base64 → window.__SF_MODELS
+const models = {};
+if (existsSync(p('assets/models'))) {
+  for (const f of readdirSync(p('assets/models'))) if (f.endsWith('.glb')) models[f.slice(0, -4)] = readFileSync(p('assets/models/' + f)).toString('base64');
+}
+const modelsJs = 'window.__SF_MODELS=' + JSON.stringify(models) + ';';
+
+
 const esc = (s) => s.replace(/<\/script/gi, '<\\/script');
 let html = read('index.html');
 const swap = (from, to) => {
@@ -63,9 +70,9 @@ swap('<link rel="stylesheet" href="styles.css">', `<style>\n${read('styles.css')
 html = html.replace(/<script type="importmap">[\s\S]*?<\/script>\s*/, '');
 swap('<script src="vendor/gsap.min.js"></script>', `<script>${esc(read('vendor/gsap.min.js'))}</script>`);
 swap('<script type="module" src="js/main.js"></script>',
-  `<script>${contentJs}</script>\n  <script type="module">${esc(appJs)}</script>`);
+  `<script>${contentJs}</script>\n  <script>${modelsJs}</script>\n  <script type="module">${esc(appJs)}</script>`);
 
 mkdirSync(p('dist'), { recursive: true });
 writeFileSync(p('dist/smart-factory.html'), html);
 const mb = (Buffer.byteLength(html) / 1048576).toFixed(1);
-console.log(`dist/smart-factory.html  ${mb} MB  ·  ${embedded} images embedded` + (missing.length ? `  ·  placeholders: ${missing.join(', ')}` : ''));
+console.log(`dist/smart-factory.html  ${mb} MB  ·  ${embedded} images, ${Object.keys(models).length} 3D models embedded` + (missing.length ? `  ·  placeholders: ${missing.join(', ')}` : ''));

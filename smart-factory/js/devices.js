@@ -6,6 +6,9 @@ import {
   Flow, sendPacket, arc, pathCurve, placeOn,
 } from './core.js';
 import { person, car } from './world.js';
+import { model, instanced, hasModel } from './models.js';
+/** Real model if loaded, otherwise the primitive fallback. */
+const M = (name, opts, fallback) => model(name, opts) || fallback();
 
 /* =====================================================================
    Registry: maps meshes → device ids, builds outline hulls + labels.
@@ -130,7 +133,7 @@ export function buildDevices(ctx) {
     for (let i = 0; i < 8; i++) at(box(0.62, 0.14, 0.14, i % 2 ? 0xffffff : 0xef4444), -0.45 - i * 0.62, 0, 0, arm);
     const lpr = at(new THREE.Group(), 0.0, 0, 3.0, bar); // plate-reading camera post
     at(cyl(0.06, 0.06, 1.6, 6, 0x475569), 0, 0.8, 0, lpr);
-    at(box(0.25, 0.2, 0.45, 0x0f172a), -0.1, 1.65, 0.1, lpr);
+    at(M('security_camera_02', { depth: 0.5 }, () => box(0.25, 0.2, 0.45, 0x0f172a)), -0.1, 1.55, 0.1, lpr);
     reg.add('boom-barrier', bar, { zone: Z, label: [-2.4, 2.4, 0] });
 
     // Visitor kiosk
@@ -255,7 +258,7 @@ export function buildDevices(ctx) {
     for (const x of [-0.3, 0.3]) at(box(0.12, 0.05, 1.15, 0x111827), x, 0.06, 1.45, carriage);
     const pallet = at(new THREE.Group(), 0, 0, 1.45, carriage);
     at(box(1.2, 0.14, 1.2, 0x92400e), 0, 0.15, 0, pallet);
-    at(box(1.1, 0.9, 1.1, 0xc8a26b), 0, 0.68, 0, pallet);
+    at(M('cardboard_box_01', { fit: [1.1, 0.9, 1.1] }, () => box(1.1, 0.9, 1.1, 0xc8a26b)), 0, hasModel('cardboard_box_01') ? 0.23 : 0.68, 0, pallet);
     at(box(1.12, 0.1, 1.12, 0xa16207), 0, 0.9, 0, pallet);
     const tagG = at(new THREE.Group(), 0.25, 0.55, 0.57, pallet);
     const tagMat = glowMat(0xef4444, 0.9);
@@ -295,7 +298,7 @@ export function buildDevices(ctx) {
     // Staging pallet that appears after drop
     const staged = at(new THREE.Group(), -40, FLOOR, 2.4, root);
     at(box(1.2, 0.14, 1.2, 0x92400e), 0, 0.07, 0, staged);
-    at(box(1.1, 0.9, 1.1, 0xc8a26b), 0, 0.6, 0, staged);
+    at(M('cardboard_box_01', { fit: [1.1, 0.9, 1.1] }, () => box(1.1, 0.9, 1.1, 0xc8a26b)), 0, hasModel('cardboard_box_01') ? 0.15 : 0.6, 0, staged);
     at(box(0.32, 0.2, 0.03, basic(0x22c55e, { toneMapped: false })), 0.25, 0.45, 0.57, staged);
     staged.visible = false;
 
@@ -366,6 +369,7 @@ export function buildDevices(ctx) {
   {
     const Z = 'warehouse';
     const b = new Batcher();
+    const cartonItems = [];
     const rows = [-19, -13, -7];
     const levels = [0, 1.6, 3.1];
     for (const rz of rows) {
@@ -380,15 +384,21 @@ export function buildDevices(ctx) {
             const ox = (i - 0.5 * (Math.max(1, n) - 1)) * 1.25;
             const hh = 0.7 + ((cx * 13 + ly * 5 + i) % 4 + 4) % 4 * 0.12;
             b.add(1.1, 0.12, 1.0, 0x92400e, cx + ox, FLOOR + ly + 0.13, rz);
-            b.add(1.0, hh, 0.95, (i + (cx | 0)) % 3 ? 0xc8a26b : 0x94a3b8, cx + ox, FLOOR + ly + 0.19 + hh / 2, rz);
+            if (hasModel('cardboard_box_01')) cartonItems.push({ x: cx + ox, y: FLOOR + ly + 0.19, z: rz, rotY: ((i + ly) % 2) * Math.PI, size: [1.0, hh, 0.95] });
+            else b.add(1.0, hh, 0.95, (i + (cx | 0)) % 3 ? 0xc8a26b : 0x94a3b8, cx + ox, FLOOR + ly + 0.19 + hh / 2, rz);
           }
         }
       }
     }
     // Staging marking
     for (const [w, d, x, z] of [[8, 0.12, -40, 0.4], [8, 0.12, -40, 4.6], [0.12, 4.2, -44, 2.5], [0.12, 4.2, -36, 2.5]]) b.add(w, 0.02, d, 0xfacc15, x, FLOOR + 0.01, z);
-    for (const x of [-43, -37.2]) { b.add(1.2, 0.14, 1.2, 0x92400e, x, FLOOR + 0.07, 2.4); b.add(1.1, 0.95, 1.1, 0xc8a26b, x, FLOOR + 0.62, 2.4); }
+    for (const x of [-43, -37.2]) {
+      b.add(1.2, 0.14, 1.2, 0x92400e, x, FLOOR + 0.07, 2.4);
+      if (hasModel('cardboard_box_01')) cartonItems.push({ x, y: FLOOR + 0.14, z: 2.4, size: [1.1, 0.95, 1.1] });
+      else b.add(1.1, 0.95, 1.1, 0xc8a26b, x, FLOOR + 0.62, 2.4);
+    }
     b.build(root);
+    instanced('cardboard_box_01', cartonItems, root);
 
     // ESL tags on the front rack
     const eslRoots = [];
@@ -499,8 +509,11 @@ export function buildDevices(ctx) {
     const cam = at(new THREE.Group(), -24.6, FLOOR, 4.6, root);
     at(cyl(0.09, 0.11, 5.2, 6, 0x64748b), 0, 2.6, 0, cam);
     const head = at(new THREE.Group(), 0, 5.3, 0, cam);
-    at(box(0.45, 0.4, 0.8, 0x0f172a), 0, 0, 0, head);
-    at(cyl(0.14, 0.14, 0.18, 10, 0x1e3a8a), 0, 0, 0.45, head).rotation.x = Math.PI / 2;
+    if (hasModel('security_camera_01')) at(model('security_camera_01', { depth: 0.9 }), 0, -0.25, 0, head);
+    else {
+      at(box(0.45, 0.4, 0.8, 0x0f172a), 0, 0, 0, head);
+      at(cyl(0.14, 0.14, 0.18, 10, 0x1e3a8a), 0, 0, 0.45, head).rotation.x = Math.PI / 2;
+    }
     const camLed = glowMat(C.warehouse, 1.6);
     at(box(0.08, 0.08, 0.04, camLed), 0.14, 0.12, 0.41, head);
     const target = v3(-40, FLOOR + 0.8, 4);
@@ -540,7 +553,7 @@ export function buildDevices(ctx) {
     const lidar = at(cyl(0.13, 0.13, 0.14, 8, 0x111827), 0, 0.51, 0.52, g);
     at(box(0.12, 0.05, 0.05, basic(0xf472b6, { toneMapped: false })), 0.08, 0.06, 0, lidar);
     const tote = at(new THREE.Group(), 0, 0.44, -0.1, g);
-    at(box(0.8, 0.38, 0.95, 0x2563eb), 0, 0.19, 0, tote);
+    at(M('plastic_crate_02', { fit: [0.8, 0.4, 0.95] }, () => at(box(0.8, 0.38, 0.95, 0x2563eb), 0, 0.19, 0)), 0, 0, 0, tote);
     for (const [x, z] of [[-0.5, 0.5], [0.5, 0.5], [-0.5, -0.5], [0.5, -0.5]]) {
       const w = cyl(0.11, 0.11, 0.08, 8, 0x0b0f19); w.rotation.z = Math.PI / 2; at(w, x, 0.11, z, g);
     }
@@ -726,7 +739,11 @@ export function buildDevices(ctx) {
       root.add(g);
       return g;
     };
-    const makeTote = () => { const g = box(0.75, 0.36, 0.6, 0x2563eb); g.visible = false; root.add(g); return g; };
+    const makeTote = () => {
+      const g = new THREE.Group();
+      at(M('plastic_crate_03', { fit: [0.75, 0.36, 0.6] }, () => at(box(0.75, 0.36, 0.6, 0x2563eb), 0, 0.18, 0)), 0, -0.18, 0, g);
+      g.visible = false; root.add(g); return g;
+    };
     const trays = Array.from({ length: 16 }, makeTray);
     const totes = Array.from({ length: 4 }, makeTote);
     const spawn = (pool, kind, x) => {
@@ -802,7 +819,11 @@ export function buildDevices(ctx) {
     for (const x of [-6, -2, 2, 6]) for (const z of [-0.5, 0.5]) at(box(0.1, 2.4, 0.1, 0x1d4ed8), x, 1.2, z, lr);
     for (const y of [0.9, 1.9]) {
       at(box(12.1, 0.08, 1.1, 0x64748b), 0, y, 0, lr);
-      for (let x = -5.4; x < 6; x += 1.2) at(box(1.0, 0.45, 0.9, (x * 10) % 3 > 1 ? 0x2563eb : 0x0ea5e9), x, y + 0.27, 0, lr);
+      if (hasModel('plastic_crate_02')) {
+        const bins = [];
+        for (let x = -5.4; x < 6; x += 1.2) bins.push({ x, y: y + 0.05, z: 0, size: [1.0, 0.45, 0.85] });
+        instanced('plastic_crate_02', bins, lr);
+      } else for (let x = -5.4; x < 6; x += 1.2) at(box(1.0, 0.45, 0.9, (x * 10) % 3 > 1 ? 0x2563eb : 0x0ea5e9), x, y + 0.27, 0, lr);
     }
     const lineTags = [];
     [[-4, 'B-118'], [0, 'B-220'], [4, 'B-305']].forEach(([x, sku], i) => {
@@ -852,7 +873,9 @@ export function buildDevices(ctx) {
     at(box(1.4, 0.15, 1.4, 0x92400e), 0, 0.075, 0, fgp);
     const cartons = [];
     for (let i = 0; i < 8; i++) {
-      const c = at(box(0.62, 0.45, 0.62, 0xc8a26b), (i % 2 - 0.5) * 0.66, 0.38 + Math.floor(i / 4) * 0.47, ((i >> 1) % 2 - 0.5) * 0.66, fgp);
+      const c = hasModel('cardboard_box_01')
+        ? at(model('cardboard_box_01', { fit: [0.62, 0.45, 0.62] }), (i % 2 - 0.5) * 0.66, 0.155 + Math.floor(i / 4) * 0.47, ((i >> 1) % 2 - 0.5) * 0.66, fgp)
+        : at(box(0.62, 0.45, 0.62, 0xc8a26b), (i % 2 - 0.5) * 0.66, 0.38 + Math.floor(i / 4) * 0.47, ((i >> 1) % 2 - 0.5) * 0.66, fgp);
       c.visible = false;
       cartons.push(c);
     }
@@ -1027,8 +1050,11 @@ export function buildDevices(ctx) {
     const Z = 'office';
     const desk = (x, z, id, drawFn, targetPts) => {
       const g = at(new THREE.Group(), x, FLOOR, z, root);
-      at(box(2.6, 0.08, 1.3, 0xcbd5e1), 0, 0.78, 0, g);
-      for (const [dx, dz] of [[-1.2, -0.55], [1.2, -0.55], [-1.2, 0.55], [1.2, 0.55]]) at(box(0.07, 0.78, 0.07, 0x475569), dx, 0.39, dz, g);
+      if (hasModel('metal_office_desk')) at(model('metal_office_desk', { fit: [2.6, 0.8, 1.3] }), 0, 0, 0, g);
+      else {
+        at(box(2.6, 0.08, 1.3, 0xcbd5e1), 0, 0.78, 0, g);
+        for (const [dx, dz] of [[-1.2, -0.55], [1.2, -0.55], [-1.2, 0.55], [1.2, 0.55]]) at(box(0.07, 0.78, 0.07, 0x475569), dx, 0.39, dz, g);
+      }
       at(box(1.6, 1.0, 0.06, 0x0f172a), 0, 1.45, -0.35, g);
       at(box(0.1, 0.4, 0.1, 0x334155), 0, 1.0, -0.4, g);
       const small = new Screen(1.5, 0.9, 300, 180, drawFn, { mini: true, i: 0 });
@@ -1099,8 +1125,12 @@ export function buildDevices(ctx) {
     at(box(4, 0.1, 2, 0xe2e8f0), -2, FLOOR + 0.75, -36, root);
     at(box(0.3, 0.7, 0.3, 0x475569), -2, FLOOR + 0.35, -36, root);
     for (const [x, z] of [[-60, -29], [-60, -42], [6, -29], [6, -42]]) {
-      at(cyl(0.3, 0.25, 0.5, 6, 0x78350f), x, FLOOR + 0.25, z, root);
-      at(new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.4, 6), mat(0x15803d)), x, FLOOR + 1.2, z, root);
+      const pl = model(x < 0 ? 'potted_plant_01' : 'potted_plant_02', { height: 1.4 });
+      if (pl) at(pl, x, FLOOR, z, root);
+      else {
+        at(cyl(0.3, 0.25, 0.5, 6, 0x78350f), x, FLOOR + 0.25, z, root);
+        at(new THREE.Mesh(new THREE.ConeGeometry(0.5, 1.4, 6), mat(0x15803d)), x, FLOOR + 1.2, z, root);
+      }
     }
   }
 

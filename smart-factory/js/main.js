@@ -11,6 +11,8 @@ import { gsap, ZONES, hex, screens, flows, WavePool } from './core.js';
 import { buildWorld } from './world.js';
 import { buildDevices, Registry, visibleChain } from './devices.js';
 import { SCENES } from './scenes.js';
+import { loadModels } from './models.js';
+import { buildProps } from './props.js';
 
 const $ = (s) => document.querySelector(s);
 const store = {
@@ -87,9 +89,12 @@ const root = new THREE.Group();
 scene.add(root);
 const ctx = { scene, root, camera, updaters: [], reg: new Registry() };
 ctx.waves = new WavePool(root, 48);
+const loadTxt = document.querySelector('#loading span');
+await loadModels((p) => { if (loadTxt) loadTxt.textContent = `Loading factory… ${Math.round(p * 100)}%`; });
 const world = buildWorld(ctx);
 ctx.updaters.push(...world.updaters);
 buildDevices(ctx);
+buildProps(root);
 const reg = ctx.reg;
 
 /* ---------------- i18n ---------------- */

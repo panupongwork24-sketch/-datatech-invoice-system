@@ -39,3 +39,32 @@ Add a file with exactly this name and the popup will show it automatically (then
 
 - `assets/img/digital-wi.jpg`
 - `assets/img/hr-system.jpg`
+
+## 3D models
+
+All 3D models are from [Poly Haven](https://polyhaven.com) under **CC0** (public domain, no attribution required; credited here as courtesy).
+Optimised for the web (GLB, meshopt, 512 px WebP textures). Every model was rendered and checked for logos; models with brand-like marks were not used.
+
+| Model | Source | Licence |
+|---|---|---|
+| `assets/models/WetFloorSign_01.glb` | [polyhaven.com/a/WetFloorSign_01](https://polyhaven.com/a/WetFloorSign_01) | CC0 |
+| `assets/models/cardboard_box_01.glb` | [polyhaven.com/a/cardboard_box_01](https://polyhaven.com/a/cardboard_box_01) | CC0 |
+| `assets/models/concrete_road_barrier.glb` | [polyhaven.com/a/concrete_road_barrier](https://polyhaven.com/a/concrete_road_barrier) | CC0 |
+| `assets/models/drill_press_01.glb` | [polyhaven.com/a/drill_press_01](https://polyhaven.com/a/drill_press_01) | CC0 |
+| `assets/models/exterior_aircon_unit.glb` | [polyhaven.com/a/exterior_aircon_unit](https://polyhaven.com/a/exterior_aircon_unit) | CC0 |
+| `assets/models/hand_truck.glb` | [polyhaven.com/a/hand_truck](https://polyhaven.com/a/hand_truck) | CC0 |
+| `assets/models/industrial_storage_cart.glb` | [polyhaven.com/a/industrial_storage_cart](https://polyhaven.com/a/industrial_storage_cart) | CC0 |
+| `assets/models/metal_office_desk.glb` | [polyhaven.com/a/metal_office_desk](https://polyhaven.com/a/metal_office_desk) | CC0 |
+| `assets/models/overhead_crane.glb` | [polyhaven.com/a/overhead_crane](https://polyhaven.com/a/overhead_crane) | CC0 |
+| `assets/models/plastic_crate_02.glb` | [polyhaven.com/a/plastic_crate_02](https://polyhaven.com/a/plastic_crate_02) | CC0 |
+| `assets/models/plastic_crate_03.glb` | [polyhaven.com/a/plastic_crate_03](https://polyhaven.com/a/plastic_crate_03) | CC0 |
+| `assets/models/potted_plant_01.glb` | [polyhaven.com/a/potted_plant_01](https://polyhaven.com/a/potted_plant_01) | CC0 |
+| `assets/models/potted_plant_02.glb` | [polyhaven.com/a/potted_plant_02](https://polyhaven.com/a/potted_plant_02) | CC0 |
+| `assets/models/power_box_01.glb` | [polyhaven.com/a/power_box_01](https://polyhaven.com/a/power_box_01) | CC0 |
+| `assets/models/rollershutter_door.glb` | [polyhaven.com/a/rollershutter_door](https://polyhaven.com/a/rollershutter_door) | CC0 |
+| `assets/models/security_camera_01.glb` | [polyhaven.com/a/security_camera_01](https://polyhaven.com/a/security_camera_01) | CC0 |
+| `assets/models/security_camera_02.glb` | [polyhaven.com/a/security_camera_02](https://polyhaven.com/a/security_camera_02) | CC0 |
+| `assets/models/steel_frame_shelves_03.glb` | [polyhaven.com/a/steel_frame_shelves_03](https://polyhaven.com/a/steel_frame_shelves_03) | CC0 |
+| `assets/models/tool_cart.glb` | [polyhaven.com/a/tool_cart](https://polyhaven.com/a/tool_cart) | CC0 |
+| `assets/models/utility_box_01.glb` | [polyhaven.com/a/utility_box_01](https://polyhaven.com/a/utility_box_01) | CC0 |
+| `assets/models/worn_metal_rack.glb` | [polyhaven.com/a/worn_metal_rack](https://polyhaven.com/a/worn_metal_rack) | CC0 |
