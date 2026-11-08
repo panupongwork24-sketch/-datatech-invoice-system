@@ -645,7 +645,7 @@
     "ai-vision-inspection": {
       "zone": "production",
       "image": "assets/img/ai-vision-inspection.jpg",
-      "credit": "",
+      "credit": "Lg123456 · CC BY-SA 4.0 · Wikimedia Commons",
       "en": {
         "name": "AI Vision Inspection & Counting",
         "function": "Camera with AI that inspects and counts every tray (OK / NG).",
@@ -727,7 +727,7 @@
     "rfid-kanban": {
       "zone": "production",
       "image": "assets/img/rfid-kanban.jpg",
-      "credit": "",
+      "credit": "CCDBarcodeScanner · CC BY-SA 4.0 · Wikimedia Commons",
       "en": {
         "name": "RFID Kanban (FG Packing)",
         "function": "RFID cards that signal finished goods and trigger the next movement.",
@@ -754,7 +754,7 @@
     "cmms": {
       "zone": "office",
       "image": "assets/img/cmms.jpg",
-      "credit": "",
+      "credit": "Siemens Pressebild, http://www.siemens.com · CC BY-SA 3.0 · Wikimedia Commons",
       "en": {
         "name": "CMMS (Maintenance Management)",
         "function": "Plans and tracks preventive and breakdown maintenance for every machine.",
@@ -781,7 +781,7 @@
     "paperless-pr-po": {
       "zone": "office",
       "image": "assets/img/paperless-pr-po.jpg",
-      "credit": "",
+      "credit": "freddie marriage fredmarriage · CC0 · Wikimedia Commons",
       "en": {
         "name": "Paperless PR → PO",
         "function": "Digital purchase requests and approvals from request to purchase order.",

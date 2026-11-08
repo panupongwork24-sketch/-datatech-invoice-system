@@ -21,8 +21,12 @@ CC BY-SA images: the modified versions in `assets/img/` are shared under the sam
 | `conveyor-dock` | `assets/img/conveyor-dock.jpg` | [Conveyor system in a factory.jpg](https://commons.wikimedia.org/wiki/File:Conveyor_system_in_a_factory.jpg) | falco | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | resized |
 | `mes-dashboard` | `assets/img/mes-dashboard.jpg` | [Diagnostic monitors in the control room of Wendelstein 7-X.jpg](https://commons.wikimedia.org/wiki/File:Diagnostic_monitors_in_the_control_room_of_Wendelstein_7-X.jpg) | Siarhei Besarab | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | cropped |
 | `mold-qr` | `assets/img/mold-qr.jpg` | [Injection mold - (2).jpg](https://commons.wikimedia.org/wiki/File:Injection_mold_-_(2).jpg) | Bricetofly | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | cropped, logo/brand marks removed |
+| `ai-vision-inspection` | `assets/img/ai-vision-inspection.jpg` | [Ids-machine-vision-cameras-usb2-2004.jpg](https://commons.wikimedia.org/wiki/File:Ids-machine-vision-cameras-usb2-2004.jpg) | Lg123456 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | cropped |
 | `auto-label` | `assets/img/auto-label.jpg` | [Print n apply ucc.jpg](https://commons.wikimedia.org/wiki/File:Print_n_apply_ucc.jpg) | Labelling Technologies http://www.labelling.com | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) | cropped |
 | `esl-lineside` | `assets/img/esl-lineside.jpg` | [2021-06-28 E-ink price tag in Sydney supermarket.jpg](https://commons.wikimedia.org/wiki/File:2021-06-28_E-ink_price_tag_in_Sydney_supermarket.jpg) | Maksym Kozlenko | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | cropped, logo/brand marks removed |
+| `rfid-kanban` | `assets/img/rfid-kanban.jpg` | [RFID.jpg](https://commons.wikimedia.org/wiki/File:RFID.jpg) | CCDBarcodeScanner | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | logo/brand marks removed |
+| `cmms` | `assets/img/cmms.jpg` | [Dampfturbine Laeufer01.jpg](https://commons.wikimedia.org/wiki/File:Dampfturbine_Laeufer01.jpg) | Siemens Pressebild, http://www.siemens.com | [CC BY-SA 3.0](http://creativecommons.org/licenses/by-sa/3.0/) | logo/brand marks removed |
+| `paperless-pr-po` | `assets/img/paperless-pr-po.jpg` | [Laptop on desk book stacks (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Laptop_on_desk_book_stacks_(Unsplash).jpg) | freddie marriage fredmarriage | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | resized |
 | `fiber-backbone` | `assets/img/fiber-backbone.jpg` | [Optical fiber cable-06ASD.jpg](https://commons.wikimedia.org/wiki/File:Optical_fiber_cable-06ASD.jpg) | Asurnipal | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | resized |
 | `network-rack` | `assets/img/network-rack.jpg` | [EFTA00002522 - Cluttered server rack filled with colorful cables and networking equipment.jpg](https://commons.wikimedia.org/wiki/File:EFTA00002522_-_Cluttered_server_rack_filled_with_colorful_cables_and_networking_equipment.jpg) | Federal Bureau of Investigation | [Public domain]() | cropped, logo/brand marks removed |
 | `lan-access` | `assets/img/lan-access.jpg` | [Access-point-wireless.jpg](https://commons.wikimedia.org/wiki/File:Access-point-wireless.jpg) | Rodrigo César | [Public domain]() | resized |
@@ -34,8 +38,4 @@ Add a file with exactly this name and the popup will show it automatically (then
 
 - `assets/img/rtls-rfid-anchor.jpg`
 - `assets/img/digital-wi.jpg`
-- `assets/img/ai-vision-inspection.jpg`
-- `assets/img/rfid-kanban.jpg`
-- `assets/img/cmms.jpg`
-- `assets/img/paperless-pr-po.jpg`
 - `assets/img/hr-system.jpg`
