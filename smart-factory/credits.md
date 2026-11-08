@@ -19,6 +19,7 @@ CC BY-SA images: the modified versions in `assets/img/` are shared under the sam
 | `amr` | `assets/img/amr.jpg` | [Vector3DHD autonomous mobile robot and EnZone wireless charging.jpg](https://commons.wikimedia.org/wiki/File:Vector3DHD_autonomous_mobile_robot_and_EnZone_wireless_charging.jpg) | PattyK33 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | logo/brand marks removed |
 | `amr-charging` | `assets/img/amr-charging.jpg` | [Vector3DHD autonomous mobile robot and EnZone wireless charging.jpg](https://commons.wikimedia.org/wiki/File:Vector3DHD_autonomous_mobile_robot_and_EnZone_wireless_charging.jpg) | PattyK33 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | cropped, logo/brand marks removed |
 | `conveyor-dock` | `assets/img/conveyor-dock.jpg` | [Conveyor system in a factory.jpg](https://commons.wikimedia.org/wiki/File:Conveyor_system_in_a_factory.jpg) | falco | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | resized |
+| `mes-dashboard` | `assets/img/mes-dashboard.jpg` | [Diagnostic monitors in the control room of Wendelstein 7-X.jpg](https://commons.wikimedia.org/wiki/File:Diagnostic_monitors_in_the_control_room_of_Wendelstein_7-X.jpg) | Siarhei Besarab | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | cropped |
 | `mold-qr` | `assets/img/mold-qr.jpg` | [Injection mold - (2).jpg](https://commons.wikimedia.org/wiki/File:Injection_mold_-_(2).jpg) | Bricetofly | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | cropped, logo/brand marks removed |
 | `auto-label` | `assets/img/auto-label.jpg` | [Print n apply ucc.jpg](https://commons.wikimedia.org/wiki/File:Print_n_apply_ucc.jpg) | Labelling Technologies http://www.labelling.com | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) | cropped |
 | `esl-lineside` | `assets/img/esl-lineside.jpg` | [2021-06-28 E-ink price tag in Sydney supermarket.jpg](https://commons.wikimedia.org/wiki/File:2021-06-28_E-ink_price_tag_in_Sydney_supermarket.jpg) | Maksym Kozlenko | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | cropped, logo/brand marks removed |
@@ -32,7 +33,6 @@ No suitable logo-free, freely licensed photo was found for these devices.
 Add a file with exactly this name and the popup will show it automatically (then add its credit here and in `content.json`).
 
 - `assets/img/rtls-rfid-anchor.jpg`
-- `assets/img/mes-dashboard.jpg`
 - `assets/img/digital-wi.jpg`
 - `assets/img/ai-vision-inspection.jpg`
 - `assets/img/rfid-kanban.jpg`
