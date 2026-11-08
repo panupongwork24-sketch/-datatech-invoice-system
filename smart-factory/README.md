@@ -18,7 +18,7 @@ Three.js and GSAP are vendored in `vendor/`, so the presentation works offline a
 
 ### Single HTML file (double-click, no server)
 
-`dist/smart-factory.html` is the whole presentation in **one file** (≈4 MB): code, Three.js, GSAP,
+`dist/smart-factory.html` is the whole presentation in **one file** (≈13 MB): code, Three.js, GSAP,
 content and all photos are embedded. Open it directly in Chrome / Edge / Safari or send it to a customer.
 
 After editing `content.json` or adding photos, rebuild it:

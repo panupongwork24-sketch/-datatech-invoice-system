@@ -402,7 +402,7 @@
     "ai-vision-camera-wh": {
       "zone": "warehouse",
       "image": "assets/img/ai-vision-camera-wh.jpg",
-      "credit": "Punit Rajpal · CC0 · Wikimedia Commons",
+      "credit": "Datatech Innovation · AI-generated illustration",
       "en": {
         "name": "Hybrid RTLS – AI Vision Camera",
         "function": "Camera with AI that recognises forklifts, pallets and people to refine positions.",
@@ -591,7 +591,7 @@
     "digital-wi": {
       "zone": "production",
       "image": "assets/img/digital-wi.jpg",
-      "credit": "",
+      "credit": "Datatech Innovation · AI-generated illustration",
       "en": {
         "name": "Digital Work Instruction",
         "function": "Step-by-step instructions with pictures on a tablet at each workstation.",

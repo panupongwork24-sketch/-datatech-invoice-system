@@ -14,7 +14,6 @@ CC BY-SA images: the modified versions in `assets/img/` are shared under the sam
 | `dock-status-light` | `assets/img/dock-status-light.jpg` | [Signalsäule an einer grossen selbstfahrenden Baumaschine (rot gelb grün).jpg](https://commons.wikimedia.org/wiki/File:Signals%C3%A4ule_an_einer_grossen_selbstfahrenden_Baumaschine_(rot_gelb_gr%C3%BCn).jpg) | User:Mattes | [Public domain]() | cropped, logo/brand marks removed |
 | `rfid-label-printer` | `assets/img/rfid-label-printer.jpg` | [Wagtail ct200 barcode printer.png](https://commons.wikimedia.org/wiki/File:Wagtail_ct200_barcode_printer.png) | Wagtail11 | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | logo/brand marks removed |
 | `rtls-rfid-anchor` | `assets/img/rtls-rfid-anchor.jpg` | [Wi-Fi and mobile phone antenna inside New York City subway.jpg](https://commons.wikimedia.org/wiki/File:Wi-Fi_and_mobile_phone_antenna_inside_New_York_City_subway.jpg) | User:z22 | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) | logo/brand marks removed |
-| `ai-vision-camera-wh` | `assets/img/ai-vision-camera-wh.jpg` | [CCTV cameras in Mumbai.jpg](https://commons.wikimedia.org/wiki/File:CCTV_cameras_in_Mumbai.jpg) | Punit Rajpal | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | cropped |
 | `esl-shelf` | `assets/img/esl-shelf.jpg` | [2021-06-28 E-ink price tag in Sydney supermarket.jpg](https://commons.wikimedia.org/wiki/File:2021-06-28_E-ink_price_tag_in_Sydney_supermarket.jpg) | Maksym Kozlenko | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | cropped, logo/brand marks removed |
 | `pick-to-light` | `assets/img/pick-to-light.jpg` | [Pick-by-Light-Fachanzeigen PickTermFlexible.JPG](https://commons.wikimedia.org/wiki/File:Pick-by-Light-Fachanzeigen_PickTermFlexible.JPG) | KBS Industrieelektronik GmbH | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) | resized |
 | `amr` | `assets/img/amr.jpg` | [Vector3DHD autonomous mobile robot and EnZone wireless charging.jpg](https://commons.wikimedia.org/wiki/File:Vector3DHD_autonomous_mobile_robot_and_EnZone_wireless_charging.jpg) | PattyK33 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | logo/brand marks removed |
@@ -32,12 +31,20 @@ CC BY-SA images: the modified versions in `assets/img/` are shared under the sam
 | `network-rack` | `assets/img/network-rack.jpg` | [EFTA00002522 - Cluttered server rack filled with colorful cables and networking equipment.jpg](https://commons.wikimedia.org/wiki/File:EFTA00002522_-_Cluttered_server_rack_filled_with_colorful_cables_and_networking_equipment.jpg) | Federal Bureau of Investigation | [Public domain]() | cropped, logo/brand marks removed |
 | `lan-access` | `assets/img/lan-access.jpg` | [Access-point-wireless.jpg](https://commons.wikimedia.org/wiki/File:Access-point-wireless.jpg) | Rodrigo César | [Public domain]() | resized |
 
+## Datatech Innovation images
+
+Illustrations from Datatech Innovation's own material (AI-generated, no third-party logos or customer names), cropped and resized.
+
+| Device | File | Source | Licence |
+|---|---|---|---|
+| `digital-wi` | `assets/img/digital-wi.jpg` | Datatech Innovation – Digital WI overview (AI-generated illustration) | © Datatech Innovation |
+| `ai-vision-camera-wh` | `assets/img/ai-vision-camera-wh.jpg` | Datatech Innovation – AI Vision zoning concept (AI-generated illustration) | © Datatech Innovation |
+
 ## Placeholders – images still needed
 
 No suitable logo-free, freely licensed photo was found for these devices.
 Add a file with exactly this name and the popup will show it automatically (then add its credit here and in `content.json`).
 
-- `assets/img/digital-wi.jpg`
 - `assets/img/hr-system.jpg`
 
 ## 3D models
