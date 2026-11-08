@@ -36,7 +36,8 @@ export function buildWorld(ctx) {
     const [col, joints] = FINISH[id];
     const t0 = floorTexture(col, { joints, noise: joints ? 16 : 30 });
     const tex = t0.clone(); tex.needsUpdate = true; tex.repeat.set(w / 4, d / 4);
-    const tm = new THREE.MeshStandardMaterial({ map: tex, roughness: id === 'production' || id === 'amr' ? 0.35 : 0.7, metalness: 0.05 });
+    // Epoxy-coated floors: low roughness so the warehouse HDRI shows as a soft sheen (office stays matte)
+    const tm = new THREE.MeshStandardMaterial({ map: tex, roughness: id === 'production' || id === 'amr' ? 0.3 : id === 'office' ? 0.7 : 0.45, metalness: 0.05, envMapIntensity: 1.1 });
     xrayMats.push(tm);
     const tile = at(new THREE.Mesh(new THREE.BoxGeometry(w, 0.04, d), tm), cx, 0.32, cz, root);
     tile.receiveShadow = true;

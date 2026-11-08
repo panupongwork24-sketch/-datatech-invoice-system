@@ -57,7 +57,10 @@ const models = {};
 if (existsSync(p('assets/models'))) {
   for (const f of readdirSync(p('assets/models'))) if (f.endsWith('.glb')) models[f.slice(0, -4)] = readFileSync(p('assets/models/' + f)).toString('base64');
 }
-const modelsJs = 'window.__SF_MODELS=' + JSON.stringify(models) + ';';
+const modelsJs = 'window.__SF_MODELS=' + JSON.stringify(models) + ';'
+  // 2c. HDR environment map (image-based lighting) as a data URI → window.__SF_ENV
+  + (existsSync(p('assets/env/warehouse_env.hdr'))
+    ? 'window.__SF_ENV="data:application/octet-stream;base64,' + readFileSync(p('assets/env/warehouse_env.hdr')).toString('base64') + '";' : '');
 
 
 const esc = (s) => s.replace(/<\/script/gi, '<\\/script');

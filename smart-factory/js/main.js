@@ -6,6 +6,8 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { gsap, ZONES, hex, screens, flows, WavePool } from './core.js';
 import { buildWorld } from './world.js';
@@ -44,10 +46,20 @@ stage.appendChild(labelRenderer.domElement);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0b1020);
 scene.fog = new THREE.Fog(0x0b1020, 180, 460);
-// Image-based lighting: a procedural studio room gives metals and plastics realistic reflections.
+// Image-based lighting: a real warehouse HDRI (Poly Haven, CC0) gives metals, plastics and the
+// epoxy floors realistic reflections. Falls back to a procedural studio room if it cannot load.
 const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
-scene.environmentIntensity = 0.4;
+try {
+  const hdr = await new RGBELoader().loadAsync(window.__SF_ENV || 'assets/env/warehouse_env.hdr');
+  hdr.mapping = THREE.EquirectangularReflectionMapping;
+  scene.environment = pmrem.fromEquirectangular(hdr).texture;
+  hdr.dispose();
+  scene.environmentIntensity = 0.55;
+} catch (e) {
+  console.warn('HDR environment failed, using RoomEnvironment', e);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+  scene.environmentIntensity = 0.4;
+}
 
 const camera = new THREE.PerspectiveCamera(32, 1, 0.5, 900);
 camera.position.set(110, 100, 140);
@@ -79,6 +91,14 @@ controls.screenSpacePanning = false;
 // Post-processing: soft bloom on emissive parts (screens, status lights, RF waves).
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
+// Ambient occlusion: soft contact shadows where objects meet the floor and each other (desktop only;
+// switched off first by the adaptive-quality loop on slower GPUs).
+const ao = new GTAOPass(scene, camera, innerWidth, innerHeight);
+ao.updateGtaoMaterial({ radius: 2.6, distanceExponent: 1.4, thickness: 3, scale: 1.4, samples: 12 });
+ao.updatePdMaterial({ radius: 6, rings: 2, samples: 12 });
+ao.blendIntensity = 1;
+ao.enabled = !(coarse || small) && !new URLSearchParams(location.search).has('noao');
+composer.addPass(ao);
 const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.35, 0.4, 0.96);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
@@ -410,7 +430,7 @@ renderer.setAnimationLoop(() => {
   }
   controls.update();
   syncLabels();
-  if (bloomOn) composer.render(); else renderer.render(scene, camera);
+  if (bloomOn || ao.enabled) { bloom.enabled = bloomOn; composer.render(); } else renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
 
   // Adaptive quality: keep the frame rate up on weaker GPUs
@@ -418,7 +438,8 @@ renderer.setAnimationLoop(() => {
   if (fpsAcc > 2.5) {
     const fps = fpsFrames / fpsAcc;
     if (fpsEl) fpsEl.textContent = `${fps.toFixed(0)} fps · q${quality} · pr ${pixelRatio}`;
-    if (fps < 45 && quality < 4 && t > 4 && !HQ) {
+    if (fps < 45 && ao.enabled && t > 4 && !HQ) ao.enabled = false; // ambient occlusion goes first
+    else if (fps < 45 && quality < 4 && t > 4 && !HQ) {
       quality++;
       // Degrade in order of cost/benefit: bloom → pixel ratio → shadows → pixel ratio again
       if (quality === 1 && bloomOn) bloomOn = false;

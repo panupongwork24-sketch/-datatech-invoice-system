@@ -15,14 +15,14 @@ CC BY-SA images: the modified versions in `assets/img/` are shared under the sam
 | `mold-qr` | `assets/img/mold-qr.jpg` | [Injection mold - (2).jpg](https://commons.wikimedia.org/wiki/File:Injection_mold_-_(2).jpg) | Bricetofly | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | cropped, logo/brand marks removed |
 | `auto-label` | `assets/img/auto-label.jpg` | [Print n apply ucc.jpg](https://commons.wikimedia.org/wiki/File:Print_n_apply_ucc.jpg) | Labelling Technologies http://www.labelling.com | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) | cropped |
 
-## Datatech Innovation images
+## Own illustrations
 
-Illustrations from Datatech Innovation's own material (AI-generated, no third-party logos or customer names), cropped and resized.
+Crops of the presentation owner's own AI-generated illustrations (no third-party logos or customer names), resized.
 
 | Device | File | Source | Licence |
 |---|---|---|---|
-| `digital-wi` | `assets/img/digital-wi.jpg` | Datatech Innovation – Digital WI overview (AI-generated illustration) | © Datatech Innovation |
-| `ai-vision-camera-wh` | `assets/img/ai-vision-camera-wh.jpg` | Datatech Innovation – AI Vision zoning concept (AI-generated illustration) | © Datatech Innovation |
+| `digital-wi` | `assets/img/digital-wi.jpg` | Own Digital WI overview (AI-generated illustration) | owned by the presentation owner |
+| `ai-vision-camera-wh` | `assets/img/ai-vision-camera-wh.jpg` | Own AI Vision zoning concept (AI-generated illustration) | owned by the presentation owner |
 
 ## AI-generated images (Canva)
 
@@ -30,22 +30,22 @@ Generated with Canva's AI image generator for this presentation; prompts asked f
 
 | Device | File | Source | Licence |
 |---|---|---|---|
-| `ai-vision-inspection` | `assets/img/ai-vision-inspection.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
-| `amr` | `assets/img/amr.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
-| `amr-charging` | `assets/img/amr-charging.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
-| `boom-barrier` | `assets/img/boom-barrier.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
-| `cmms` | `assets/img/cmms.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
-| `esl-lineside` | `assets/img/esl-lineside.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
-| `esl-shelf` | `assets/img/esl-shelf.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
-| `fiber-backbone` | `assets/img/fiber-backbone.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
-| `lan-access` | `assets/img/lan-access.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
-| `mes-dashboard` | `assets/img/mes-dashboard.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
-| `network-rack` | `assets/img/network-rack.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
-| `pallet-rfid-tag` | `assets/img/pallet-rfid-tag.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
-| `paperless-pr-po` | `assets/img/paperless-pr-po.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
-| `rfid-kanban` | `assets/img/rfid-kanban.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
-| `visitor-badge` | `assets/img/visitor-badge.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
-| `visitor-kiosk` | `assets/img/visitor-kiosk.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
+| `ai-vision-inspection` | `assets/img/ai-vision-inspection.jpg` | Canva AI image generator | AI-generated, owned by the presentation owner |
+| `amr` | `assets/img/amr.jpg` | Canva AI image generator | AI-generated, owned by the presentation owner |
+| `amr-charging` | `assets/img/amr-charging.jpg` | Canva AI image generator | AI-generated, owned by the presentation owner |
+| `boom-barrier` | `assets/img/boom-barrier.jpg` | Canva AI image generator | AI-generated, owned by the presentation owner |
+| `cmms` | `assets/img/cmms.jpg` | Canva AI image generator | AI-generated, owned by the presentation owner |
+| `esl-lineside` | `assets/img/esl-lineside.jpg` | Canva AI image generator | AI-generated, owned by the presentation owner |
+| `esl-shelf` | `assets/img/esl-shelf.jpg` | Canva AI image generator | AI-generated, owned by the presentation owner |
+| `fiber-backbone` | `assets/img/fiber-backbone.jpg` | Canva AI image generator | AI-generated, owned by the presentation owner |
+| `lan-access` | `assets/img/lan-access.jpg` | Canva AI image generator | AI-generated, owned by the presentation owner |
+| `mes-dashboard` | `assets/img/mes-dashboard.jpg` | Canva AI image generator | AI-generated, owned by the presentation owner |
+| `network-rack` | `assets/img/network-rack.jpg` | Canva AI image generator | AI-generated, owned by the presentation owner |
+| `pallet-rfid-tag` | `assets/img/pallet-rfid-tag.jpg` | Canva AI image generator | AI-generated, owned by the presentation owner |
+| `paperless-pr-po` | `assets/img/paperless-pr-po.jpg` | Canva AI image generator | AI-generated, owned by the presentation owner |
+| `rfid-kanban` | `assets/img/rfid-kanban.jpg` | Canva AI image generator | AI-generated, owned by the presentation owner |
+| `visitor-badge` | `assets/img/visitor-badge.jpg` | Canva AI image generator | AI-generated, owned by the presentation owner |
+| `visitor-kiosk` | `assets/img/visitor-kiosk.jpg` | Canva AI image generator | AI-generated, owned by the presentation owner |
 
 ## Placeholders – images still needed
 
@@ -53,6 +53,10 @@ No suitable logo-free, freely licensed photo was found for these devices.
 Add a file with exactly this name and the popup will show it automatically (then add its credit here and in `content.json`).
 
 - `assets/img/hr-system.jpg`
+
+## Lighting
+
+`assets/env/warehouse_env.hdr`: [Empty Warehouse 01](https://polyhaven.com/a/empty_warehouse_01) HDRI from Poly Haven, **CC0**, downsampled to 512×256 for reflections / image-based lighting.
 
 ## 3D models
 
@@ -93,4 +97,7 @@ Every model was rendered and checked for brand names or logos; a forklift candid
 |---|---|---|---|---|---|
 | `assets/models/forklift_truck.glb` | Forklift Truck | [louis-muir](https://sketchfab.com/louir-muir) | [sketchfab.com/3d-models/forklift-truck-060f3f8bc7de4e6ca2f348d414702e9d](https://sketchfab.com/3d-models/forklift-truck-060f3f8bc7de4e6ca2f348d414702e9d) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | optimised |
 | `assets/models/box_truck.glb` | Box-truck | [CristianRus](https://sketchfab.com/CristianRus) | [sketchfab.com/3d-models/box-truck-b0e8788b6b774fe3a18eda1895a2b8fe](https://sketchfab.com/3d-models/box-truck-b0e8788b6b774fe3a18eda1895a2b8fe) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | optimised |
+| `assets/models/amr_agv.glb` | AGV | [lazier6666](https://sketchfab.com/lazier6666) | [sketchfab.com/3d-models/agv-29d8f05f8aa5403ebddd8b760814e8e2](https://sketchfab.com/3d-models/agv-29d8f05f8aa5403ebddd8b760814e8e2) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | optimised, scaled to the AMR footprint |
+| `assets/models/network_racks.glb` | Network Server Rack | [Khoa Nguyen (ngdkh)](https://sketchfab.com/ngdkh) | [sketchfab.com/3d-models/network-server-rack-3b15fb8779274844b54e63a40194d450](https://sketchfab.com/3d-models/network-server-rack-3b15fb8779274844b54e63a40194d450) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | optimised |
+| `assets/models/boom_barrier_housing.glb` | Automatic Boom Barriers | [Maxwell autodoors (maihupronoob)](https://sketchfab.com/maihupronoob) | [sketchfab.com/3d-models/automatic-boom-barriers-0013365d67f84b8bb22d62e128f69fa2](https://sketchfab.com/3d-models/automatic-boom-barriers-0013365d67f84b8bb22d62e128f69fa2) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | arm removed (animated arm is drawn in code), optimised |
 | `assets/models/passenger_cars.glb` | Generic passenger car pack | [Comrade1280](https://sketchfab.com/comrade1280) | [sketchfab.com/3d-models/generic-passenger-car-pack-20f9af9b8a404d5cb022ac6fe87f21f5](https://sketchfab.com/3d-models/generic-passenger-car-pack-20f9af9b8a404d5cb022ac6fe87f21f5) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | split into sedan, hatchback, compact, minivan, coupe, pickup; optimised |

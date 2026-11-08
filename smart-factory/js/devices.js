@@ -129,7 +129,8 @@ export function buildDevices(ctx) {
 
     // Boom barrier
     const bar = at(new THREE.Group(), -46.6, FLOOR, 43, root);
-    at(box(0.6, 1.15, 0.6, C.gate), 0, 0.575, 0, bar);
+    // Barrier housing: Sketchfab model (arm removed; our striped arm below animates), else a box
+    at(M('boom_barrier_housing', { height: 1.2 }, () => at(box(0.6, 1.15, 0.6, C.gate), 0, 0.575, 0)), 0, 0, 0, bar);
     const lamp = glowMat(0xef4444, 1.4);
     at(box(0.3, 0.22, 0.3, lamp), 0, 1.27, 0, bar);
     const arm = at(new THREE.Group(), 0, 1.0, 0, bar);
@@ -562,14 +563,16 @@ export function buildDevices(ctx) {
   /* -------------------------- ④ INTRALOGISTICS -------------------------- */
   function makeAMR() {
     const g = new THREE.Group();
-    at(box(1.0, 0.34, 1.45, 0xe2e8f0), 0, 0.27, 0, g);
+    // Body: Sketchfab AGV model squeezed to the AMR footprint, else a box with wheels
+    const body = model('amr_agv', { fit: [1.0, 0.4, 1.45] });
+    if (body) g.add(body); else at(box(1.0, 0.34, 1.45, 0xe2e8f0), 0, 0.27, 0, g);
     const lampM = glowMat(C.amr, 1.4);
-    at(box(1.02, 0.07, 1.47, lampM), 0, 0.2, 0, g);
+    at(box(1.02, 0.05, 1.47, lampM), 0, body ? 0.12 : 0.2, 0, g);
     const lidar = at(cyl(0.13, 0.13, 0.14, 8, 0x111827), 0, 0.51, 0.52, g);
     at(box(0.12, 0.05, 0.05, basic(0xf472b6, { toneMapped: false })), 0.08, 0.06, 0, lidar);
     const tote = at(new THREE.Group(), 0, 0.44, -0.1, g);
     at(M('plastic_crate_02', { fit: [0.8, 0.4, 0.95] }, () => at(box(0.8, 0.38, 0.95, 0x2563eb), 0, 0.19, 0)), 0, 0, 0, tote);
-    for (const [x, z] of [[-0.5, 0.5], [0.5, 0.5], [-0.5, -0.5], [0.5, -0.5]]) {
+    if (!body) for (const [x, z] of [[-0.5, 0.5], [0.5, 0.5], [-0.5, -0.5], [0.5, -0.5]]) {
       const w = cyl(0.11, 0.11, 0.08, 8, 0x0b0f19); w.rotation.z = Math.PI / 2; at(w, x, 0.11, z, g);
     }
     up.push((t, dt) => { lidar.rotation.y += dt * 9; });
@@ -1158,10 +1161,14 @@ export function buildDevices(ctx) {
     const m4 = new THREE.Matrix4();
     const ledCols = [new THREE.Color(0x22c55e), new THREE.Color(0x2dd4bf), new THREE.Color(0xf59e0b), new THREE.Color(0x0b1220)];
     let li = 0;
+    // Three racks: Sketchfab model (racks stand along its X, fronts face +X → turn to face +Z), else boxes
+    const racks = model('network_racks', { fit: [1.1, 2.4, 3.4] });
+    if (racks) { racks.rotation.y = -Math.PI / 2; rk.add(racks); }
     for (let r = 0; r < 3; r++) {
       const x = (r - 1) * 1.15;
-      at(box(1.0, 2.4, 1.1, 0x0b1220), x, 1.2, 0, rk);
-      at(box(1.02, 0.08, 1.12, glowMat(C.infra, 0.8)), x, 2.42, 0, rk);
+      if (!racks) at(box(1.0, 2.4, 1.1, 0x0b1220), x, 1.2, 0, rk);
+      if (racks) at(box(1.0, 0.025, 0.04, glowMat(C.infra, 0.8)), x, 2.3, 0.56, rk); // thin status strip on the front
+      else at(box(1.02, 0.08, 1.12, glowMat(C.infra, 0.8)), x, 2.42, 0, rk);
       for (let k = 0; k < 30; k++) {
         m4.makeTranslation(x - 0.36 + (k % 6) * 0.14, 0.4 + Math.floor(k / 6) * 0.38, 0.56);
         leds.setMatrixAt(li, m4); leds.setColorAt(li, ledCols[k % 4]); li++;

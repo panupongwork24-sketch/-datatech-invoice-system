@@ -10,7 +10,7 @@ export const MODEL_NAMES = [
   'tool_cart', 'drill_press_01', 'hand_truck', 'power_box_01', 'utility_box_01', 'exterior_aircon_unit',
   'concrete_road_barrier', 'WetFloorSign_01', 'steel_frame_shelves_03', 'worn_metal_rack', 'rollershutter_door',
   // Sketchfab (CC-BY) vehicles — passenger_cars holds one child node per car: car_sedan, car_hatchback, …
-  'forklift_truck', 'box_truck', 'passenger_cars',
+  'forklift_truck', 'box_truck', 'passenger_cars', 'amr_agv', 'network_racks', 'boom_barrier_housing',
 ];
 
 const lib = new Map();
