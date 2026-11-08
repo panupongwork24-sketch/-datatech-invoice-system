@@ -429,7 +429,7 @@
     "esl-shelf": {
       "zone": "warehouse",
       "image": "assets/img/esl-shelf.jpg",
-      "credit": "",
+      "credit": "Maksym Kozlenko · CC BY-SA 4.0 · Wikimedia Commons",
       "en": {
         "name": "Electronic Shelf Label (ESL)",
         "function": "E-paper labels on racks that show live item, quantity and location data.",
@@ -700,7 +700,7 @@
     "esl-lineside": {
       "zone": "production",
       "image": "assets/img/esl-lineside.jpg",
-      "credit": "",
+      "credit": "Maksym Kozlenko · CC BY-SA 4.0 · Wikimedia Commons",
       "en": {
         "name": "Line-side ESL",
         "function": "Electronic labels on the line-side rack that show live material levels.",
