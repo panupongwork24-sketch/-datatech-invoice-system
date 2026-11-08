@@ -835,7 +835,7 @@
     "fiber-backbone": {
       "zone": "infra",
       "image": "assets/img/fiber-backbone.jpg",
-      "credit": "",
+      "credit": "Asurnipal · CC BY-SA 4.0 · Wikimedia Commons",
       "en": {
         "name": "Fiber Optic Backbone",
         "function": "High-speed fiber network that connects every zone to the core.",
@@ -862,7 +862,7 @@
     "network-rack": {
       "zone": "infra",
       "image": "assets/img/network-rack.jpg",
-      "credit": "",
+      "credit": "Federal Bureau of Investigation · Public domain · Wikimedia Commons",
       "en": {
         "name": "Core Network & Server Rack",
         "function": "Core switches and servers that host the factory systems.",
@@ -889,7 +889,7 @@
     "lan-access": {
       "zone": "infra",
       "image": "assets/img/lan-access.jpg",
-      "credit": "",
+      "credit": "Rodrigo César · Public domain · Wikimedia Commons",
       "en": {
         "name": "Wi-Fi / LAN Access Point",
         "function": "Industrial wireless coverage for AMRs, tablets, scanners and ESL.",

@@ -18,6 +18,9 @@ CC BY-SA images: the modified versions in `assets/img/` are shared under the sam
 | `conveyor-dock` | `assets/img/conveyor-dock.jpg` | [Conveyor system in a factory.jpg](https://commons.wikimedia.org/wiki/File:Conveyor_system_in_a_factory.jpg) | falco | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | resized |
 | `mold-qr` | `assets/img/mold-qr.jpg` | [Injection mold - (2).jpg](https://commons.wikimedia.org/wiki/File:Injection_mold_-_(2).jpg) | Bricetofly | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | cropped, logo/brand marks removed |
 | `auto-label` | `assets/img/auto-label.jpg` | [Print n apply ucc.jpg](https://commons.wikimedia.org/wiki/File:Print_n_apply_ucc.jpg) | Labelling Technologies http://www.labelling.com | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) | cropped |
+| `fiber-backbone` | `assets/img/fiber-backbone.jpg` | [Optical fiber cable-06ASD.jpg](https://commons.wikimedia.org/wiki/File:Optical_fiber_cable-06ASD.jpg) | Asurnipal | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | resized |
+| `network-rack` | `assets/img/network-rack.jpg` | [EFTA00002522 - Cluttered server rack filled with colorful cables and networking equipment.jpg](https://commons.wikimedia.org/wiki/File:EFTA00002522_-_Cluttered_server_rack_filled_with_colorful_cables_and_networking_equipment.jpg) | Federal Bureau of Investigation | [Public domain]() | cropped, logo/brand marks removed |
+| `lan-access` | `assets/img/lan-access.jpg` | [Access-point-wireless.jpg](https://commons.wikimedia.org/wiki/File:Access-point-wireless.jpg) | Rodrigo César | [Public domain]() | resized |
 
 ## Placeholders – images still needed
 
@@ -36,6 +39,3 @@ Add a file with exactly this name and the popup will show it automatically (then
 - `assets/img/cmms.jpg`
 - `assets/img/paperless-pr-po.jpg`
 - `assets/img/hr-system.jpg`
-- `assets/img/fiber-backbone.jpg`
-- `assets/img/network-rack.jpg`
-- `assets/img/lan-access.jpg`
