@@ -17,6 +17,7 @@ CC BY-SA images: the modified versions in `assets/img/` are shared under the sam
 | `amr-charging` | `assets/img/amr-charging.jpg` | [Vector3DHD autonomous mobile robot and EnZone wireless charging.jpg](https://commons.wikimedia.org/wiki/File:Vector3DHD_autonomous_mobile_robot_and_EnZone_wireless_charging.jpg) | PattyK33 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | cropped, logo/brand marks removed |
 | `conveyor-dock` | `assets/img/conveyor-dock.jpg` | [Conveyor system in a factory.jpg](https://commons.wikimedia.org/wiki/File:Conveyor_system_in_a_factory.jpg) | falco | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | resized |
 | `mold-qr` | `assets/img/mold-qr.jpg` | [Injection mold - (2).jpg](https://commons.wikimedia.org/wiki/File:Injection_mold_-_(2).jpg) | Bricetofly | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | cropped, logo/brand marks removed |
+| `auto-label` | `assets/img/auto-label.jpg` | [Print n apply ucc.jpg](https://commons.wikimedia.org/wiki/File:Print_n_apply_ucc.jpg) | Labelling Technologies http://www.labelling.com | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) | cropped |
 
 ## Placeholders – images still needed
 
@@ -30,7 +31,6 @@ Add a file with exactly this name and the popup will show it automatically (then
 - `assets/img/mes-dashboard.jpg`
 - `assets/img/digital-wi.jpg`
 - `assets/img/ai-vision-inspection.jpg`
-- `assets/img/auto-label.jpg`
 - `assets/img/esl-lineside.jpg`
 - `assets/img/rfid-kanban.jpg`
 - `assets/img/cmms.jpg`
