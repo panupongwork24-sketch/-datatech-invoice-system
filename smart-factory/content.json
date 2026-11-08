@@ -402,7 +402,7 @@
     "ai-vision-camera-wh": {
       "zone": "warehouse",
       "image": "assets/img/ai-vision-camera-wh.jpg",
-      "credit": "",
+      "credit": "Punit Rajpal · CC0 · Wikimedia Commons",
       "en": {
         "name": "Hybrid RTLS – AI Vision Camera",
         "function": "Camera with AI that recognises forklifts, pallets and people to refine positions.",
