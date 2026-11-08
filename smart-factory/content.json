@@ -185,7 +185,7 @@
     "visitor-kiosk": {
       "zone": "gate",
       "image": "assets/img/visitor-kiosk.jpg",
-      "credit": "Zheng Zhou · CC BY-SA 4.0 · Wikimedia Commons",
+      "credit": "AI-generated illustration (Canva)",
       "en": {
         "name": "Visitor Kiosk",
         "function": "Self-service check-in for visitors and contractors at the main gate.",
@@ -212,7 +212,7 @@
     "boom-barrier": {
       "zone": "gate",
       "image": "assets/img/boom-barrier.jpg",
-      "credit": "Epolk · CC BY-SA 4.0 · Wikimedia Commons",
+      "credit": "AI-generated illustration (Canva)",
       "en": {
         "name": "Automatic Boom Barrier",
         "function": "Controls vehicle access with plate recognition / badge reading.",
@@ -239,7 +239,7 @@
     "visitor-badge": {
       "zone": "gate",
       "image": "assets/img/visitor-badge.jpg",
-      "credit": "Anonymous Agent · CC BY-SA 4.0 · Wikimedia Commons",
+      "credit": "AI-generated illustration (Canva)",
       "en": {
         "name": "Visitor Badge (QR / RFID)",
         "function": "Temporary pass that defines where a visitor may go and for how long.",
@@ -293,7 +293,7 @@
     "pallet-rfid-tag": {
       "zone": "dock",
       "image": "assets/img/pallet-rfid-tag.jpg",
-      "credit": "Mister rf · CC BY-SA 4.0 · Wikimedia Commons",
+      "credit": "AI-generated illustration (Canva)",
       "en": {
         "name": "Pallet RFID Tag",
         "function": "Passive UHF tag that gives every pallet a unique digital identity.",
@@ -429,7 +429,7 @@
     "esl-shelf": {
       "zone": "warehouse",
       "image": "assets/img/esl-shelf.jpg",
-      "credit": "Maksym Kozlenko · CC BY-SA 4.0 · Wikimedia Commons",
+      "credit": "AI-generated illustration (Canva)",
       "en": {
         "name": "Electronic Shelf Label (ESL)",
         "function": "E-paper labels on racks that show live item, quantity and location data.",
@@ -483,7 +483,7 @@
     "amr": {
       "zone": "amr",
       "image": "assets/img/amr.jpg",
-      "credit": "PattyK33 · CC BY-SA 4.0 · Wikimedia Commons",
+      "credit": "AI-generated illustration (Canva)",
       "en": {
         "name": "AMR (Autonomous Mobile Robot)",
         "function": "Self-driving robot that moves totes and carts between the warehouse and the line.",
@@ -510,7 +510,7 @@
     "amr-charging": {
       "zone": "amr",
       "image": "assets/img/amr-charging.jpg",
-      "credit": "PattyK33 · CC BY-SA 4.0 · Wikimedia Commons",
+      "credit": "AI-generated illustration (Canva)",
       "en": {
         "name": "AMR Charging Station",
         "function": "Automatic charging dock that keeps the AMR fleet running 24/7.",
@@ -564,7 +564,7 @@
     "mes-dashboard": {
       "zone": "production",
       "image": "assets/img/mes-dashboard.jpg",
-      "credit": "Siarhei Besarab · CC BY-SA 4.0 · Wikimedia Commons",
+      "credit": "AI-generated illustration (Canva)",
       "en": {
         "name": "MES Dashboard",
         "function": "Live view of the line: output, OEE, quality and status of every station.",
@@ -645,7 +645,7 @@
     "ai-vision-inspection": {
       "zone": "production",
       "image": "assets/img/ai-vision-inspection.jpg",
-      "credit": "Lg123456 · CC BY-SA 4.0 · Wikimedia Commons",
+      "credit": "AI-generated illustration (Canva)",
       "en": {
         "name": "AI Vision Inspection & Counting",
         "function": "Camera with AI that inspects and counts every tray (OK / NG).",
@@ -700,7 +700,7 @@
     "esl-lineside": {
       "zone": "production",
       "image": "assets/img/esl-lineside.jpg",
-      "credit": "Maksym Kozlenko · CC BY-SA 4.0 · Wikimedia Commons",
+      "credit": "AI-generated illustration (Canva)",
       "en": {
         "name": "Line-side ESL",
         "function": "Electronic labels on the line-side rack that show live material levels.",
@@ -727,7 +727,7 @@
     "rfid-kanban": {
       "zone": "production",
       "image": "assets/img/rfid-kanban.jpg",
-      "credit": "CCDBarcodeScanner · CC BY-SA 4.0 · Wikimedia Commons",
+      "credit": "AI-generated illustration (Canva)",
       "en": {
         "name": "RFID Kanban (FG Packing)",
         "function": "RFID cards that signal finished goods and trigger the next movement.",
@@ -754,7 +754,7 @@
     "cmms": {
       "zone": "office",
       "image": "assets/img/cmms.jpg",
-      "credit": "Siemens Pressebild, http://www.siemens.com · CC BY-SA 3.0 · Wikimedia Commons",
+      "credit": "AI-generated illustration (Canva)",
       "en": {
         "name": "CMMS (Maintenance Management)",
         "function": "Plans and tracks preventive and breakdown maintenance for every machine.",
@@ -781,7 +781,7 @@
     "paperless-pr-po": {
       "zone": "office",
       "image": "assets/img/paperless-pr-po.jpg",
-      "credit": "freddie marriage fredmarriage · CC0 · Wikimedia Commons",
+      "credit": "AI-generated illustration (Canva)",
       "en": {
         "name": "Paperless PR → PO",
         "function": "Digital purchase requests and approvals from request to purchase order.",
@@ -835,7 +835,7 @@
     "fiber-backbone": {
       "zone": "infra",
       "image": "assets/img/fiber-backbone.jpg",
-      "credit": "Asurnipal · CC BY-SA 4.0 · Wikimedia Commons",
+      "credit": "AI-generated illustration (Canva)",
       "en": {
         "name": "Fiber Optic Backbone",
         "function": "High-speed fiber network that connects every zone to the core.",
@@ -862,7 +862,7 @@
     "network-rack": {
       "zone": "infra",
       "image": "assets/img/network-rack.jpg",
-      "credit": "Federal Bureau of Investigation · Public domain · Wikimedia Commons",
+      "credit": "AI-generated illustration (Canva)",
       "en": {
         "name": "Core Network & Server Rack",
         "function": "Core switches and servers that host the factory systems.",
@@ -889,7 +889,7 @@
     "lan-access": {
       "zone": "infra",
       "image": "assets/img/lan-access.jpg",
-      "credit": "Rodrigo César · Public domain · Wikimedia Commons",
+      "credit": "AI-generated illustration (Canva)",
       "en": {
         "name": "Wi-Fi / LAN Access Point",
         "function": "Industrial wireless coverage for AMRs, tablets, scanners and ESL.",

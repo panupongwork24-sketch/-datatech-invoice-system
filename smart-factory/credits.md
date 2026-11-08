@@ -6,30 +6,14 @@ CC BY-SA images: the modified versions in `assets/img/` are shared under the sam
 
 | Device | File | Source | Author | Licence | Changes |
 |---|---|---|---|---|---|
-| `visitor-kiosk` | `assets/img/visitor-kiosk.jpg` | [Self Check-in and Baggage Drop Kiosks at Wuhan Tianhe Airport.jpg](https://commons.wikimedia.org/wiki/File:Self_Check-in_and_Baggage_Drop_Kiosks_at_Wuhan_Tianhe_Airport.jpg) | Zheng Zhou | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | resized |
-| `boom-barrier` | `assets/img/boom-barrier.jpg` | [Closed parking lot boom barrier.jpg](https://commons.wikimedia.org/wiki/File:Closed_parking_lot_boom_barrier.jpg) | Epolk | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | cropped |
-| `visitor-badge` | `assets/img/visitor-badge.jpg` | [13.56MHz RFID tags.jpg](https://commons.wikimedia.org/wiki/File:13.56MHz_RFID_tags.jpg) | Anonymous Agent | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | resized |
 | `rfid-dock-portal` | `assets/img/rfid-dock-portal.jpg` | [HRAFN Advanced RFID portal.png](https://commons.wikimedia.org/wiki/File:HRAFN_Advanced_RFID_portal.png) | Geirvevle | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) | logo/brand marks removed |
-| `pallet-rfid-tag` | `assets/img/pallet-rfid-tag.jpg` | [LTO-3 cartridge memory chip.jpg](https://commons.wikimedia.org/wiki/File:LTO-3_cartridge_memory_chip.jpg) | Mister rf | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | resized |
 | `dock-status-light` | `assets/img/dock-status-light.jpg` | [Signalsäule an einer grossen selbstfahrenden Baumaschine (rot gelb grün).jpg](https://commons.wikimedia.org/wiki/File:Signals%C3%A4ule_an_einer_grossen_selbstfahrenden_Baumaschine_(rot_gelb_gr%C3%BCn).jpg) | User:Mattes | [Public domain]() | cropped, logo/brand marks removed |
 | `rfid-label-printer` | `assets/img/rfid-label-printer.jpg` | [Wagtail ct200 barcode printer.png](https://commons.wikimedia.org/wiki/File:Wagtail_ct200_barcode_printer.png) | Wagtail11 | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | logo/brand marks removed |
 | `rtls-rfid-anchor` | `assets/img/rtls-rfid-anchor.jpg` | [Wi-Fi and mobile phone antenna inside New York City subway.jpg](https://commons.wikimedia.org/wiki/File:Wi-Fi_and_mobile_phone_antenna_inside_New_York_City_subway.jpg) | User:z22 | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) | logo/brand marks removed |
-| `esl-shelf` | `assets/img/esl-shelf.jpg` | [2021-06-28 E-ink price tag in Sydney supermarket.jpg](https://commons.wikimedia.org/wiki/File:2021-06-28_E-ink_price_tag_in_Sydney_supermarket.jpg) | Maksym Kozlenko | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | cropped, logo/brand marks removed |
 | `pick-to-light` | `assets/img/pick-to-light.jpg` | [Pick-by-Light-Fachanzeigen PickTermFlexible.JPG](https://commons.wikimedia.org/wiki/File:Pick-by-Light-Fachanzeigen_PickTermFlexible.JPG) | KBS Industrieelektronik GmbH | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) | resized |
-| `amr` | `assets/img/amr.jpg` | [Vector3DHD autonomous mobile robot and EnZone wireless charging.jpg](https://commons.wikimedia.org/wiki/File:Vector3DHD_autonomous_mobile_robot_and_EnZone_wireless_charging.jpg) | PattyK33 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | logo/brand marks removed |
-| `amr-charging` | `assets/img/amr-charging.jpg` | [Vector3DHD autonomous mobile robot and EnZone wireless charging.jpg](https://commons.wikimedia.org/wiki/File:Vector3DHD_autonomous_mobile_robot_and_EnZone_wireless_charging.jpg) | PattyK33 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | cropped, logo/brand marks removed |
 | `conveyor-dock` | `assets/img/conveyor-dock.jpg` | [Conveyor system in a factory.jpg](https://commons.wikimedia.org/wiki/File:Conveyor_system_in_a_factory.jpg) | falco | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | resized |
-| `mes-dashboard` | `assets/img/mes-dashboard.jpg` | [Diagnostic monitors in the control room of Wendelstein 7-X.jpg](https://commons.wikimedia.org/wiki/File:Diagnostic_monitors_in_the_control_room_of_Wendelstein_7-X.jpg) | Siarhei Besarab | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | cropped |
 | `mold-qr` | `assets/img/mold-qr.jpg` | [Injection mold - (2).jpg](https://commons.wikimedia.org/wiki/File:Injection_mold_-_(2).jpg) | Bricetofly | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | cropped, logo/brand marks removed |
-| `ai-vision-inspection` | `assets/img/ai-vision-inspection.jpg` | [Ids-machine-vision-cameras-usb2-2004.jpg](https://commons.wikimedia.org/wiki/File:Ids-machine-vision-cameras-usb2-2004.jpg) | Lg123456 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | cropped |
 | `auto-label` | `assets/img/auto-label.jpg` | [Print n apply ucc.jpg](https://commons.wikimedia.org/wiki/File:Print_n_apply_ucc.jpg) | Labelling Technologies http://www.labelling.com | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) | cropped |
-| `esl-lineside` | `assets/img/esl-lineside.jpg` | [2021-06-28 E-ink price tag in Sydney supermarket.jpg](https://commons.wikimedia.org/wiki/File:2021-06-28_E-ink_price_tag_in_Sydney_supermarket.jpg) | Maksym Kozlenko | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | cropped, logo/brand marks removed |
-| `rfid-kanban` | `assets/img/rfid-kanban.jpg` | [RFID.jpg](https://commons.wikimedia.org/wiki/File:RFID.jpg) | CCDBarcodeScanner | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | logo/brand marks removed |
-| `cmms` | `assets/img/cmms.jpg` | [Dampfturbine Laeufer01.jpg](https://commons.wikimedia.org/wiki/File:Dampfturbine_Laeufer01.jpg) | Siemens Pressebild, http://www.siemens.com | [CC BY-SA 3.0](http://creativecommons.org/licenses/by-sa/3.0/) | logo/brand marks removed |
-| `paperless-pr-po` | `assets/img/paperless-pr-po.jpg` | [Laptop on desk book stacks (Unsplash).jpg](https://commons.wikimedia.org/wiki/File:Laptop_on_desk_book_stacks_(Unsplash).jpg) | freddie marriage fredmarriage | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | resized |
-| `fiber-backbone` | `assets/img/fiber-backbone.jpg` | [Optical fiber cable-06ASD.jpg](https://commons.wikimedia.org/wiki/File:Optical_fiber_cable-06ASD.jpg) | Asurnipal | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | resized |
-| `network-rack` | `assets/img/network-rack.jpg` | [EFTA00002522 - Cluttered server rack filled with colorful cables and networking equipment.jpg](https://commons.wikimedia.org/wiki/File:EFTA00002522_-_Cluttered_server_rack_filled_with_colorful_cables_and_networking_equipment.jpg) | Federal Bureau of Investigation | [Public domain]() | cropped, logo/brand marks removed |
-| `lan-access` | `assets/img/lan-access.jpg` | [Access-point-wireless.jpg](https://commons.wikimedia.org/wiki/File:Access-point-wireless.jpg) | Rodrigo César | [Public domain]() | resized |
 
 ## Datatech Innovation images
 
@@ -39,6 +23,29 @@ Illustrations from Datatech Innovation's own material (AI-generated, no third-pa
 |---|---|---|---|
 | `digital-wi` | `assets/img/digital-wi.jpg` | Datatech Innovation – Digital WI overview (AI-generated illustration) | © Datatech Innovation |
 | `ai-vision-camera-wh` | `assets/img/ai-vision-camera-wh.jpg` | Datatech Innovation – AI Vision zoning concept (AI-generated illustration) | © Datatech Innovation |
+
+## AI-generated images (Canva)
+
+Generated with Canva's AI image generator for this presentation; prompts asked for no logos, brand names or readable text, and every image was checked for logos. Resized to max 960 px.
+
+| Device | File | Source | Licence |
+|---|---|---|---|
+| `ai-vision-inspection` | `assets/img/ai-vision-inspection.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
+| `amr` | `assets/img/amr.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
+| `amr-charging` | `assets/img/amr-charging.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
+| `boom-barrier` | `assets/img/boom-barrier.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
+| `cmms` | `assets/img/cmms.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
+| `esl-lineside` | `assets/img/esl-lineside.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
+| `esl-shelf` | `assets/img/esl-shelf.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
+| `fiber-backbone` | `assets/img/fiber-backbone.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
+| `lan-access` | `assets/img/lan-access.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
+| `mes-dashboard` | `assets/img/mes-dashboard.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
+| `network-rack` | `assets/img/network-rack.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
+| `pallet-rfid-tag` | `assets/img/pallet-rfid-tag.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
+| `paperless-pr-po` | `assets/img/paperless-pr-po.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
+| `rfid-kanban` | `assets/img/rfid-kanban.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
+| `visitor-badge` | `assets/img/visitor-badge.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
+| `visitor-kiosk` | `assets/img/visitor-kiosk.jpg` | Canva AI image generator (prompted by Datatech Innovation) | AI-generated, owned by Datatech Innovation |
 
 ## Placeholders – images still needed
 
