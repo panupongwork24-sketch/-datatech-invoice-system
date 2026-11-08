@@ -17,6 +17,6 @@ export const SCENES = [
     devices: ['cmms', 'paperless-pr-po', 'hr-system'] },
   { id: 'infra', zone: 'infra', cam: [34, 86, 70], target: [-2, 0, -4], duration: 12, xray: true, dist: 1,
     devices: ['fiber-backbone', 'network-rack', 'lan-access'] },
-  { id: 'highlight', zone: null, cam: [4, 50, 34], target: [-6, 0, -9], duration: 27, chain: true, dist: 1,
+  { id: 'highlight', zone: null, cam: [1, 70, 58], target: [-8, 2, -7], duration: 27, chain: true, dist: 1,
     devices: ['esl-lineside', 'mes-dashboard', 'pick-to-light', 'amr'] },
 ];
