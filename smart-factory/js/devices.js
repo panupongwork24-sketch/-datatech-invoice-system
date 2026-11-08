@@ -142,11 +142,24 @@ export function buildDevices(ctx) {
 
     // Visitor kiosk
     const k = at(new THREE.Group(), -44.4, FLOOR, 50.4, root);
-    at(box(0.9, 1.0, 0.6, 0x1e293b), 0, 0.5, 0, k);
-    at(box(0.95, 0.08, 0.65, C.gate), 0, 1.02, 0, k);
-    const head = at(new THREE.Group(), 0, 1.45, 0.05, k);
-    head.rotation.x = -0.35;
-    at(box(1.0, 0.78, 0.12, 0x0f172a), 0, 0, 0, head);
+    const STEEL = 0xd1d5db, DARK = 0x111827;
+    at(box(0.8, 0.04, 0.6, 0x6b7280), 0, 0.02, 0, k);                               // floor plate
+    at(box(0.56, 1.05, 0.42, STEEL), 0, 0.565, -0.02, k);                           // brushed-steel pedestal
+    at(box(0.5, 0.36, 0.02, C.gate, { roughness: 0.4, metalness: 0.1 }), 0, 0.3, 0.2, k); // accent panel
+    // Desk with ID / QR scanner window and the badge printer slot
+    const desk = at(new THREE.Group(), 0, 1.0, 0.08, k);
+    desk.rotation.x = -0.18;
+    at(box(0.66, 0.08, 0.46, STEEL), 0, 0, 0, desk);
+    at(box(0.22, 0.012, 0.16, basic(0x0ea5e9, { toneMapped: false, transparent: true, opacity: 0.85 })), -0.14, 0.045, 0.05, desk); // scanner glass
+    at(box(0.2, 0.01, 0.12, DARK), 0.16, 0.045, 0.05, desk);                         // card reader pad
+    at(box(0.46, 0.03, 0.03, DARK), 0, -0.07, 0.24, k);                              // badge slot
+    const head = at(new THREE.Group(), 0, 1.5, 0.02, k);
+    head.rotation.x = -0.3;
+    at(box(0.12, 0.5, 0.1, STEEL), 0, -0.3, -0.06, head);                            // neck
+    at(box(1.02, 0.8, 0.08, DARK), 0, 0, 0, head);                                   // bezel
+    at(box(1.04, 0.82, 0.04, STEEL), 0, 0, -0.05, head);                             // back shell
+    at(cyl(0.025, 0.025, 0.02, 10, DARK), 0, 0.37, 0.045, head).rotation.x = Math.PI / 2; // camera
+    at(cyl(0.012, 0.012, 0.022, 8, basic(0x22c55e, { toneMapped: false })), 0.06, 0.37, 0.045, head).rotation.x = Math.PI / 2;
     const KSTEPS = [['WELCOME', 'Tap to check in'], ['SCAN ID', 'Hold ID card to reader'], ['PHOTO', 'Look at the camera'], ['PRINTING', 'Your badge is printing'], ['DONE ✓', 'Host has been notified']];
     const ks = new Screen(0.88, 0.64, 256, 186, (c, W, H, s) => {
       panelBg(c, W, H, hex(C.gate));
@@ -156,7 +169,7 @@ export function buildDevices(ctx) {
       txt(c, b, W / 2, 118, 16, '#e2e8f0', 500, 'center');
       for (let i = 0; i < 5; i++) { c.fillStyle = i <= s.step ? hex(C.gate) : '#334155'; c.fillRect(40 + i * 38, 150, 30, 8); }
     }, { step: 0 });
-    at(ks.mesh, 0, 0, 0.065, head);
+    at(ks.mesh, 0, 0, 0.045, head);
     reg.add('visitor-kiosk', k, { zone: Z, label: [0, 2.4, 0] });
 
     // Visitor badge (card slides out + floating badge hologram)
@@ -233,15 +246,43 @@ export function buildDevices(ctx) {
     const Z = 'dock';
     // RFID portal
     const portal = at(new THREE.Group(), -40, FLOOR, 9, root);
-    const antMat = glowMat(C.dock, 0.25);
+    const antMat = glowMat(C.dock, 0.25);           // LED strip on each antenna (flashes on read)
     const ants = [];
+    const POST = 0x9ca3af, ABS = { roughness: 0.55, metalness: 0 };
     for (const s of [-1, 1]) {
-      at(box(0.35, 3.4, 0.55, 0x334155), s * 2.6, 1.7, 0, portal);
-      ants.push(at(box(0.14, 1.3, 0.8, antMat), s * 2.36, 1.55, 0, portal));
-      at(box(0.14, 0.5, 0.6, antMat), s * 2.36, 2.75, 0, portal);
+      const x = s * 2.55;
+      // Square steel post on a bolted base plate
+      at(box(0.5, 0.03, 0.5, 0x6b7280), x, 0.015, 0, portal);
+      for (const [bx, bz] of [[-0.18, -0.18], [0.18, -0.18], [-0.18, 0.18], [0.18, 0.18]]) at(cyl(0.025, 0.025, 0.04, 6, 0x374151), x + bx, 0.05, bz, portal);
+      at(box(0.16, 3.5, 0.16, POST), x, 1.75, 0, portal);
+      // Yellow/black impact bollard on the outside of each post (forklift protection)
+      const bol = at(new THREE.Group(), x + s * 0.32, 0, 0.55, portal);
+      at(cyl(0.09, 0.09, 1.1, 14, 0xfacc15), 0, 0.55, 0, bol);
+      for (const y of [0.35, 0.75]) at(cyl(0.092, 0.092, 0.12, 14, 0x111827), 0, y, 0, bol);
+      // Two flat-panel UHF antennas per side, facing the lane
+      for (const y of [1.05, 2.15]) {
+        const a = at(new THREE.Group(), x - s * 0.17, y, 0, portal);
+        at(box(0.06, 0.34, 0.08, 0x4b5563), s * 0.06, 0, 0, a);                  // bracket
+        at(box(0.07, 0.62, 0.62, 0xf1f5f9, ABS), 0, 0, 0, a);                    // radome
+        at(box(0.075, 0.045, 0.4, 0x94a3b8, ABS), 0, -0.24, 0, a);               // logo-free label plate
+        ants.push(at(box(0.02, 0.5, 0.03, antMat), -s * 0.04, 0, 0.27, a));     // LED strip
+      }
+      // Cable running down the post
+      at(cyl(0.015, 0.015, 3.3, 6, 0x111827), x + s * 0.1, 1.7, -0.1, portal);
     }
-    at(box(5.55, 0.35, 0.55, 0x334155), 0, 3.57, 0, portal);
-    at(box(4.2, 0.08, 0.1, antMat), 0, 3.38, 0.28, portal);
+    // Top beam with two down-facing antennas and a status light bar
+    at(box(5.3, 0.18, 0.18, POST), 0, 3.5, 0, portal);
+    for (const x of [-1.1, 1.1]) {
+      at(box(0.62, 0.07, 0.62, 0xf1f5f9, ABS), x, 3.35, 0, portal);
+      at(box(0.4, 0.02, 0.03, antMat), x, 3.31, 0.27, portal);
+    }
+    at(box(1.4, 0.1, 0.12, antMat), 0, 3.66, 0.02, portal);
+    // RFID reader enclosure with cable glands on the left post
+    const rd = at(new THREE.Group(), -2.55 + 0.02, 1.55, 0.2, portal);
+    at(box(0.42, 0.5, 0.16, 0xd1d5db, ABS), 0, 0, 0, rd);
+    at(box(0.3, 0.06, 0.02, 0x111827), 0, 0.12, 0.085, rd);
+    for (const [lx, c] of [[-0.1, 0x22c55e], [0, 0x38bdf8], [0.1, 0xf59e0b]]) at(cyl(0.018, 0.018, 0.02, 8, basic(c, { toneMapped: false })), lx, -0.05, 0.085, rd).rotation.x = Math.PI / 2;
+    for (const gx of [-0.12, 0, 0.12]) at(cyl(0.025, 0.025, 0.05, 8, 0x111827), gx, -0.27, 0, rd);
     reg.add('rfid-dock-portal', portal, { zone: Z, label: [0, 4.6, 0] });
 
     // Forklift with RFID-tagged pallet
@@ -356,16 +397,27 @@ export function buildDevices(ctx) {
     at(box(2.2, 0.08, 1.1, 0x94a3b8), 0, 0.86, 0, pr);
     for (const [x, z] of [[-1, -0.45], [1, -0.45], [-1, 0.45], [1, 0.45]]) at(box(0.07, 0.86, 0.07, 0x475569), x, 0.43, z, pr);
     const body = at(new THREE.Group(), -0.3, 0.9, 0, pr);
-    at(box(0.85, 0.6, 1.0, 0xe5e7eb), 0, 0.3, 0, body);
-    at(box(0.86, 0.12, 0.6, 0x475569), 0, 0.62, -0.15, body);
-    at(box(0.6, 0.06, 0.05, 0x111827), 0, 0.18, 0.51, body);
+    at(box(0.62, 0.32, 0.86, 0x374151), 0, 0.16, 0, body);                         // metal base / mechanism
+    // Hinged cover with a smoked window showing the label roll
+    at(box(0.62, 0.28, 0.6, 0xe5e7eb, ABS), 0, 0.46, -0.13, body);
+    at(box(0.02, 0.2, 0.44, basic(0x1e293b, { transparent: true, opacity: 0.55 })), 0.315, 0.46, -0.13, body);
+    const roll = at(cyl(0.12, 0.12, 0.42, 20, 0xf8fafc, ABS), 0.12, 0.45, -0.14, body);
+    roll.rotation.z = Math.PI / 2;
+    at(cyl(0.04, 0.04, 0.44, 12, 0x6b7280), 0.12, 0.45, -0.14, body).rotation.z = Math.PI / 2;
+    // Front control panel (screen + LED + keys) and label exit
+    at(box(0.62, 0.3, 0.16, 0xe5e7eb, ABS), 0, 0.47, 0.3, body);
+    at(box(0.5, 0.04, 0.05, 0x111827), 0, 0.17, 0.44, body);                        // exit slot
+    at(box(0.5, 0.012, 0.08, 0x9ca3af), 0, 0.14, 0.47, body);                       // tear bar
     const prLed = glowMat(C.dock, 0.4);
-    at(box(0.12, 0.06, 0.03, prLed), 0.3, 0.45, 0.51, body);
+    at(box(0.06, 0.03, 0.02, prLed), 0.22, 0.55, 0.385, body);
+    for (const [kx, ky] of [[0.12, 0.42], [0.2, 0.42], [0.28, 0.42], [0.2, 0.36]]) at(box(0.05, 0.035, 0.02, 0x4b5563), kx - 0.04, ky, 0.385, body);
+    // Rear cables
+    at(cyl(0.015, 0.015, 0.5, 6, 0x111827), -0.2, 0.1, -0.6, body).rotation.x = Math.PI / 2;
     const prScr = new Screen(0.3, 0.16, 120, 64, (c, W, H, s) => {
       c.fillStyle = '#0f2a3a'; c.fillRect(0, 0, W, H);
       txt(c, s.t, W / 2, H / 2, 18, '#7dd3fc', 700, 'center');
     }, { t: 'READY' });
-    at(prScr.mesh, -0.15, 0.45, 0.505, body);
+    at(prScr.mesh, -0.12, 0.5, 0.386, body);
     const lbl = at(box(0.36, 0.01, 0.42, 0xffffff), 0, 0.17, 0.3, body);
     lbl.visible = false;
     const op = at(person(0x0ea5e9), 0.6, 0, 1.2, pr);
