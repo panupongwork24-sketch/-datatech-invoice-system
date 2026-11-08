@@ -185,7 +185,7 @@
     "visitor-kiosk": {
       "zone": "gate",
       "image": "assets/img/visitor-kiosk.jpg",
-      "credit": "",
+      "credit": "Zheng Zhou · CC BY-SA 4.0 · Wikimedia Commons",
       "en": {
         "name": "Visitor Kiosk",
         "function": "Self-service check-in for visitors and contractors at the main gate.",
@@ -212,7 +212,7 @@
     "boom-barrier": {
       "zone": "gate",
       "image": "assets/img/boom-barrier.jpg",
-      "credit": "",
+      "credit": "Epolk · CC BY-SA 4.0 · Wikimedia Commons",
       "en": {
         "name": "Automatic Boom Barrier",
         "function": "Controls vehicle access with plate recognition / badge reading.",
@@ -239,7 +239,7 @@
     "visitor-badge": {
       "zone": "gate",
       "image": "assets/img/visitor-badge.jpg",
-      "credit": "",
+      "credit": "Anonymous Agent · CC BY-SA 4.0 · Wikimedia Commons",
       "en": {
         "name": "Visitor Badge (QR / RFID)",
         "function": "Temporary pass that defines where a visitor may go and for how long.",
@@ -266,7 +266,7 @@
     "rfid-dock-portal": {
       "zone": "dock",
       "image": "assets/img/rfid-dock-portal.jpg",
-      "credit": "",
+      "credit": "Geirvevle · CC BY-SA 3.0 · Wikimedia Commons",
       "en": {
         "name": "RFID Dock Gate",
         "function": "Reads every tagged pallet that passes the dock door — no scanning by hand.",
@@ -293,7 +293,7 @@
     "pallet-rfid-tag": {
       "zone": "dock",
       "image": "assets/img/pallet-rfid-tag.jpg",
-      "credit": "",
+      "credit": "Mister rf · CC BY-SA 4.0 · Wikimedia Commons",
       "en": {
         "name": "Pallet RFID Tag",
         "function": "Passive UHF tag that gives every pallet a unique digital identity.",
@@ -320,7 +320,7 @@
     "dock-status-light": {
       "zone": "dock",
       "image": "assets/img/dock-status-light.jpg",
-      "credit": "",
+      "credit": "User:Mattes · Public domain · Wikimedia Commons",
       "en": {
         "name": "Dock Status Light & Board",
         "function": "Shows the dock team the live receiving status at a glance.",
@@ -456,7 +456,7 @@
     "pick-to-light": {
       "zone": "warehouse",
       "image": "assets/img/pick-to-light.jpg",
-      "credit": "",
+      "credit": "KBS Industrieelektronik GmbH · CC BY-SA 3.0 · Wikimedia Commons",
       "en": {
         "name": "Pick-to-Light",
         "function": "Lights and displays on each slot that guide the picker to the right item and quantity.",
@@ -483,7 +483,7 @@
     "amr": {
       "zone": "amr",
       "image": "assets/img/amr.jpg",
-      "credit": "",
+      "credit": "PattyK33 · CC BY-SA 4.0 · Wikimedia Commons",
       "en": {
         "name": "AMR (Autonomous Mobile Robot)",
         "function": "Self-driving robot that moves totes and carts between the warehouse and the line.",
@@ -510,7 +510,7 @@
     "amr-charging": {
       "zone": "amr",
       "image": "assets/img/amr-charging.jpg",
-      "credit": "",
+      "credit": "PattyK33 · CC BY-SA 4.0 · Wikimedia Commons",
       "en": {
         "name": "AMR Charging Station",
         "function": "Automatic charging dock that keeps the AMR fleet running 24/7.",
@@ -537,7 +537,7 @@
     "conveyor-dock": {
       "zone": "amr",
       "image": "assets/img/conveyor-dock.jpg",
-      "credit": "",
+      "credit": "falco · CC0 · Wikimedia Commons",
       "en": {
         "name": "AMR–Conveyor Transfer Station",
         "function": "Roller station where the AMR hands material over to the production conveyor.",
