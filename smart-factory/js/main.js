@@ -156,10 +156,9 @@ function setXray(on) {
   updateButtons();
 }
 
-function camFor(s) {
+function camFor(s, aspect = camera.aspect) {
   const target = new THREE.Vector3(...s.target);
   const dir = new THREE.Vector3(...s.cam).sub(target).multiplyScalar(s.dist ?? 1.5);
-  const aspect = camera.aspect;
   if (aspect < 1.3) dir.multiplyScalar(Math.min(2.2, 1.35 / aspect));
   return { pos: target.clone().add(dir), target };
 }
@@ -168,7 +167,9 @@ function goTo(i, { instant = false } = {}) {
   current = (i + SCENES.length) % SCENES.length;
   sceneTime = 0;
   const s = SCENES[current];
-  const { pos, target } = camFor(s);
+  sceneDevices = new Set(s.devices);
+  renderCaption(); measureFrame();
+  const { pos, target } = camFor(s, frame.tw / frame.th);
   controls.autoRotate = false;
   gsap.killTweensOf(camera.position); gsap.killTweensOf(controls.target);
   if (instant) {
@@ -183,8 +184,6 @@ function goTo(i, { instant = false } = {}) {
   }
   setXray(!!s.xray || xrayManual);
   if (s.chain && ctx.chain) { ctx.chain.restart(true); chainStep = -1; }
-  sceneDevices = new Set(s.devices);
-  renderCaption();
   document.querySelectorAll('#sceneList li').forEach((li, k) => li.classList.toggle('active', k === current));
   closeDrawer();
 }
@@ -390,19 +389,40 @@ function syncLabels() {
   }
 }
 
-/* ---------------- resize ---------------- */
+/* ---------------- resize / framing ---------------- */
+// The camera is framed for the part of the screen that the top bar, sidebar and caption leave free
+// (camera.aspect = free area's aspect); the projection is then widened through setViewOffset so the
+// rest of the canvas still renders around it. Values ease each frame so caption changes glide.
+const frame = { l: 0, t: 0, w: 1, h: 1, tl: 0, tt: 0, tw: 1, th: 1, init: false };
+function measureFrame() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  const top = Math.min(h * 0.15, $('#topbar').getBoundingClientRect().bottom);
+  const sb = $('#sidebar').getBoundingClientRect();
+  const left = w > 900 && sb.width ? sb.right + 8 : 0;
+  const cap = $('#caption').getBoundingClientRect();
+  let bottom = cap.height ? Math.max(0, h - cap.top + 8) : 0;
+  if (w <= 900 && h <= 500) bottom = 0;                    // landscape phone: caption sits beside the scene
+  const fh = Math.max(h * 0.5, h - top - bottom);
+  Object.assign(frame, { tl: left, tt: Math.min(top, h - fh), tw: w - left, th: fh });
+  if (!frame.init) { frame.init = true; frame.l = frame.tl; frame.t = frame.tt; frame.w = frame.tw; frame.h = frame.th; }
+}
+function applyFrame(k = 1) {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  for (const key of ['l', 't', 'w', 'h']) frame[key] += (frame['t' + key] - frame[key]) * k;
+  camera.aspect = frame.w / frame.h;
+  camera.setViewOffset(frame.w, frame.h, -frame.l, -frame.t, w, h);
+  camera.updateProjectionMatrix();
+}
+function frameMoving() { return Math.abs(frame.tl - frame.l) + Math.abs(frame.tt - frame.t) + Math.abs(frame.tw - frame.w) + Math.abs(frame.th - frame.h) > 0.5; }
 function resize() {
   const w = stage.clientWidth, h = stage.clientHeight;
-  camera.aspect = w / h;
-  // Keep the subject centred in the space not covered by the sidebar / caption.
-  if (w > 900) camera.setViewOffset(w, h, -(248 + 16) / 2, 70, w, h);
-  else camera.setViewOffset(w, h, 0, h > w ? h * 0.17 : h * 0.06, w, h); // lift above the caption sheet
-  camera.updateProjectionMatrix();
+  measureFrame(); applyFrame(1);
   renderer.setSize(w, h, false);
   composer.setPixelRatio(pixelRatio);
   composer.setSize(w, h);
   labelRenderer.setSize(w, h);
 }
+new ResizeObserver(() => { measureFrame(); }).observe($('#caption'));
 new ResizeObserver(resize).observe(stage);
 resize();
 
@@ -428,6 +448,7 @@ renderer.setAnimationLoop(() => {
   } else {
     $('#progress i').style.transform = 'scaleX(0)';
   }
+  if (frameMoving()) applyFrame(Math.min(1, dt * 5));
   controls.update();
   syncLabels();
   if (bloomOn || ao.enabled) { bloom.enabled = bloomOn; composer.render(); } else renderer.render(scene, camera);

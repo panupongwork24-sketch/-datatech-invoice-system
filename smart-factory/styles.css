@@ -79,7 +79,7 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 /* ---------- caption ---------- */
 #caption {
   --zc: #38bdf8;
-  position: fixed; z-index: 14; left: calc(var(--side-w) + 32px); bottom: calc(16px + env(safe-area-inset-bottom)); width: min(560px, calc(100% - var(--side-w) - 48px));
+  position: fixed; z-index: 14; left: calc(var(--side-w) + 32px); bottom: calc(16px + env(safe-area-inset-bottom)); width: min(520px, calc(100% - var(--side-w) - 48px));
   background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--zc); border-radius: var(--radius);
   padding: 14px 16px 12px; backdrop-filter: blur(12px);
 }
@@ -103,7 +103,10 @@ svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width:
 .ctrl .pp { background: var(--zc); color: #0b1020; border-color: transparent; }
 #progress { flex: 1; height: 4px; border-radius: 4px; background: rgba(148, 163, 184, .2); overflow: hidden; }
 #progress i { display: block; height: 100%; background: var(--zc); transform-origin: left; transform: scaleX(0); }
-.cap-toggle { display: none; position: absolute; right: 10px; top: 10px; width: 30px; height: 30px; }
+.cap-toggle { display: grid; position: absolute; right: 10px; top: 10px; width: 30px; height: 30px; }
+#capTitle { padding-right: 34px; }
+body.cap-min #capText, body.cap-min #capDevices, body.cap-min #capSteps { display: none; }
+body.cap-min .cap-toggle svg { transform: rotate(180deg); }
 
 /* ---------- modal ---------- */
 #modal { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 20px; background: rgba(2, 6, 18, 0); transition: background .2s; }
@@ -176,15 +179,12 @@ body.xray #stage::after { content: ""; position: absolute; inset: 0; pointer-eve
   body.drawer #topbar { z-index: 35; }
   #sceneList button { padding: 11px 8px; font-size: 15px; }
   #caption { left: 12px; right: 12px; width: auto; bottom: calc(12px + env(safe-area-inset-bottom)); padding: 12px 14px 10px; }
-  .cap-toggle { display: grid; }
   #capTitle { font-size: 17px; padding-right: 34px; }
   #capText { font-size: 13px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
   #capDevices { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-right: -14px; padding-right: 14px; }
   #capDevices::-webkit-scrollbar { display: none; }
   .chip { white-space: nowrap; flex: none; }
   #capSteps li { padding: 2px 4px; font-size: 12px; }
-  body.cap-min #capText, body.cap-min #capDevices, body.cap-min #capSteps { display: none; }
-  body.cap-min .cap-toggle svg { transform: rotate(180deg); }
   #modal { padding: 0; place-items: end center; }
   #modal .card { grid-template-columns: 1fr; max-height: 92%; border-radius: 18px 18px 0 0; }
   .media, .media img { min-height: 190px; max-height: 240px; }

@@ -396,29 +396,45 @@ export function buildDevices(ctx) {
     const pr = at(new THREE.Group(), -55, FLOOR, 15.2, root);
     at(box(2.2, 0.08, 1.1, 0x94a3b8), 0, 0.86, 0, pr);
     for (const [x, z] of [[-1, -0.45], [1, -0.45], [-1, 0.45], [1, 0.45]]) at(box(0.07, 0.86, 0.07, 0x475569), x, 0.43, z, pr);
+    // Industrial thermal-transfer RFID printer (metal case, black touch-panel column, side media window)
     const body = at(new THREE.Group(), -0.3, 0.9, 0, pr);
-    at(box(0.62, 0.32, 0.86, 0x374151), 0, 0.16, 0, body);                         // metal base / mechanism
-    // Hinged cover with a smoked window showing the label roll
-    at(box(0.62, 0.28, 0.6, 0xe5e7eb, ABS), 0, 0.46, -0.13, body);
-    at(box(0.02, 0.2, 0.44, basic(0x1e293b, { transparent: true, opacity: 0.55 })), 0.315, 0.46, -0.13, body);
-    const roll = at(cyl(0.12, 0.12, 0.42, 20, 0xf8fafc, ABS), 0.12, 0.45, -0.14, body);
+    const SILV = { roughness: 0.32, metalness: 0.65 }, BLK = { roughness: 0.5, metalness: 0.1 };
+    const W = 0.56, H = 0.66, D = 0.86, fz = D / 2;                                 // case size, front face at +z
+    at(box(W, 0.03, D - 0.04, 0x1f2937, BLK), 0, 0.015, 0, body);                    // rubber feet plinth
+    at(box(W, H - 0.03, D, 0x9ca3af, SILV), 0, 0.03 + (H - 0.03) / 2, 0, body);      // silver main case
+    at(box(0.21, H - 0.02, 0.12, 0x1f2937, BLK), -W / 2 + 0.1, 0.03 + (H - 0.02) / 2, fz - 0.055, body); // black front panel column
+    at(box(W - 0.2, 0.012, D - 0.02, 0x6b7280, SILV), 0.1, H + 0.006, 0, body);     // lid seam line
+    // Side media window (smoked glass in a black frame) on the right side
+    at(box(0.012, 0.3, 0.44, 0x111827, BLK), W / 2 + 0.002, H - 0.22, -0.08, body);
+    at(box(0.006, 0.24, 0.38, basic(0x334155, { transparent: true, opacity: 0.55 })), W / 2 + 0.01, H - 0.22, -0.08, body);
+    const roll = at(cyl(0.11, 0.11, 0.3, 20, 0xf8fafc, ABS), 0.12, H - 0.22, -0.1, body);
     roll.rotation.z = Math.PI / 2;
-    at(cyl(0.04, 0.04, 0.44, 12, 0x6b7280), 0.12, 0.45, -0.14, body).rotation.z = Math.PI / 2;
-    // Front control panel (screen + LED + keys) and label exit
-    at(box(0.62, 0.3, 0.16, 0xe5e7eb, ABS), 0, 0.47, 0.3, body);
-    at(box(0.5, 0.04, 0.05, 0x111827), 0, 0.17, 0.44, body);                        // exit slot
-    at(box(0.5, 0.012, 0.08, 0x9ca3af), 0, 0.14, 0.47, body);                       // tear bar
-    const prLed = glowMat(C.dock, 0.4);
-    at(box(0.06, 0.03, 0.02, prLed), 0.22, 0.55, 0.385, body);
-    for (const [kx, ky] of [[0.12, 0.42], [0.2, 0.42], [0.28, 0.42], [0.2, 0.36]]) at(box(0.05, 0.035, 0.02, 0x4b5563), kx - 0.04, ky, 0.385, body);
+    at(cyl(0.035, 0.035, 0.34, 12, 0x6b7280), 0.12, H - 0.22, -0.1, body).rotation.z = Math.PI / 2;
+    // Front: black touch panel column — power key, portrait touchscreen, three keys, USB port
+    at(box(0.12, 0.05, 0.012, 0x0b0f17, BLK), -W / 2 + 0.1, H - 0.06, fz + 0.006, body);
+    const prLed = glowMat(0x38bdf8, 0.4);
+    at(box(0.025, 0.025, 0.006, prLed), -W / 2 + 0.1, H - 0.06, fz + 0.014, body);
+    at(box(0.15, 0.23, 0.01, 0x0b0f17, BLK), -W / 2 + 0.1, H - 0.24, fz + 0.005, body);
+    for (const kx of [-0.045, 0, 0.045]) at(box(0.03, 0.025, 0.008, 0x374151, BLK), -W / 2 + 0.1 + kx, H - 0.39, fz + 0.004, body);
+    at(box(0.03, 0.012, 0.006, 0x4b5563), -W / 2 + 0.06, 0.08, fz + 0.003, body);
+    at(box(0.008, 0.12, 0.01, glowMat(0x38bdf8, 0.5)), -W / 2 + 0.195, H - 0.2, fz + 0.005, body); // blue accent strip
+    // Front: silver upper door, label exit slot with tear bar, lower panel, blue latch
+    at(box(W - 0.22, 0.26, 0.012, 0xb4bac2, SILV), 0.1, H - 0.17, fz + 0.006, body);
+    at(box(W - 0.24, 0.04, 0.02, 0x111827, BLK), 0.1, 0.3, fz + 0.005, body);         // exit slot
+    at(box(W - 0.24, 0.012, 0.03, 0x6b7280, SILV), 0.1, 0.275, fz + 0.012, body);      // tear bar
+    at(box(W - 0.22, 0.2, 0.012, 0x8b9199, SILV), 0.1, 0.14, fz + 0.006, body);
+    at(box(0.012, 0.06, 0.05, glowMat(0x38bdf8, 0.35)), W / 2 + 0.006, 0.1, fz - 0.1, body);
     // Rear cables
-    at(cyl(0.015, 0.015, 0.5, 6, 0x111827), -0.2, 0.1, -0.6, body).rotation.x = Math.PI / 2;
-    const prScr = new Screen(0.3, 0.16, 120, 64, (c, W, H, s) => {
-      c.fillStyle = '#0f2a3a'; c.fillRect(0, 0, W, H);
-      txt(c, s.t, W / 2, H / 2, 18, '#7dd3fc', 700, 'center');
+    at(cyl(0.015, 0.015, 0.5, 6, 0x111827), -0.15, 0.1, -fz - 0.2, body).rotation.x = Math.PI / 2;
+    const prScr = new Screen(0.13, 0.2, 78, 120, (c, W2, H2, s) => {
+      c.fillStyle = '#e0f2fe'; c.fillRect(0, 0, W2, H2);
+      c.fillStyle = '#0ea5e9'; c.fillRect(0, 0, 10, H2);
+      c.beginPath(); c.arc(26, 22, 9, 0, Math.PI * 2); c.fill();
+      txt(c, s.t, W2 / 2 + 6, H2 / 2 + 4, 13, '#0c4a6e', 800, 'center');
+      txt(c, 'QTY ' + (S.labels % 1000), W2 / 2 + 6, H2 / 2 + 24, 10, '#334155', 600, 'center');
     }, { t: 'READY' });
-    at(prScr.mesh, -0.12, 0.5, 0.386, body);
-    const lbl = at(box(0.36, 0.01, 0.42, 0xffffff), 0, 0.17, 0.3, body);
+    at(prScr.mesh, -W / 2 + 0.1, H - 0.24, fz + 0.011, body);
+    const lbl = at(box(0.3, 0.008, 0.36, 0xffffff), 0.1, 0.3, 0.3, body);
     lbl.visible = false;
     const op = at(person(0x0ea5e9), 0.6, 0, 1.2, pr);
     op.rotation.y = Math.PI;
@@ -427,8 +443,8 @@ export function buildDevices(ctx) {
       .call(() => { prScr.set({ t: 'ENCODE…' }); prLed.emissiveIntensity = 2; })
       .call(() => { const p = body.getWorldPosition(new THREE.Vector3()); p.y += 0.3; waves.spawn(p, C.dock, { normal: 'y', size: 1.6, dur: 0.9 }); waves.spawn(p, C.dock, { normal: 'y', size: 1.6, dur: 0.9, delay: 0.3 }); })
       .to({}, { duration: 1 })
-      .call(() => { prScr.set({ t: 'EPC ✓' }); lbl.visible = true; lbl.position.z = 0.3; })
-      .to(lbl.position, { z: 0.85, duration: 0.9, ease: 'none' })
+      .call(() => { prScr.set({ t: 'EPC ✓' }); lbl.visible = true; lbl.position.z = 0.42; })
+      .to(lbl.position, { z: 0.72, duration: 0.9, ease: 'none' })
       .to({}, { duration: 0.8 })
       .call(() => { lbl.visible = false; prScr.set({ t: 'READY' }); prLed.emissiveIntensity = 0.4; });
   }
@@ -1113,6 +1129,309 @@ export function buildDevices(ctx) {
 
     // Network access point (production, plus others registered in infra)
     refs.beltY = BELT_Y;
+  }
+
+  /* ------------------------- ③b WAREHOUSE · WMS ------------------------- */
+  {
+    const Z = 'warehouse';
+    const wms = at(new THREE.Group(), -53, FLOOR, 1.6, root);
+    wms.rotation.y = 0.55;                                            // turned toward the warehouse camera
+    // Supervisor workstation: desk, twin monitors, mini tower, operator
+    at(box(2.6, 0.07, 1.15, 0x9aa5b1), 0, 0.78, 0, wms);
+    for (const [dx, dz] of [[-1.22, -0.5], [1.22, -0.5], [-1.22, 0.5], [1.22, 0.5]]) at(box(0.07, 0.78, 0.07, 0x334155), dx, 0.39, dz, wms);
+    at(box(0.45, 0.5, 0.5, 0x1f2937), 1.0, 0.25, -0.1, wms);
+    const wmsDraw = (c, W, H, s) => {
+      c.fillStyle = '#0b1324'; c.fillRect(0, 0, W, H);
+      c.fillStyle = '#1d4ed8'; c.fillRect(0, 0, W, H * 0.16);
+      txt(c, 'WMS · ' + (s.view || 'INVENTORY'), 10, H * 0.08, H * 0.09, '#fff', 800);
+      const cols = 10, rows = 3, gx = 10, gy = H * 0.24, cw = (W - 20) / cols, ch = (H * 0.48) / rows;
+      for (let r = 0; r < rows; r++) for (let k = 0; k < cols; k++) {
+        const v = (r * 7 + k * 3 + (s.tick || 0)) % 11;
+        c.fillStyle = v < 2 ? '#334155' : v < 3 ? '#f59e0b' : '#22c55e';
+        c.fillRect(gx + k * cw + 1.5, gy + r * ch + 1.5, cw - 3, ch - 3);
+      }
+      txt(c, `IN ${S.pallets}`, 10, H * 0.84, H * 0.1, '#7dd3fc', 800);
+      txt(c, `OUT ${18 + ((s.tick || 0) % 9)}`, W / 2, H * 0.84, H * 0.1, '#86efac', 800, 'center');
+      txt(c, '99.8%', W - 10, H * 0.84, H * 0.1, '#facc15', 800, 'right');
+    };
+    const mons = [];
+    for (const dx of [-0.48, 0.48]) {
+      at(box(0.1, 0.36, 0.1, 0x334155), dx, 0.98, -0.32, wms);
+      at(box(0.86, 0.52, 0.04, 0x0f172a), dx, 1.3, -0.34, wms);
+      const sc = new Screen(0.8, 0.46, 220, 126, wmsDraw, { view: dx < 0 ? 'INVENTORY' : 'TASKS', tick: 0 });
+      at(sc.mesh, dx, 1.3, -0.317, wms);
+      sc.mesh.rotation.y = dx < 0 ? 0.12 : -0.12;
+      mons.push(sc);
+    }
+    const op = at(person(C.warehouse, { seated: true, helmet: false }), 0, 0, 0.85, wms);
+    op.rotation.y = Math.PI;
+    at(box(0.6, 0.45, 0.6, 0x1e293b), 0, 0.22, 0.9, wms);
+    // Big floating WMS board: rack map, task queue and accuracy
+    const board = new Screen(4.4, 2.4, 640, 350, (c, W, H, s) => {
+      panelBg(c, W, H, hex(C.warehouse), 0.94);
+      txt(c, 'WMS · Warehouse Management', 22, 34, 26, '#93c5fd', 800);
+      txt(c, 'Live from RFID / RTLS / ESL', 22, 66, 17, '#94a3b8', 600);
+      const cols = 12, gx = 22, gy = 92, cw = 30, ch = 24;
+      ['A', 'B', 'C'].forEach((rw, r) => {
+        txt(c, rw, gx, gy + r * (ch + 6) + ch / 2, 16, '#cbd5e1', 800);
+        for (let k = 0; k < cols; k++) {
+          const v = (r * 5 + k * 7 + s.tick) % 13;
+          c.fillStyle = v < 2 ? '#334155' : v < 3 ? '#f59e0b' : '#22c55e';
+          rr(c, gx + 20 + k * cw, gy + r * (ch + 6), cw - 5, ch, 4); c.fill();
+        }
+      });
+      txt(c, 'Occupancy 87%', gx, 205, 17, '#cbd5e1', 700);
+      const tasks = [[`PUTAWAY  PLT-${String(S.pallets).padStart(4, '0')} → A-0${(S.pallets % 9) + 1}-2`, '#7dd3fc'],
+        [`PICK  ORD-${2400 + s.tick % 50} · 6 lines`, '#86efac'], [`REPLENISH  LINE-1 · ${S.line.low ? 'URGENT' : 'planned'}`, S.line.low ? '#fca5a5' : '#cbd5e1']];
+      tasks.forEach(([t, col], i) => txt(c, t, gx, 240 + i * 28, 18, col, 700));
+      txt(c, '99.8%', W - 26, 120, 52, '#f8fafc', 800, 'right');
+      txt(c, 'stock accuracy', W - 26, 160, 16, '#94a3b8', 600, 'right');
+      txt(c, `${S.pallets} in · ${18 + s.tick % 9} out`, W - 26, 200, 18, '#facc15', 700, 'right');
+    }, { tick: 0 });
+    board.mesh.material.transparent = true;
+    at(board.mesh, 0, 4.4, -0.5, wms);
+    board.mesh.rotation.x = -0.15;
+    at(pickProxy(4.4, 2.4, 0.3), 0, 4.4, -0.5, wms);
+    reg.add('wms', wms, { zone: Z, label: [0, 6.0, 0] });
+    for (const tp of [v3(-55, FLOOR + 2.6, 15.2), v3(-53.8, FLOOR + 1.6, -6.4), v3(-40, FLOOR + 2, -6.4), v3(-40, FLOOR + 1, 3)])
+      new Flow(root, arc(v3(-53, FLOOR + 4.4, 1.6), tp, 3.5), C.warehouse, { count: 3, speed: 0.25, size: 0.18, tube: 0.03, lineOpacity: 0.2 });
+    let tick = 0;
+    gsap.timeline({ repeat: -1 }).to({}, { duration: 1.6 }).call(() => { tick++; board.set({ tick }); for (const m of mons) m.set({ tick }); });
+  }
+
+  /* --------------------- ⑤b PROCESS CONTROL (PLC / SCADA) --------------------- */
+  {
+    const Z = 'production';
+    const pc = at(new THREE.Group(), 24, FLOOR, 16.5, root);
+    const STEEL = { roughness: 0.22, metalness: 0.85 };
+    const b = new Batcher();
+    // Concrete bund (spill containment) under the tanks
+    at(box(14.5, 0.18, 6.2, 0x9ca3af, { roughness: 0.9, metalness: 0 }), -4, 0.09, 1.2, pc);
+    const tanks = [];
+    const names = [['T-101', 'DEGREASE', 55], ['T-102', 'PHOSPHATE', 48], ['T-103', 'RINSE', 32]];
+    names.forEach(([tag, name, temp], i) => {
+      const x = -9 + i * 3.6;
+      const g = at(new THREE.Group(), x, 0.18, 1.6, pc);
+      at(cyl(1.25, 1.25, 3.2, 28, 0xd4d8de, STEEL), 0, 2.0, 0, g);
+      const dome = at(sphere(1.25, 0xd4d8de, 24), 0, 3.6, 0, g); dome.scale.y = 0.35; dome.material = mat(0xd4d8de, STEEL);
+      at(cyl(1.0, 0.25, 0.45, 20, 0xd4d8de, STEEL), 0, 0.22, 0, g);   // cone bottom
+      for (const [lx, lz] of [[-0.88, -0.88], [0.88, -0.88], [-0.88, 0.88], [0.88, 0.88]]) at(box(0.12, 0.6, 0.12, 0x64748b), lx, 0.3, lz, g);
+      at(box(2.55, 0.08, 0.06, 0x0ea5e9), 0, 3.3, 1.22, g);             // colour band
+      // Level sight glass with a glowing liquid column (animated)
+      at(box(0.18, 2.5, 0.06, 0x334155), 0.75, 2.0, 1.02, g).rotation.y = 0.6;
+      const liq = glowMat(i === 1 ? 0x22d3ee : 0x38bdf8, 0.9);
+      const col = at(box(0.1, 2.3, 0.07, liq), 0.75, 0.85, 1.04, g); col.rotation.y = 0.6;
+      col.geometry = col.geometry.clone(); col.geometry.translate(0, 1.15, 0);
+      // Name plate
+      const plate = new Screen(1.3, 0.5, 200, 76, (c, W, H) => {
+        c.fillStyle = '#f8fafc'; c.fillRect(0, 0, W, H);
+        txt(c, tag, W / 2, 22, 22, '#0f172a', 800, 'center'); txt(c, name, W / 2, 54, 18, '#0369a1', 800, 'center');
+      });
+      at(plate.mesh, 0, 2.5, 1.27, g);
+      // Temperature transmitter
+      at(cyl(0.12, 0.12, 0.2, 12, 0x1d4ed8), -0.7, 1.4, 1.08, g).rotation.x = Math.PI / 2;
+      const tLed = glowMat(0x22c55e, 1.2);
+      at(box(0.1, 0.06, 0.04, tLed), -0.7, 1.62, 1.12, g);
+      // Ladder
+      for (let y = 0.6; y < 3.6; y += 0.35) b.add(0.05, 0.04, 0.5, 0xfacc15, 24 + x + 1.34, FLOOR + 0.18 + y, 18.1);
+      tanks.push({ g, col, tLed, temp, set: temp, level: 0.6 + i * 0.1 });
+    });
+    // Pipe header on a rack, drops into every tank, pumps and valves
+    const pipe = (len, x, y, z, rot) => { const p = at(cyl(0.11, 0.11, len, 12, 0xb8c0ca, STEEL), x, y, z, pc); if (rot === 'x') p.rotation.z = Math.PI / 2; if (rot === 'z') p.rotation.x = Math.PI / 2; return p; };
+    pipe(12.5, -3.2, 4.6, -1.1, 'x');
+    pipe(12.5, -3.2, 4.3, -1.4, 'x');
+    for (let i = 0; i < 3; i++) { const x = -9 + i * 3.6; pipe(0.9, x, 4.25, -0.75, 'z'); pipe(0.7, x, 4.05, -0.3); }
+    for (const x of [-10.2, -6.6, -3.0, 0.6, 3.0]) { at(box(0.16, 4.7, 0.16, 0x2f5d8a), x, 2.35, -1.25, pc); }
+    at(box(13.6, 0.14, 0.7, 0x2f5d8a), -3.6, 4.85, -1.25, pc);
+    const valves = [];
+    for (let i = 0; i < 3; i++) {
+      const v = at(new THREE.Mesh(new THREE.TorusGeometry(0.2, 0.035, 8, 20), mat(0xdc2626)), -9 + i * 3.6 + 0.6, 4.6, -0.86, pc);
+      valves.push(v);
+    }
+    const pumps = [];
+    for (const px of [1.6, 3.2]) {
+      const g = at(new THREE.Group(), px, 0.18, 2.6, pc);
+      at(box(1.2, 0.12, 0.6, 0x475569), 0, 0.06, 0, g);
+      at(cyl(0.22, 0.22, 0.6, 16, 0x1d4ed8), -0.25, 0.38, 0, g).rotation.z = Math.PI / 2;
+      const fan = at(cyl(0.2, 0.2, 0.05, 6, 0x0f172a), -0.58, 0.38, 0, g); fan.rotation.z = Math.PI / 2;
+      at(cyl(0.2, 0.24, 0.3, 16, 0x9ca3af, STEEL), 0.25, 0.38, 0, g);
+      pipe(2.2, px + 0.25, 1.6, 2.6);
+      pumps.push(fan);
+    }
+    pipe(4.6, 2.4, 2.7, 2.6, 'x');
+    // PLC control cabinet with stack light
+    const plc = at(new THREE.Group(), 5.6, 0, 1.6, pc);
+    at(box(1.8, 2.1, 0.6, 0xd1d5db, { roughness: 0.45, metalness: 0.3 }), 0, 1.15, 0, plc);
+    at(box(0.02, 1.9, 0.02, 0x6b7280), 0, 1.15, 0.31, plc);
+    for (const dx of [-0.75, 0.75]) at(box(0.05, 0.25, 0.05, 0x111827), dx * 0.9, 1.2, 0.32, plc);
+    at(box(1.9, 0.1, 0.1, 0x4b5563), 0, 0.05, 0, plc);
+    const stack = { g: glowMat(0x22c55e, 1.5), a: glowMat(0xf59e0b, 0.08), r: glowMat(0xef4444, 0.08) };
+    at(cyl(0.03, 0.03, 0.3, 8, 0x4b5563), 0.7, 2.35, 0, plc);
+    [['g', 2.55], ['a', 2.72], ['r', 2.89]].forEach(([k, y]) => at(cyl(0.08, 0.08, 0.16, 14, stack[k]), 0.7, y, 0, plc));
+    const plcScr = new Screen(0.5, 0.32, 140, 90, (c, W, H, s) => {
+      c.fillStyle = '#0b1324'; c.fillRect(0, 0, W, H);
+      txt(c, 'PLC RUN', 8, 16, 14, '#4ade80', 800);
+      txt(c, s.alarm ? 'AUTO-CORRECT' : 'I/O OK', 8, 44, 13, s.alarm ? '#fbbf24' : '#cbd5e1', 700);
+      txt(c, 'SCAN 10 ms', 8, 72, 12, '#94a3b8', 600);
+    }, { alarm: false });
+    at(plcScr.mesh, -0.45, 1.6, 0.31, plc);
+    // Operator HMI panel on a pedestal
+    const hmi = at(new THREE.Group(), 3.0, 0, 5.0, pc);
+    at(box(0.4, 0.1, 0.4, 0x334155), 0, 0.05, 0, hmi);
+    at(cyl(0.06, 0.06, 1.2, 10, 0x64748b), 0, 0.65, 0, hmi);
+    const hp = at(box(1.0, 0.68, 0.1, 0x111827), 0, 1.45, 0, hmi); hp.rotation.x = -0.35;
+    const trend = [];
+    const hmiDraw = (c, W, H, s) => {
+      c.fillStyle = '#0b1324'; c.fillRect(0, 0, W, H);
+      c.fillStyle = s.alarm ? '#b45309' : '#15803d'; c.fillRect(0, 0, W, 26);
+      txt(c, s.alarm ? '⚠ T-102 TEMP HIGH · auto-correcting' : 'PROCESS OK · all loops in spec', 10, 13, 15, '#fff', 800);
+      tanks.forEach((t, i) => {
+        const x = 14 + i * (W - 28) / 3, w = (W - 28) / 3 - 12;
+        c.strokeStyle = '#475569'; c.lineWidth = 2; rr(c, x, 40, w, 92, 8); c.stroke();
+        c.fillStyle = i === 1 && s.alarm ? '#f59e0b' : '#0ea5e9';
+        const lh = 84 * t.level; rr(c, x + 4, 128 - lh, w - 8, lh, 5); c.fill();
+        txt(c, names[i][0], x + w / 2, 148, 14, '#cbd5e1', 800, 'center');
+        txt(c, `${t.temp.toFixed(1)}°C`, x + w / 2, 170, 19, i === 1 && s.alarm ? '#fbbf24' : '#f8fafc', 800, 'center');
+      });
+      c.strokeStyle = '#38bdf8'; c.lineWidth = 2.5; c.beginPath();
+      trend.forEach((v, k) => { const x = 14 + k * (W - 28) / 59, y = H - 14 - (v - 40) * 3.2; k ? c.lineTo(x, y) : c.moveTo(x, y); });
+      c.stroke();
+      txt(c, 'T-102 trend', 14, 196, 12, '#94a3b8', 600);
+    };
+    const hs = new Screen(0.9, 0.58, 300, 290, hmiDraw, { alarm: false });
+    at(hs.mesh, 0, 0, 0.051, hp);
+    const tech = at(person(C.production), 0.15, 0, 0.75, hmi);
+    tech.rotation.y = Math.PI;
+    // Large SCADA board above the process
+    const scada = new Screen(6.4, 3.2, 640, 320, (c, W, H, s) => { panelBg(c, W, H, hex(C.production), 0.94); c.save(); c.translate(10, 30); c.scale((W - 20) / 300, (H - 40) / 290); hmiDraw(c, 300, 290, s); c.restore(); txt(c, 'SCADA · Process Control', 18, 18, 18, '#86efac', 800); }, { alarm: false });
+    scada.mesh.material.transparent = true;
+    at(scada.mesh, -3.4, 7.6, -0.6, pc);
+    scada.mesh.rotation.x = -0.12;
+    at(pickProxy(6.4, 3.2, 0.3), -3.4, 7.6, -0.6, pc);
+    b.build(root);
+    reg.add('process-control', pc, { zone: Z, label: [5.6, 3.6, 1.6] });
+    // Data: tank sensors → PLC → MES
+    const plcW = v3(24 + 5.6, FLOOR + 2.4, 16.5 + 1.6);
+    for (let i = 0; i < 3; i++) new Flow(root, arc(v3(24 - 9 + i * 3.6 - 0.7, FLOOR + 1.9, 16.5 + 2.7), plcW, 2.5), C.production, { count: 2, speed: 0.4, size: 0.14, tube: 0.025, lineOpacity: 0.2 });
+    new Flow(root, arc(plcW, v3(24, FLOOR + 9.2, -2.5), 4), C.production, { count: 4, speed: 0.25, size: 0.2, tube: 0.035, lineOpacity: 0.22 });
+    // Live values + a recurring "temperature drift → PLC corrects it" story
+    let tAcc = 0;
+    up.push((t, dt) => {
+      for (const [i, tk] of tanks.entries()) {
+        tk.temp += (tk.set - tk.temp) * Math.min(1, dt * 0.6) + Math.sin(t * 0.7 + i) * 0.01;
+        tk.level = 0.62 + i * 0.08 + Math.sin(t * 0.25 + i * 2) * 0.08;
+        tk.col.scale.y = tk.level;
+      }
+      for (const f of pumps) f.rotation.x += dt * 14;
+      tAcc += dt;
+      if (tAcc > 0.5) { tAcc = 0; trend.push(tanks[1].temp); if (trend.length > 60) trend.shift(); }
+    });
+    const setAlarm = (on) => {
+      for (const sc of [hs, scada, plcScr]) sc.set({ alarm: on });
+      stack.g.emissiveIntensity = on ? 0.08 : 1.5; stack.a.emissiveIntensity = on ? 2 : 0.08;
+      tanks[1].tLed.color.set(on ? 0xf59e0b : 0x22c55e); tanks[1].tLed.emissive.set(on ? 0xf59e0b : 0x22c55e);
+    };
+    gsap.timeline({ repeat: -1, repeatDelay: 4 })
+      .call(() => { tanks[1].set = 58; })
+      .to({}, { duration: 4 })
+      .call(() => { setAlarm(true); const p = tanks[1].g.getWorldPosition(new THREE.Vector3()); p.y += 2; for (let k = 0; k < 3; k++) waves.spawn(p, 0xf59e0b, { normal: 'z', size: 2.6, dur: 1, delay: k * 0.25 }); })
+      .to({}, { duration: 1.2 })
+      .call(() => { tanks[1].set = 48; waves.spawn(plcW, C.production, { normal: 'y', size: 2, dur: 0.9 }); })
+      .to(valves[1].rotation, { z: '+=' + Math.PI * 4, duration: 2.4, ease: 'power1.inOut' })
+      .to({}, { duration: 4 })
+      .call(() => setAlarm(false))
+      .to({}, { duration: 6 });
+    for (let i = 0; i < 60; i++) trend.push(48);
+  }
+
+  /* ------------------ ⑤c PRODUCTION · machining cell (scenery) ------------------ */
+  {
+    const b = new Batcher();
+    [34, 40.5, 47].forEach((x, i) => {
+      const g = at(new THREE.Group(), x, FLOOR, -15, root);
+      at(box(4.2, 2.7, 2.6, 0xe5e7eb, { roughness: 0.4, metalness: 0.25 }), 0, 1.45, 0, g);  // enclosure
+      at(box(4.24, 0.3, 2.64, 0x1e3a8a), 0, 0.15, 0, g);                                      // base band
+      at(box(1.9, 1.3, 0.04, basic(0x1e293b, { transparent: true, opacity: 0.7 })), -0.4, 1.7, 1.31, g); // door window
+      at(box(0.06, 1.0, 0.06, 0x6b7280), 0.62, 1.6, 1.34, g);                                  // door handle
+      at(box(0.7, 1.0, 0.25, 0x111827), 1.65, 1.6, 1.35, g);                                   // control pendant
+      const sc = new Screen(0.55, 0.4, 120, 88, (c, W, H, s) => {
+        c.fillStyle = '#0b1324'; c.fillRect(0, 0, W, H);
+        txt(c, `CNC-0${i + 1}`, 8, 16, 15, '#93c5fd', 800);
+        txt(c, i === 2 ? 'SETUP' : 'RUN', 8, 46, 22, i === 2 ? '#fbbf24' : '#4ade80', 800);
+        txt(c, `${(s.n || 0) + 120 + i * 37} pcs`, 8, 74, 14, '#cbd5e1', 600);
+      }, { n: 0 });
+      at(sc.mesh, 1.65, 1.75, 1.48, g);
+      [[0x22c55e, i === 2 ? 0.1 : 1.6], [0xf59e0b, i === 2 ? 1.6 : 0.1]].forEach(([c0, e], k) => at(cyl(0.07, 0.07, 0.14, 12, glowMat(c0, e)), 2.0, 2.95 + k * 0.15, 0.8, g));
+      at(box(1.2, 0.5, 1.8, 0x374151), -2.7, 0.25, 0.2, g);                                  // chip conveyor / coolant tank
+      const w = at(person(C.production), 0.6, 0, 2.2, g); w.rotation.y = Math.PI;
+      if (i === 2) w.visible = false;
+      gsap.timeline({ repeat: -1 }).to({}, { duration: 3 + i }).call(() => sc.set({ n: (sc.state.n || 0) + 1 }));
+      // parts bins beside each machine
+      b.add(1.0, 0.6, 0.8, 0x2563eb, x + 2.9, FLOOR + 0.3, -13.6);
+      b.add(1.0, 0.12, 0.8, 0x92400e, x + 2.9, FLOOR + 0.06, -13.6);
+    });
+    // Walkway markings in front of the cell
+    for (const z of [-12.3, -11.1]) b.add(20, 0.012, 0.1, 0xfacc15, 40.5, FLOOR + 0.006, z);
+    b.build(root);
+  }
+
+  /* ------------------ ⑥b OFFICE + ⑦b SERVER ROOM · scenery ------------------ */
+  {
+    const b = new Batcher();
+    // Meeting room at the east end of the office: table, chairs, wall display
+    b.add(4.4, 0.08, 1.8, 0x8b6b4a, 0, FLOOR + 0.76, -36);
+    for (const dx of [-1.9, 1.9]) b.add(0.12, 0.74, 1.4, 0x475569, dx, FLOOR + 0.37, -36);
+    for (const dx of [-1.5, -0.5, 0.5, 1.5]) for (const dz of [-1.3, 1.3]) { b.add(0.5, 0.08, 0.5, 0x1e293b, dx, FLOOR + 0.46, -36 + dz); b.add(0.5, 0.5, 0.08, 0x1e293b, dx, FLOOR + 0.75, -36 + dz * 1.2); }
+    b.add(3.4, 0.08, 0.08, 0x334155, 0, FLOOR + 0.9, -40.2);
+    b.add(0.12, 1.6, 0.12, 0x334155, 0, FLOOR + 0.8, -40.3);
+    const tv = new Screen(3.0, 1.7, 400, 226, (c, W, H) => {
+      c.fillStyle = '#0b1324'; c.fillRect(0, 0, W, H);
+      txt(c, 'Daily Tier Meeting', 16, 24, 22, '#f9a8d4', 800);
+      [['OEE', '86%', '#4ade80'], ['Quality', '99.2%', '#4ade80'], ['Delivery', '100%', '#4ade80'], ['Safety', '0 LTI', '#93c5fd']].forEach(([k, v, col], i) => {
+        const x = 16 + (i % 2) * 190, y = 70 + Math.floor(i / 2) * 76;
+        txt(c, k, x, y, 16, '#94a3b8', 700); txt(c, v, x, y + 32, 32, col, 800);
+      });
+    });
+    at(tv.mesh, 0, FLOOR + 1.9, -40.25, root);
+    // Glass partition around the meeting room
+    const glass = new THREE.MeshPhysicalMaterial({ color: 0xbfe3ff, transparent: true, opacity: 0.16, roughness: 0.05, depthWrite: false });
+    at(new THREE.Mesh(new THREE.BoxGeometry(0.06, 2.6, 13), glass), -4.6, FLOOR + 1.3, -37.5, root);
+    for (let z = -44; z <= -31; z += 2.6) b.add(0.08, 2.6, 0.08, 0x64748b, -4.6, FLOOR + 1.3, z);
+    // Open-plan desk rows between the system desks
+    for (const cx of [-41, -23]) for (const dx of [-1.6, 0, 1.6]) {
+      b.add(1.5, 0.06, 1.0, 0xe7e5e4, cx + dx, FLOOR + 0.74, -30);
+      b.add(0.06, 0.72, 0.9, 0x64748b, cx + dx - 0.7, FLOOR + 0.36, -30);
+      b.add(0.62, 0.4, 0.04, 0x0f172a, cx + dx, FLOOR + 1.05, -30.4);
+      b.add(0.56, 0.34, 0.01, 0x1e40af, cx + dx, FLOOR + 1.05, -30.375);
+      if (dx !== 1.6) { const w = at(person(0xec4899, { seated: true, helmet: false }), cx + dx, FLOOR, -29.2, root); w.rotation.y = Math.PI; }
+    }
+    // Plants
+    const leaf = mat(0x2e7d32, { roughness: 0.8, metalness: 0 });
+    for (const [x, z] of [[-60, -28.5], [-44, -43.5], [-26, -43.5], [-6, -28.5], [6, -43.5]]) {
+      at(cyl(0.3, 0.24, 0.5, 12, 0xf5f5f4), x, FLOOR + 0.25, z, root);
+      at(sphere(0.55, leaf, 10), x, FLOOR + 1.0, z, root).scale.y = 1.3;
+    }
+    // Server room: second rack row, UPS, precision cooling, NOC desk, fire suppression
+    for (let r = 0; r < 4; r++) {
+      b.add(1.0, 2.3, 1.1, 0x0b1220, 39 + r * 1.1, FLOOR + 1.15, -40);
+      b.add(0.9, 0.04, 0.02, 0x14b8a6, 39 + r * 1.1, FLOOR + 2.2, -39.44);
+      for (let k = 0; k < 6; k++) b.add(0.8, 0.03, 0.02, k % 3 ? 0x22c55e : 0x2dd4bf, 39 + r * 1.1, FLOOR + 0.5 + k * 0.3, -39.44);
+    }
+    for (let r = 0; r < 2; r++) { b.add(0.9, 2.0, 0.9, 0xe2e8f0, 24 + r, FLOOR + 1.0, -36); b.add(0.4, 0.25, 0.02, 0x0f172a, 24 + r, FLOOR + 1.5, -35.54); }
+    b.add(2.0, 2.2, 0.9, 0xf1f5f9, 17, FLOOR + 1.1, -43.5);
+    for (let k = 0; k < 8; k++) b.add(1.8, 0.04, 0.02, 0x94a3b8, 17, FLOOR + 0.4 + k * 0.22, -43.03);
+    for (let k = 0; k < 3; k++) { b.add(0.35, 1.5, 0.35, 0xdc2626, 57 + k * 0.5, FLOOR + 0.75, -44.5); }
+    b.add(3.0, 0.07, 1.1, 0x9aa5b1, 50, FLOOR + 0.76, -33);
+    for (const dx of [-1.4, 1.4]) b.add(0.08, 0.76, 1.0, 0x334155, 50 + dx, FLOOR + 0.38, -33);
+    const noc = new Screen(2.4, 0.5, 480, 100, (c, W, H) => {
+      c.fillStyle = '#04141a'; c.fillRect(0, 0, W, H);
+      ['GATE', 'DOCK', 'WH', 'LINE', 'OFFICE'].forEach((n, i) => { c.fillStyle = '#14b8a6'; rr(c, 10 + i * 94, 18, 84, 64, 8); c.fill(); txt(c, n, 52 + i * 94, 50, 16, '#04141a', 800, 'center'); });
+    });
+    at(noc.mesh, 50, FLOOR + 1.25, -33.5, root);
+    b.add(2.5, 0.6, 0.06, 0x0f172a, 50, FLOOR + 1.25, -33.54);
+    const nocOp = at(person(C.infra, { seated: true, helmet: false }), 50, FLOOR, -32.3, root);
+    nocOp.rotation.y = Math.PI;
+    b.build(root);
   }
 
   /* ----------------------------- ⑥ OFFICE ----------------------------- */

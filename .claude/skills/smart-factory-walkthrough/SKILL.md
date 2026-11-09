@@ -5,7 +5,7 @@ description: Build, extend and polish the interactive 3D "Smart Factory Walkthro
 
 # Smart Factory Walkthrough
 
-Interactive 3D tour of a connected automotive-parts factory (gate → dock → warehouse → AMR → production → office → infrastructure → "everything connected"). It is a **sales demo**, so every change should make it more believable to a factory prospect, stay fast on a phone, and stay legally clean (licences, no logos, no customer names).
+Interactive 3D tour of a connected automotive-parts factory (gate → dock → warehouse/WMS → AMR → production/MES → process control (PLC/SCADA) → office → infrastructure → "everything connected"). It is a **sales demo**, so every change should make it more believable to a factory prospect, stay fast on a phone, and stay legally clean (licences, no logos, no customer names).
 
 The user writes in **Thai**: reply in Thai, keep code/commit messages in English.
 
@@ -14,7 +14,7 @@ The user writes in **Thai**: reply in Thai, keep code/commit messages in English
 | Path | What it is |
 |---|---|
 | `index.html`, `styles.css` | UI shell (topbar, sidebar, caption, modal) |
-| `js/main.js` | renderer, lighting (HDRI env), post-processing (GTAO + bloom), adaptive quality, i18n, popups. Exposes `window.__sf = { ctx, goTo, openModal, closeModal, setXray }` with `ctx.camera`, `ctx.controls`, `ctx.refs` |
+| `js/main.js` | camera framing (`measureFrame`/`applyFrame`: camera aspect = screen area left free by topbar/sidebar/caption, widened with `setViewOffset`, eased per frame - so captions never cover the subject), renderer, lighting (HDRI env), post-processing (GTAO + bloom), adaptive quality, i18n, popups. Exposes `window.__sf = { ctx, goTo, openModal, closeModal, setXray }` with `ctx.camera`, `ctx.controls`, `ctx.refs` |
 | `js/core.js` | helpers: `box` (bevelled), `cyl`, `mat` (PBR guessed from colour), `glowMat`, `basic`, `Screen` (canvas screens), `txt`, `rr`, `placeOn`, `pathCurve`, `ZONES`, `FLOOR` |
 | `js/world.js` | site, zone floors, roads, trees, parked/moving cars & trucks (`car()`, `truck()`), people |
 | `js/devices.js` | every clickable device + its animation (`reg.add(id, group, {zone,label})`), forklift, AMRs, portal, kiosk, printer, racks |
@@ -37,7 +37,9 @@ Orientation convention: **models face +Z** (`placeOn` uses `atan2(t.x, t.z)`).
 5. **Never bypass bot checks** (no fake browser UA on Unsplash/Pexels). Use official APIs with the user's key, or ask the user to download.
 6. **Secrets**: never ask for tokens in chat — use `request_credential` (e.g. Sketchfab: host `api.sketchfab.com`, header `Authorization`, prefix `Token`).
 7. Keep primitive fallbacks for every model (`model(...) || boxes`) so a missing GLB never breaks the scene.
-8. Single HTML must stay < ~20 MB (currently ~13 MB).
+8. Single HTML must stay < ~20 MB (currently ~13.7 MB).
+9. Fill empty floor with believable scenery (machines, meeting room, server row) rather than leaving big bare zones - the user wants a balanced layout.
+10. Product photos the user supplies (e.g. their own printer brand) may keep their brand - `brand` field shows it on the popup.
 
 ## Workflows
 
@@ -50,6 +52,7 @@ Read `references/models.md` for the full recipe. Short version:
 5. Copy to `assets/models/`, add the name to `MODEL_NAMES`, use it in code with a fallback, add a row to `credits.md` (title, author display name + username, link, licence, changes).
 
 ### B. Popup images
+For software systems (WMS, SCADA, MES…) a good popup image is a screen mock-up: write a small HTML page with fictitious data, screenshot it with Playwright at 600×720 @1.6× and save as JPG (credits: own work).
 Read `references/images.md`. Priority: real screenshots / own photos supplied by the user → Canva AI images (generate with `mcp__Canva__generate-image`, **the connector only returns a 199 px preview**, so give the user the Canva links to download and send/upload the full-size files) → Unsplash/Pexels via official API key → Wikimedia (needs on-screen credit).
 Process: inspect full image → crop for the portrait-ish popup (`object-fit: cover`, ~436×520) → max 960 px JPG q82 → `assets/img/<device-id>.jpg` → `content.json` credit (empty for own/AI) → `credits.md`.
 

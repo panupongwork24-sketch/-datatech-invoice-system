@@ -8,7 +8,6 @@ CC BY-SA images: the modified versions in `assets/img/` are shared under the sam
 |---|---|---|---|---|---|
 | `rfid-dock-portal` | `assets/img/rfid-dock-portal.jpg` | [HRAFN Advanced RFID portal.png](https://commons.wikimedia.org/wiki/File:HRAFN_Advanced_RFID_portal.png) | Geirvevle | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) | logo/brand marks removed |
 | `dock-status-light` | `assets/img/dock-status-light.jpg` | [Signalsäule an einer grossen selbstfahrenden Baumaschine (rot gelb grün).jpg](https://commons.wikimedia.org/wiki/File:Signals%C3%A4ule_an_einer_grossen_selbstfahrenden_Baumaschine_(rot_gelb_gr%C3%BCn).jpg) | User:Mattes | [Public domain]() | cropped, logo/brand marks removed |
-| `rfid-label-printer` | `assets/img/rfid-label-printer.jpg` | [Wagtail ct200 barcode printer.png](https://commons.wikimedia.org/wiki/File:Wagtail_ct200_barcode_printer.png) | Wagtail11 | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | logo/brand marks removed |
 | `rtls-rfid-anchor` | `assets/img/rtls-rfid-anchor.jpg` | [Wi-Fi and mobile phone antenna inside New York City subway.jpg](https://commons.wikimedia.org/wiki/File:Wi-Fi_and_mobile_phone_antenna_inside_New_York_City_subway.jpg) | User:z22 | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) | logo/brand marks removed |
 | `pick-to-light` | `assets/img/pick-to-light.jpg` | [Pick-by-Light-Fachanzeigen PickTermFlexible.JPG](https://commons.wikimedia.org/wiki/File:Pick-by-Light-Fachanzeigen_PickTermFlexible.JPG) | KBS Industrieelektronik GmbH | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0) | resized |
 | `conveyor-dock` | `assets/img/conveyor-dock.jpg` | [Conveyor system in a factory.jpg](https://commons.wikimedia.org/wiki/File:Conveyor_system_in_a_factory.jpg) | falco | [CC0](http://creativecommons.org/publicdomain/zero/1.0/deed.en) | resized |
@@ -23,6 +22,9 @@ Crops of the presentation owner's own AI-generated illustrations (no third-party
 |---|---|---|---|
 | `digital-wi` | `assets/img/digital-wi.jpg` | Own Digital WI overview (AI-generated illustration) | owned by the presentation owner |
 | `hr-system` | `assets/img/hr-system.jpg` | Own Skill Management overview (supplied by the presentation owner), cropped | owned by the presentation owner |
+| `rfid-label-printer` | `assets/img/rfid-label-printer.jpg` | Product photo of the industrial RFID printer (supplied by the presentation owner), padded to the popup format | owned by the presentation owner |
+| `wms` | `assets/img/wms.jpg` | WMS dashboard mock-up made for this demo (HTML rendered to image, fictitious data) | own work |
+| `process-control` | `assets/img/process-control.jpg` | SCADA / HMI screen mock-up made for this demo (HTML rendered to image, fictitious data) | own work |
 | `ai-vision-camera-wh` | `assets/img/ai-vision-camera-wh.jpg` | Own AI Vision zoning concept (AI-generated illustration) | owned by the presentation owner |
 
 ## AI-generated images (Canva)

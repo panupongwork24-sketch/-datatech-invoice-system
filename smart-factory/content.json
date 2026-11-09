@@ -108,12 +108,12 @@
     },
     "warehouse": {
       "en": {
-        "title": "Warehouse · Hybrid RTLS, ESL, Pick-to-Light",
-        "caption": "RFID anchors and AI Vision track every asset live. ESL labels show live stock and Pick-to-Light guides each pick."
+        "title": "Warehouse · WMS, RTLS, ESL, Pick-to-Light",
+        "caption": "WMS runs every location and task. RFID anchors and AI Vision track assets live, ESL labels show stock and Pick-to-Light guides each pick."
       },
       "th": {
-        "title": "คลังสินค้า · Hybrid RTLS, ESL, Pick-to-Light",
-        "caption": "RFID Anchor และ AI Vision ติดตามทรัพย์สินทุกชิ้นแบบสด ป้าย ESL แสดงสต็อกจริง และ Pick-to-Light นำทางการหยิบ"
+        "title": "คลังสินค้า · WMS, RTLS, ESL, Pick-to-Light",
+        "caption": "WMS บริหารทุกโลเคชันและทุกงาน RFID Anchor และ AI Vision ติดตามทรัพย์สินแบบสด ป้าย ESL แสดงสต็อก และ Pick-to-Light นำทางการหยิบ"
       }
     },
     "intralogistics": {
@@ -134,6 +134,16 @@
       "th": {
         "title": "ไลน์ผลิต · MES",
         "caption": "MES เชื่อมทุกสถานี: Digital WI, QR Traceability ของแม่พิมพ์, AI Vision OK/NG, ติดฉลากเฉพาะชิ้น OK, ESL ข้างไลน์ และ RFID Kanban"
+      }
+    },
+    "process": {
+      "en": {
+        "title": "Process Control · PLC / SCADA",
+        "caption": "Sensors on every tank feed the PLC. When T-102 drifts hot, SCADA alarms and the PLC corrects it automatically — the batch record goes to MES."
+      },
+      "th": {
+        "title": "ควบคุมกระบวนการ · PLC / SCADA",
+        "caption": "เซนเซอร์ทุกถังส่งค่าให้ PLC เมื่อ T-102 ร้อนเกิน SCADA แจ้งเตือนและ PLC ปรับแก้ให้อัตโนมัติ ข้อมูลแบทช์ส่งเข้า MES"
       }
     },
     "office": {
@@ -347,7 +357,7 @@
     "rfid-label-printer": {
       "zone": "dock",
       "image": "assets/img/rfid-label-printer.jpg",
-      "credit": "Wagtail11 · CC0 · Wikimedia Commons",
+      "credit": "",
       "brand": "SATO",
       "en": {
         "name": "RFID Label Printer",
@@ -911,6 +921,60 @@
         ],
         "problem": "มีจุดอับสัญญาณ AMR และเครื่องสแกนหลุดการเชื่อมต่อ",
         "result": "สัญญาณครอบคลุมอุปกรณ์เคลื่อนที่ทุกชิ้นในโรงงาน"
+      }
+    },
+    "wms": {
+      "zone": "warehouse",
+      "image": "assets/img/wms.jpg",
+      "credit": "",
+      "en": {
+        "name": "WMS (Warehouse Management System)",
+        "function": "Manages every location, pallet and task in the warehouse — receiving, put-away, picking and replenishment — with live data from RFID, RTLS, ESL and Pick-to-Light.",
+        "how": [
+          "RFID receiving confirms the pallet and WMS assigns a put-away location",
+          "WMS releases pick and replenishment tasks to Pick-to-Light, ESL and the AMR",
+          "Every move updates stock by location in real time, and MES/ERP see the same numbers"
+        ],
+        "problem": "Stock kept in Excel and paper; nobody knows exactly where a pallet is, and counts never match the system.",
+        "result": "Location-level stock you can trust, faster put-away and picking, and fewer stock-count days."
+      },
+      "th": {
+        "name": "WMS (ระบบบริหารคลังสินค้า)",
+        "function": "บริหารทุกโลเคชัน พาเลท และงานในคลัง ตั้งแต่รับเข้า จัดเก็บ หยิบ จนถึงเติมของ โดยใช้ข้อมูลสดจาก RFID, RTLS, ESL และ Pick-to-Light",
+        "how": [
+          "รับสินค้าด้วย RFID ยืนยันพาเลท แล้ว WMS กำหนดโลเคชันจัดเก็บให้",
+          "WMS ปล่อยงานหยิบและงานเติมของไปที่ Pick-to-Light, ESL และ AMR",
+          "ทุกการเคลื่อนย้ายอัปเดตสต็อกรายโลเคชันทันที MES/ERP เห็นตัวเลขชุดเดียวกัน"
+        ],
+        "problem": "สต็อกอยู่ใน Excel และกระดาษ ไม่รู้ว่าพาเลทอยู่ตรงไหนแน่ และนับสต็อกไม่เคยตรงกับระบบ",
+        "result": "สต็อกรายโลเคชันที่เชื่อถือได้ จัดเก็บและหยิบเร็วขึ้น และใช้วันนับสต็อกน้อยลง"
+      }
+    },
+    "process-control": {
+      "zone": "production",
+      "image": "assets/img/process-control.jpg",
+      "credit": "",
+      "en": {
+        "name": "Process Control (PLC / SCADA)",
+        "function": "PLC loops keep tank temperature, level, flow and pumps in spec; SCADA shows the live process, alarms and trends, and sends batch data to MES.",
+        "how": [
+          "Sensors measure temperature, level, pressure and flow on every tank and pump",
+          "The PLC compares each value with its set point and adjusts valves, heaters and pumps automatically",
+          "SCADA raises alarms, records trends and sends batch / quality data to MES for traceability"
+        ],
+        "problem": "Operators read gauges and write values on paper; drifts are found only after bad parts come out.",
+        "result": "Stable process, alarms before defects happen, and a full process record for every lot."
+      },
+      "th": {
+        "name": "ระบบควบคุมกระบวนการ (PLC / SCADA)",
+        "function": "PLC ควบคุมอุณหภูมิ ระดับ อัตราการไหล และปั๊มของถังให้อยู่ในค่ามาตรฐาน SCADA แสดงกระบวนการสด สัญญาณเตือน และกราฟแนวโน้ม แล้วส่งข้อมูลแบทช์ให้ MES",
+        "how": [
+          "เซนเซอร์วัดอุณหภูมิ ระดับ แรงดัน และอัตราการไหลของทุกถังและปั๊ม",
+          "PLC เทียบค่าที่วัดกับค่าตั้ง แล้วปรับวาล์ว ฮีตเตอร์ และปั๊มอัตโนมัติ",
+          "SCADA แจ้งเตือน เก็บกราฟแนวโน้ม และส่งข้อมูลแบทช์/คุณภาพเข้า MES เพื่อการสอบย้อนกลับ"
+        ],
+        "problem": "พนักงานอ่านเกจแล้วจดลงกระดาษ ค่าเพี้ยนจะรู้ก็ต่อเมื่อชิ้นงานเสียออกมาแล้ว",
+        "result": "กระบวนการนิ่ง เตือนก่อนเกิดของเสีย และมีประวัติกระบวนการครบทุก Lot"
       }
     }
   }
