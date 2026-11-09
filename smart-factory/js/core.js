@@ -299,3 +299,25 @@ export function floorTexture(base = '#6b7280', { size = 512, joints = true, nois
   texCache.set(key, t);
   return t;
 }
+
+/* ---------- photo textures (CC0 Poly Haven, assets/tex) ---------- */
+// Dev mode loads assets/tex/<name>.jpg; the single-file build embeds them in window.__SF_TEX.
+const texLoader = new THREE.TextureLoader();
+export function photoTex(name, rx = 1, ry = 1, srgb = true) {
+  const src = (window.__SF_TEX && window.__SF_TEX[name]) || `assets/tex/${name}.jpg`;
+  const t = texLoader.load(src);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(rx, ry);
+  t.anisotropy = 8;
+  if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+/** Asphalt / concrete material from a Poly Haven texture set, tiled every `tile` metres. */
+export function photoMat(set, w, d, { tile = 6, color = 0xffffff, roughness = 0.95, normal = 0.6 } = {}) {
+  return new THREE.MeshStandardMaterial({
+    color, roughness, metalness: 0,
+    map: photoTex(set + '_diff', w / tile, d / tile),
+    normalMap: photoTex(set + '_nor', w / tile, d / tile, false),
+    normalScale: new THREE.Vector2(normal, normal),
+  });
+}

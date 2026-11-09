@@ -27,6 +27,24 @@ const PLACE = [
   ['steel_frame_shelves_03', { width: 2.3 }, -56, FLOOR, -44.6, 0],
   ['steel_frame_shelves_03', { width: 2.3 }, -22, FLOOR, -44.6, 0],
   // Server room / infrastructure: electrical and network cabinets
+  // Maintenance corner + process area: oil drums, welding cart, parts shelves (Poly Haven CC0)
+  ['Barrel_01', { height: 0.9 }, 52.4, FLOOR, -21, 0],
+  ['Barrel_01', { height: 0.9 }, 53.1, FLOOR, -21.1, 1.2],
+  ['Barrel_01', { height: 0.9 }, 52.75, FLOOR, -20.4, 2.5],
+  ['Barrel_01', { height: 0.9 }, 13.2, FLOOR, 20.6, 0.4],
+  ['Barrel_01', { height: 0.9 }, 13.9, FLOOR, 20.8, 2.0],
+  ['Barrel_01', { height: 0.9 }, 13.5, FLOOR, 21.4, 3.1],
+  ['portable_welding_cart', { height: 1.5 }, 50.6, FLOOR, -20.6, 0.3],
+  ['steel_frame_shelves_02', { height: 2.1 }, 61.6, FLOOR, -15, -Math.PI / 2],
+  ['steel_frame_shelves_02', { height: 2.1 }, 61.6, FLOOR, -13.8, -Math.PI / 2],
+  ['steel_frame_shelves_02', { height: 2.1 }, 29.4, FLOOR, -16.6, 0],
+  ['steel_frame_shelves_02', { height: 2.1 }, 59, FLOOR, -44.9, 0],
+  // Office lounge next to the meeting room
+  ['modern_arm_chair_01', { height: 1.0 }, 4.6, FLOOR, -30.4, Math.PI / 2],
+  ['modern_arm_chair_01', { height: 1.0 }, 7.2, FLOOR, -30.4, -Math.PI / 2],
+  // Outdoor electrical cabinets (gate, east wall)
+  ['utility_box_02', { height: 1.15 }, -38.6, FLOOR, 41.6, Math.PI],
+  ['utility_box_02', { height: 1.15 }, 65.2, 0.3, -30, -Math.PI / 2],
   ['utility_box_01', { height: 1.6 }, 22, FLOOR, -43.6, 0],
   ['utility_box_01', { height: 1.6 }, 23, FLOOR, -43.6, 0],
   ['power_box_01', { width: 0.8 }, 36, FLOOR + 1.0, -45.4, 0],

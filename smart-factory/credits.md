@@ -58,6 +58,10 @@ None – every device has an image. To replace one, overwrite `assets/img/<devic
 
 `assets/env/warehouse_env.hdr`: [Empty Warehouse 01](https://polyhaven.com/a/empty_warehouse_01) HDRI from Poly Haven, **CC0**, downsampled to 512×256 for reflections / image-based lighting.
 
+## Textures
+
+`assets/tex/asphalt_02_*` (roads, yard) and `assets/tex/asphalt_04_*` (dock apron): [Asphalt 02](https://polyhaven.com/a/asphalt_02) and [Asphalt 04](https://polyhaven.com/a/asphalt_04) from Poly Haven, **CC0**, diffuse + normal maps resized to 512 px.
+
 ## 3D models
 
 The props and equipment models are from [Poly Haven](https://polyhaven.com) under **CC0** (public domain, no attribution required; credited here as courtesy).
@@ -86,6 +90,11 @@ Optimised for the web (GLB, meshopt, 512 px WebP textures). Every model was rend
 | `assets/models/tool_cart.glb` | [polyhaven.com/a/tool_cart](https://polyhaven.com/a/tool_cart) | CC0 |
 | `assets/models/utility_box_01.glb` | [polyhaven.com/a/utility_box_01](https://polyhaven.com/a/utility_box_01) | CC0 |
 | `assets/models/worn_metal_rack.glb` | [polyhaven.com/a/worn_metal_rack](https://polyhaven.com/a/worn_metal_rack) | CC0 |
+| `assets/models/Barrel_01.glb` | [polyhaven.com/a/Barrel_01](https://polyhaven.com/a/Barrel_01) | CC0 |
+| `assets/models/portable_welding_cart.glb` | [polyhaven.com/a/portable_welding_cart](https://polyhaven.com/a/portable_welding_cart) | CC0 |
+| `assets/models/modern_arm_chair_01.glb` | [polyhaven.com/a/modern_arm_chair_01](https://polyhaven.com/a/modern_arm_chair_01) | CC0 |
+| `assets/models/steel_frame_shelves_02.glb` | [polyhaven.com/a/steel_frame_shelves_02](https://polyhaven.com/a/steel_frame_shelves_02) | CC0 |
+| `assets/models/utility_box_02.glb` | [polyhaven.com/a/utility_box_02](https://polyhaven.com/a/utility_box_02) | CC0 |
 
 ## Sketchfab models (CC-BY)
 

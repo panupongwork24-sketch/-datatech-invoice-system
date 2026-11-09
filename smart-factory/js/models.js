@@ -9,6 +9,7 @@ export const MODEL_NAMES = [
   'metal_office_desk', 'potted_plant_01', 'potted_plant_02', 'overhead_crane', 'industrial_storage_cart',
   'tool_cart', 'drill_press_01', 'hand_truck', 'power_box_01', 'utility_box_01', 'exterior_aircon_unit',
   'concrete_road_barrier', 'WetFloorSign_01', 'steel_frame_shelves_03', 'worn_metal_rack', 'rollershutter_door',
+  'Barrel_01', 'portable_welding_cart', 'modern_arm_chair_01', 'steel_frame_shelves_02', 'utility_box_02',
   // Sketchfab (CC-BY) vehicles — passenger_cars holds one child node per car: car_sedan, car_hatchback, …
   'forklift_truck', 'box_truck', 'passenger_cars', 'amr_agv', 'network_racks', 'boom_barrier_housing',
 ];

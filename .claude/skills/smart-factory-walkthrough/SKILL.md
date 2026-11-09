@@ -37,7 +37,7 @@ Orientation convention: **models face +Z** (`placeOn` uses `atan2(t.x, t.z)`).
 5. **Never bypass bot checks** (no fake browser UA on Unsplash/Pexels). Use official APIs with the user's key, or ask the user to download.
 6. **Secrets**: never ask for tokens in chat — use `request_credential` (e.g. Sketchfab: host `api.sketchfab.com`, header `Authorization`, prefix `Token`).
 7. Keep primitive fallbacks for every model (`model(...) || boxes`) so a missing GLB never breaks the scene.
-8. Single HTML must stay < ~20 MB (currently ~13.7 MB).
+8. Single HTML must stay < ~20 MB (currently ~14.9 MB).
 9. Fill empty floor with believable scenery (machines, meeting room, server row) rather than leaving big bare zones - the user wants a balanced layout.
 10. Product photos the user supplies (e.g. their own printer brand) may keep their brand - `brand` field shows it on the popup.
 

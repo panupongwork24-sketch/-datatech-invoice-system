@@ -1,7 +1,7 @@
 // Static environment (site, zones, roads, walls) + ambient actors (people, cars, trucks).
 import * as THREE from 'three';
 import { model, hasModel } from './models.js';
-import { ZONES, FLOOR, gsap, mat, basic, box, cyl, sphere, at, v3, Batcher, Screen, txt, hex, pathCurve, placeOn, floorTexture } from './core.js';
+import { ZONES, FLOOR, gsap, mat, basic, box, cyl, sphere, at, v3, Batcher, Screen, txt, hex, pathCurve, placeOn, floorTexture, photoMat } from './core.js';
 
 export function buildWorld(ctx) {
   const { scene } = ctx;
@@ -19,7 +19,7 @@ export function buildWorld(ctx) {
 
   // Site slab (the concrete the fiber runs inside). Transparent in X-ray mode.
   const xrayMats = [];
-  const siteMat = new THREE.MeshStandardMaterial({ color: 0x353a41, roughness: 0.9 });
+  const siteMat = photoMat('asphalt_02', 132, 104, { tile: 7, color: 0x6b7078, normal: 0.4 });
   xrayMats.push(siteMat);
   const site = at(new THREE.Mesh(new THREE.BoxGeometry(132, 0.3, 104), siteMat), 0, 0.15, 4, root);
   site.receiveShadow = true;
@@ -63,9 +63,10 @@ export function buildWorld(ctx) {
   }
 
   // Roads: asphalt with painted markings
-  const asphalt = (w, d) => { const t = floorTexture('#25282d', { joints: false, noise: 26, stains: 30 }).clone(); t.needsUpdate = true; t.repeat.set(w / 6, d / 6); return new THREE.MeshStandardMaterial({ map: t, roughness: 0.92 }); };
+  // Photo textures: cracked asphalt for roads, smooth concrete for the dock apron (Poly Haven CC0)
+  const asphalt = (w, d) => photoMat('asphalt_02', w, d, { tile: 5, color: 0x9aa0a8 });
   const flat = (w, h, d, m) => { const o = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); o.receiveShadow = true; return o; };
-  at(flat(44, 0.04, 10.8, asphalt(44, 10.8)), -42, 0.33, 29.6, root); // dock apron
+  at(flat(44, 0.04, 10.8, photoMat('asphalt_04', 44, 10.8, { tile: 4, color: 0xb8bcc2, roughness: 0.85 })), -42, 0.33, 29.6, root); // dock apron (concrete)
   at(flat(132, 0.05, 4.4, asphalt(132, 4.4)), 0, 0.33, 37.4, root);
   at(flat(5, 0.06, 16.6, asphalt(5, 16.6)), -49.5, 0.34, 47.7, root);
   const b = new Batcher();

@@ -8,9 +8,12 @@
   - Download: `GET /v3/models/<uid>/download` → `glb.url` (signed S3, host sketchfab-prod-media.s3.amazonaws.com)
   - Network: allowed hosts live in the cloud environment; add new ones with `update_environment` (user approves).
 
+## Photo textures
+Poly Haven texture sets (`https://api.polyhaven.com/files/<id>` → `Diffuse`/`nor_gl` 1k jpg) resized to 512 px into `assets/tex/<id>_diff.jpg` / `_nor.jpg`; use `photoMat(id, w, d, {tile, color})` from `js/core.js` (build embeds them in `window.__SF_TEX`).
+
 ## Pick
 1. Contact sheet of thumbnails (`thumbnails.images` closest to 640 px) labelled with uid + name + licence.
-2. Skip: NC/ND licences, brand names/logos (forklift "SQUIRE", "LN" logo AGV, logo on rack top), sci-fi/cartoon looks, broken files (huge units, render fails).
+2. Skip: NC/ND licences, Poly Haven items with printed brands (plastic_crate_01 "GALLER", generator "EN2500", fire extinguisher label, tool chest badge) or a worn/vintage look (rusty trash can, old street lamp), brand names/logos (forklift "SQUIRE", "LN" logo AGV, logo on rack top), sci-fi/cartoon looks, broken files (huge units, render fails).
 
 ## Inspect
 - `node scripts/glb_tree.mjs file.glb [depth]` – node hierarchy, mesh bounds, materials (gltf-transform core).

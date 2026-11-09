@@ -1407,10 +1407,14 @@ export function buildDevices(ctx) {
     }
     // Plants
     const leaf = mat(0x2e7d32, { roughness: 0.8, metalness: 0 });
-    for (const [x, z] of [[-60, -28.5], [-44, -43.5], [-26, -43.5], [-6, -28.5], [6, -43.5]]) {
+    [[-60, -28.5], [-44, -43.5], [-26, -43.5], [-6, -28.5], [6, -43.5], [5.9, -29.2]].forEach(([x, z], i) => {
+      const pl = model(i % 2 ? 'potted_plant_02' : 'potted_plant_01', { height: 1.3 });
+      if (pl) { at(pl, x, FLOOR, z, root); return; }
       at(cyl(0.3, 0.24, 0.5, 12, 0xf5f5f4), x, FLOOR + 0.25, z, root);
       at(sphere(0.55, leaf, 10), x, FLOOR + 1.0, z, root).scale.y = 1.3;
-    }
+    });
+    b.add(0.9, 0.05, 0.6, 0x8b6b4a, 5.9, FLOOR + 0.45, -30.4);           // lounge coffee table
+    b.add(0.08, 0.42, 0.08, 0x334155, 5.9, FLOOR + 0.21, -30.4);
     // Server room: second rack row, UPS, precision cooling, NOC desk, fire suppression
     for (let r = 0; r < 4; r++) {
       b.add(1.0, 2.3, 1.1, 0x0b1220, 39 + r * 1.1, FLOOR + 1.15, -40);

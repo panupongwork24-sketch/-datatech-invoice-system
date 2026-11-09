@@ -60,7 +60,10 @@ if (existsSync(p('assets/models'))) {
 const modelsJs = 'window.__SF_MODELS=' + JSON.stringify(models) + ';'
   // 2c. HDR environment map (image-based lighting) as a data URI → window.__SF_ENV
   + (existsSync(p('assets/env/warehouse_env.hdr'))
-    ? 'window.__SF_ENV="data:application/octet-stream;base64,' + readFileSync(p('assets/env/warehouse_env.hdr')).toString('base64') + '";' : '');
+    ? 'window.__SF_ENV="data:application/octet-stream;base64,' + readFileSync(p('assets/env/warehouse_env.hdr')).toString('base64') + '";' : '')
+  // 2d. Photo textures (Poly Haven CC0) → window.__SF_TEX
+  + 'window.__SF_TEX=' + JSON.stringify(Object.fromEntries((existsSync(p('assets/tex')) ? readdirSync(p('assets/tex')) : [])
+    .filter((f) => f.endsWith('.jpg')).map((f) => [f.slice(0, -4), 'data:image/jpeg;base64,' + readFileSync(p('assets/tex/' + f)).toString('base64')]))) + ';';
 
 
 const esc = (s) => s.replace(/<\/script/gi, '<\\/script');
