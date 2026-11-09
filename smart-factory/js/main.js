@@ -9,7 +9,9 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { gsap, ZONES, hex, screens, flows, WavePool } from './core.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { FXAAShader } from 'three/addons/shaders/FXAAShader.js';
+import { gsap, ZONES, hex, screens, screenRes, flows, WavePool } from './core.js';
 import { buildWorld } from './world.js';
 import { buildDevices, Registry, visibleChain } from './devices.js';
 import { SCENES } from './scenes.js';
@@ -31,8 +33,13 @@ const stage = $('#stage');
 const coarse = matchMedia('(pointer: coarse)').matches;
 const small = Math.min(innerWidth, innerHeight) < 700;
 const QS = new URLSearchParams(location.search);
-// Pixel ratio capped at 1.5: on retina screens 2× means 4× the pixels for little visible gain
-let pixelRatio = Math.min(devicePixelRatio || 1, QS.has('hq') ? 2 : coarse || small ? 1.4 : 1.5);
+// Dynamic resolution: sharp (slightly supersampled) while the camera rests, lighter while it moves.
+const DPR = devicePixelRatio || 1;
+let prStill = coarse || small ? Math.min(DPR, 1.6) : Math.min(2, Math.max(1.5, DPR * 1.25));
+const prMove = () => Math.min(prStill, coarse || small ? 1.2 : Math.max(1, DPR * 0.85));
+let pixelRatio = prStill;
+// In-scene screens (MES, WMS, SCADA…) get 2× canvases on desktop so their text stays crisp
+screenRes.k = coarse || small ? 1.5 : 2;
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(pixelRatio);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -94,7 +101,8 @@ controls.autoRotateSpeed = 0.55;
 controls.screenSpacePanning = false;
 
 // Post-processing: soft bloom on emissive parts (screens, status lights, RF waves).
-const composer = new EffectComposer(renderer);
+// Post-processing target (multisampled only with ?hq)
+const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(innerWidth, innerHeight, { type: THREE.HalfFloatType, samples: QS.has('hq') ? 4 : 0 }));
 composer.addPass(new RenderPass(scene, camera));
 // Ambient occlusion: soft contact shadows where objects meet the floor and each other (desktop only;
 // switched off first by the adaptive-quality loop on slower GPUs).
@@ -108,6 +116,10 @@ composer.addPass(ao);
 const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.35, 0.4, 0.96);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
+// FXAA: cheap edge smoothing for the post-processed image (MSAA only with ?hq — it is costly on laptop GPUs)
+const fxaa = new ShaderPass(FXAAShader);
+fxaa.enabled = !QS.has('hq');
+composer.addPass(fxaa);
 let bloomOn = !(coarse && small);
 
 /* ---------------- build factory ---------------- */
@@ -344,7 +356,10 @@ addEventListener('keydown', (e) => {
   else if (e.key.toLowerCase() === 'l') { showAll = !showAll; updateButtons(); }
 });
 
+let userMoving = false, restAt = 0;
+controls.addEventListener('end', () => { userMoving = false; restAt = performance.now(); });
 controls.addEventListener('start', () => {
+  userMoving = true;
   if (flying) { gsap.killTweensOf(camera.position); gsap.killTweensOf(controls.target); flying = false; }
   controls.autoRotate = false;
   if (playing) setPlaying(false);
@@ -437,6 +452,7 @@ function resize() {
   renderer.setSize(w, h, false);
   composer.setPixelRatio(pixelRatio);
   composer.setSize(w, h);
+  fxaa.material.uniforms.resolution.value.set(1 / (w * pixelRatio), 1 / (h * pixelRatio));
   labelRenderer.setSize(w, h);
 }
 new ResizeObserver(() => { measureFrame(); }).observe($('#caption'));
@@ -468,6 +484,9 @@ renderer.setAnimationLoop(() => {
   }
   if (frameMoving()) applyFrame(Math.min(1, dt * 5));
   if (++shadowTick % 3 === 0) renderer.shadowMap.needsUpdate = true;
+  // Dynamic resolution: drop while the camera flies / is dragged, back to sharp 0.35 s after it rests
+  const wantPR = (flying || userMoving || performance.now() - restAt < 350) ? prMove() : prStill;
+  if (Math.abs(wantPR - pixelRatio) > 0.01) { pixelRatio = wantPR; renderer.setPixelRatio(pixelRatio); resize(); }
   controls.update();
   syncLabels();
   if (bloomOn || ao.enabled) { bloom.enabled = bloomOn; composer.render(); } else renderer.render(scene, camera);
@@ -483,9 +502,9 @@ renderer.setAnimationLoop(() => {
       quality++;
       // Degrade in order of cost/benefit: bloom → pixel ratio → shadows → pixel ratio again
       if (quality === 1 && bloomOn) bloomOn = false;
-      else if (quality <= 2 && pixelRatio > 1.25) { pixelRatio = Math.max(1, pixelRatio - 0.5); renderer.setPixelRatio(pixelRatio); resize(); quality = 2; }
+      else if (quality <= 2 && prStill > 1.25) { prStill = Math.max(1, prStill - 0.5); quality = 2; }
       else if (quality <= 3) { sun.castShadow = false; quality = 3; }
-      else { pixelRatio = Math.max(0.75, pixelRatio - 0.25); renderer.setPixelRatio(pixelRatio); resize(); }
+      else { prStill = Math.max(0.75, prStill - 0.25); }
     }
     fpsFrames = 0; fpsAcc = 0;
   }

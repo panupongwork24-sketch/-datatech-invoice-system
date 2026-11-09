@@ -108,11 +108,14 @@ export class Batcher {
 
 /* ---------- canvas-driven screens (ESL, dashboards, kiosks) ---------- */
 export const screens = [];
+/** Canvas resolution multiplier for in-scene screens (set by main.js before the factory is built). */
+export const screenRes = { k: 1 };
 export class Screen {
   /** w/h in world units, pw/ph canvas pixels, draw(ctx, W, H, state) */
   constructor(w, h, pw, ph, draw, state = {}) {
     this.canvas = document.createElement('canvas');
-    this.canvas.width = pw; this.canvas.height = ph;
+    this.k = screenRes.k; this.pw = pw; this.ph = ph;
+    this.canvas.width = Math.round(pw * this.k); this.canvas.height = Math.round(ph * this.k);
     this.ctx = this.canvas.getContext('2d');
     this.tex = new THREE.CanvasTexture(this.canvas);
     this.tex.colorSpace = THREE.SRGBColorSpace;
@@ -128,7 +131,8 @@ export class Screen {
   flush() {
     if (!this.dirty) return;
     this.dirty = false;
-    this.draw(this.ctx, this.canvas.width, this.canvas.height, this.state);
+    this.ctx.setTransform(this.k, 0, 0, this.k, 0, 0);   // draw code works in logical pixels
+    this.draw(this.ctx, this.pw, this.ph, this.state);
     this.tex.needsUpdate = true;
   }
 }
