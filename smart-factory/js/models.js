@@ -63,6 +63,7 @@ export function model(name, opts = {}) {
   const clone = obj.clone(true);
   clone.position.set(0, 0, 0);
   const wrap = new THREE.Group();
+  wrap.userData.modelName = name;
   wrap.add(clone);
   const box = new THREE.Box3().setFromObject(clone);
   const size = box.getSize(new THREE.Vector3());
@@ -99,6 +100,7 @@ export function instanced(name, items, parent) {
       im.setMatrixAt(i, m4);
     });
     im.castShadow = im.receiveShadow = true;
+    im.userData.modelName = name;
     parent.add(im);
   });
   return true;

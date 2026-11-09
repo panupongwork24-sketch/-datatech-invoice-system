@@ -37,7 +37,7 @@ Orientation convention: **models face +Z** (`placeOn` uses `atan2(t.x, t.z)`).
 5. **Never bypass bot checks** (no fake browser UA on Unsplash/Pexels). Use official APIs with the user's key, or ask the user to download.
 6. **Secrets**: never ask for tokens in chat — use `request_credential` (e.g. Sketchfab: host `api.sketchfab.com`, header `Authorization`, prefix `Token`).
 7. Keep primitive fallbacks for every model (`model(...) || boxes`) so a missing GLB never breaks the scene.
-8. Single HTML must stay < ~20 MB (currently ~14.9 MB).
+8. Single HTML must stay < ~20 MB (currently ~13 MB).
 9. Fill empty floor with believable scenery (machines, meeting room, server row) rather than leaving big bare zones - the user wants a balanced layout.
 10. Product photos the user supplies (e.g. their own printer brand) may keep their brand - `brand` field shows it on the popup.
 
@@ -71,6 +71,7 @@ Edit `content.json` with a Python json round-trip (`ensure_ascii=False, indent=2
 6. Report in Thai: what changed, what was rejected and why, credits added, final file size, open questions.
 
 ## Things that went wrong before (avoid)
+- **Performance**: the user noticed lag after props were added. Budget: ~1,500 draw calls and ~1.2 M triangles per frame (measure with `renderer.info` via `__sf.ctx.renderer`, `?hq` off). Check triangle counts before placing a model many times — Poly Haven plants/boxes are 30–90k tris each: run `gltf-transform simplify --ratio 0.02–0.3 --error 0.004` then `meshopt`. Defaults now: AO off (`?ao`/`?hq` to enable), pixel ratio ≤ 1.5, 2048 shadow map refreshed every 3rd frame, meshes < 0.35 m radius cast no shadow.
 - `gltf-transform optimize` flattens/joins nodes by default → named sub-models vanish.
 - Some Sketchfab GLBs are in cm or have huge units - `model()` normalises by bbox, but stray geometry breaks the bbox; check with `scripts/viewer.html`.
 - Model forks/arms are often fused into one mesh: animate a separate code-built part instead (barrier arm, forklift pallet).

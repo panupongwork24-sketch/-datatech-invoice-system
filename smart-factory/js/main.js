@@ -30,13 +30,18 @@ let lang = store.get('sf-lang') || content.meta.defaultLang || 'en';
 const stage = $('#stage');
 const coarse = matchMedia('(pointer: coarse)').matches;
 const small = Math.min(innerWidth, innerHeight) < 700;
-let pixelRatio = Math.min(devicePixelRatio || 1, coarse || small ? 1.6 : 2);
+const QS = new URLSearchParams(location.search);
+// Pixel ratio capped at 1.5: on retina screens 2× means 4× the pixels for little visible gain
+let pixelRatio = Math.min(devicePixelRatio || 1, QS.has('hq') ? 2 : coarse || small ? 1.4 : 1.5);
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(pixelRatio);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.82;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+// The sun never moves: refresh the shadow map every 3rd frame instead of every frame (moving
+// forklifts / AMRs / people still get shadows, updated at ~20 Hz).
+renderer.shadowMap.autoUpdate = false;
 stage.appendChild(renderer.domElement);
 
 const labelRenderer = new CSS2DRenderer();
@@ -68,7 +73,7 @@ scene.add(new THREE.HemisphereLight(0xdbe7ff, 0x1a1f2b, 0.35));
 const sun = new THREE.DirectionalLight(0xfff4e0, 2.0);
 sun.position.set(45, 90, 40);
 sun.castShadow = true;
-const SH = coarse || small ? 2048 : 4096;
+const SH = QS.has('hq') ? 4096 : coarse || small ? 1024 : 2048;
 sun.shadow.mapSize.set(SH, SH);
 sun.shadow.radius = 3;
 Object.assign(sun.shadow.camera, { left: -80, right: 80, top: 70, bottom: -70, near: 10, far: 220 });
@@ -97,7 +102,8 @@ const ao = new GTAOPass(scene, camera, innerWidth, innerHeight);
 ao.updateGtaoMaterial({ radius: 2.6, distanceExponent: 1.4, thickness: 3, scale: 1.4, samples: 12 });
 ao.updatePdMaterial({ radius: 6, rings: 2, samples: 12 });
 ao.blendIntensity = 1;
-ao.enabled = !(coarse || small) && !new URLSearchParams(location.search).has('noao');
+// Off by default (it re-renders the whole scene); ?hq or ?ao turns it on for high-end machines.
+ao.enabled = !(coarse || small) && (QS.has('hq') || QS.has('ao')) && !QS.has('noao');
 composer.addPass(ao);
 const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.35, 0.4, 0.96);
 composer.addPass(bloom);
@@ -115,6 +121,17 @@ const world = buildWorld(ctx);
 ctx.updaters.push(...world.updaters);
 buildDevices(ctx);
 buildProps(root);
+// Small parts (LEDs, keys, screens, bolts) do not cast shadows: fewer draw calls in the shadow pass.
+{
+  const ws = new THREE.Vector3();
+  root.updateMatrixWorld(true);
+  root.traverse((o) => {
+    if (!o.isMesh || o.isInstancedMesh || !o.castShadow) return;
+    if (!o.geometry.boundingSphere) o.geometry.computeBoundingSphere();
+    o.getWorldScale(ws);
+    if (o.geometry.boundingSphere.radius * Math.max(ws.x, ws.y, ws.z) < 0.35) o.castShadow = false;
+  });
+}
 const reg = ctx.reg;
 
 /* ---------------- i18n ---------------- */
@@ -428,9 +445,10 @@ resize();
 
 /* ---------------- main loop ---------------- */
 const clock = new THREE.Clock();
+let shadowTick = 0;
 let screenAcc = 0, fpsFrames = 0, fpsAcc = 0, quality = 0;
 const fpsEl = new URLSearchParams(location.search).has('fps') ? $('#fps') : null;
-const HQ = new URLSearchParams(location.search).has('hq'); // keep full quality (no auto-downgrade)
+const HQ = QS.has('hq'); // keep full quality (no auto-downgrade)
 if (fpsEl) fpsEl.hidden = false;
 renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.05);
@@ -449,6 +467,7 @@ renderer.setAnimationLoop(() => {
     $('#progress i').style.transform = 'scaleX(0)';
   }
   if (frameMoving()) applyFrame(Math.min(1, dt * 5));
+  if (++shadowTick % 3 === 0) renderer.shadowMap.needsUpdate = true;
   controls.update();
   syncLabels();
   if (bloomOn || ao.enabled) { bloom.enabled = bloomOn; composer.render(); } else renderer.render(scene, camera);
@@ -456,11 +475,11 @@ renderer.setAnimationLoop(() => {
 
   // Adaptive quality: keep the frame rate up on weaker GPUs
   fpsFrames++; fpsAcc += dt;
-  if (fpsAcc > 2.5) {
+  if (fpsAcc > 1.5) {
     const fps = fpsFrames / fpsAcc;
     if (fpsEl) fpsEl.textContent = `${fps.toFixed(0)} fps · q${quality} · pr ${pixelRatio}`;
-    if (fps < 45 && ao.enabled && t > 4 && !HQ) ao.enabled = false; // ambient occlusion goes first
-    else if (fps < 45 && quality < 4 && t > 4 && !HQ) {
+    if (fps < 45 && ao.enabled && t > 2 && !HQ) ao.enabled = false; // ambient occlusion goes first
+    else if (fps < 45 && quality < 4 && t > 2 && !HQ) {
       quality++;
       // Degrade in order of cost/benefit: bloom → pixel ratio → shadows → pixel ratio again
       if (quality === 1 && bloomOn) bloomOn = false;
