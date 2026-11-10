@@ -22,7 +22,8 @@ const swap = (from, to) => { if (!html.includes(from)) throw new Error('index.ht
 swap('<link rel="stylesheet" href="styles.css">', `<style>\n${read(p('styles.css'))}\n</style>`);
 html = html.replace(/<script type="importmap">[\s\S]*?<\/script>\s*/, '');
 swap('<script src="../smart-factory/vendor/gsap.min.js"></script>', `<script>${esc(read(resolve(VENDOR, 'gsap.min.js')))}</script>`);
-swap('<script type="module" src="js/main.js"></script>', `<script type="module">${esc(out.outputFiles[0].text)}</script>`);
+const env = 'window.__BB_ENV="data:application/octet-stream;base64,' + readFileSync(resolve(ROOT, '../smart-factory/assets/env/warehouse_env.hdr')).toString('base64') + '";';
+swap('<script type="module" src="js/main.js"></script>', `<script>${env}</script>\n  <script type="module">${esc(out.outputFiles[0].text)}</script>`);
 mkdirSync(p('dist'), { recursive: true });
 writeFileSync(p('dist/brake-booster-line.html'), html);
 console.log(`dist/brake-booster-line.html  ${(Buffer.byteLength(html) / 1048576).toFixed(2)} MB`);

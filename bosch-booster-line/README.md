@@ -7,4 +7,5 @@ infrastructure + WI Traceability, AEP Print, customer label printing) and the ro
 - Dev: serve the repo root (`python3 -m http.server`) and open `/bosch-booster-line/` (uses `../smart-factory/vendor`)
 - Single file: `npm install && npm run build:html` → `dist/brake-booster-line.html` (opens by double-click)
 
-All geometry is built in code (no external models, no logos). Screens show illustrative sample data only.
+All geometry is built in code (no external models, no logos, no company or customer names). Screens show illustrative sample data only.
+- Lighting: Poly Haven `empty_warehouse_01` HDRI (CC0), shared from `smart-factory/assets/env/`.

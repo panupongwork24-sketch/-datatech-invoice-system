@@ -1,12 +1,15 @@
-// Brake booster plant — 3D walkthrough draft (Three.js + GSAP).
+// Brake booster plant — 3D walkthrough (Three.js + GSAP).
 // Layout (metres): hall x -40..40, z -26..22. Lines run along Z (start z=-20 → end z=12).
-//   Line 1 x=-15, Line 2 x=0, Line 3 x=15. Right side x 24..38 = conveyor + AMR.
-//   Front z 13..20 = end-of-line label printing + packing. Left = network cabinet + (planned) flow rack.
+//   Line 1 x=-15, Line 2 x=0, Line 3 x=15.
+//   Right side x 28..37: 3 conveyor units → lane switch → X-lift (safety cage) → AMR + karakuri cart.
+//   AMRs dock at Line 2 (x≈9.6, z=-9); totes roll off the karakuri cart onto the line-side conveyor.
+//   Front z 13..20 = end-of-line label printing + packing. Left = network cabinet + (planned) RFID e-Kanban flow rack.
 //   Front exit z=22 = (planned) RFID gate to the FG warehouse annex.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/OrbitControls.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/CSS2DRenderer.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { UI, SCENES } from './content.js';
 
@@ -14,13 +17,22 @@ const gsap = window.gsap;
 gsap.ticker.lagSmoothing(0); // keep camera moves time-accurate even on slow GPUs
 const isMobile = matchMedia('(max-width: 760px)').matches;
 
+/* ---------------- palette (clean, light factory like the site photos) ---------------- */
+const C = {
+  bg: 0x1b2433, floor: 0xcfd5db, lineZone: 0xb7cbbf, wall: 0xe4e8ec, column: 0xe5e7eb,
+  machine: 0xe9ecef, machineTrim: 0x5b6573, panel: 0x3a4250, alu: 0xc5ccd4,
+  tote: 0x1f5fc4, toteRim: 0xb9c3cf, belt: 0x2f7d5e, safety: 0xf2c200, stainless: 0xd5dbe1,
+  amrTop: 0xf4f5f7, amrBody: 0x2a2f37, amrAccent: 0xc62f3a, cardboard: 0xc49a6c, pallet: 0xa77b46,
+  walkway: 0x4f9d6c, yellow: 0xf5c400,
+};
+
 /* ---------------- renderer / scene ---------------- */
 const app = document.getElementById('app');
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(devicePixelRatio, isMobile ? 1.5 : 1.75));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 0.8;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 app.appendChild(renderer.domElement);
@@ -30,39 +42,50 @@ labelRenderer.domElement.style.cssText = 'position:fixed;inset:0;pointer-events:
 app.appendChild(labelRenderer.domElement);
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0b1220);
-scene.fog = new THREE.Fog(0x0b1220, 90, 190);
+scene.background = new THREE.Color(C.bg);
+scene.fog = new THREE.Fog(C.bg, 110, 220);
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+// Real warehouse HDRI (Poly Haven, CC0) for believable reflections; RoomEnvironment stays as fallback.
+new RGBELoader().loadAsync(window.__BB_ENV || '../smart-factory/assets/env/warehouse_env.hdr')
+  .then((hdr) => { hdr.mapping = THREE.EquirectangularReflectionMapping; scene.environment = pmrem.fromEquirectangular(hdr).texture; hdr.dispose(); })
+  .catch(() => {});
 
 const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.3, 400);
-camera.position.set(8, 62, 66);
+camera.position.set(6, 70, 62);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
 controls.maxPolarAngle = Math.PI * 0.47;
-controls.minDistance = 4;
+controls.minDistance = 2;
 controls.maxDistance = 140;
-controls.target.set(-2, 0, -2);
+controls.target.set(-1, 0, 0);
 
-scene.add(new THREE.HemisphereLight(0xdbeafe, 0x1e293b, 0.55));
-const sun = new THREE.DirectionalLight(0xffffff, 2.1);
-sun.position.set(30, 60, 35);
+scene.add(new THREE.HemisphereLight(0xf1f5f9, 0x64748b, 0.45));
+const sun = new THREE.DirectionalLight(0xfffaf0, 1.6);
+sun.position.set(28, 60, 30);
 sun.castShadow = true;
 sun.shadow.mapSize.set(isMobile ? 1024 : 2048, isMobile ? 1024 : 2048);
 Object.assign(sun.shadow.camera, { left: -55, right: 55, top: 50, bottom: -50, near: 10, far: 160 });
 sun.shadow.bias = -0.0004;
+sun.shadow.normalBias = 0.02;
 scene.add(sun);
 
 /* ---------------- helpers ---------------- */
 const mats = new Map();
 function mat(color, o = {}) {
   const k = color + JSON.stringify(o);
-  if (!mats.has(k)) mats.set(k, new THREE.MeshStandardMaterial({ color, roughness: 0.55, metalness: 0.2, ...o }));
+  if (!mats.has(k)) mats.set(k, new THREE.MeshStandardMaterial({ color, roughness: 0.55, metalness: 0.15, ...o }));
   return mats.get(k);
 }
-const steel = mat(0xb8c0cc, { roughness: 0.35, metalness: 0.75 });
-const dark = mat(0x1f2937, { roughness: 0.6, metalness: 0.3 });
+const steel = mat(C.stainless, { roughness: 0.3, metalness: 0.8 });
+const alu = mat(C.alu, { roughness: 0.35, metalness: 0.75 });
+const dark = mat(0x23272e, { roughness: 0.6, metalness: 0.3 });
+const rubber = mat(0x15171a, { roughness: 0.9, metalness: 0 });
+const toteMat = mat(C.tote, { roughness: 0.55, metalness: 0 });
+const cardMat = mat(C.cardboard, { roughness: 0.9, metalness: 0 });
+const palletMat = mat(C.pallet, { roughness: 0.9, metalness: 0 });
+const glass = new THREE.MeshStandardMaterial({ color: 0xdbeafe, transparent: true, opacity: 0.28, roughness: 0.05, metalness: 0.1, depthWrite: false });
 const geos = new Map();
 function box(w, h, d, m, parent, x = 0, y = 0, z = 0) {
   const k = `${w},${h},${d}`;
@@ -72,13 +95,15 @@ function box(w, h, d, m, parent, x = 0, y = 0, z = 0) {
   }
   const mesh = new THREE.Mesh(geos.get(k), typeof m === 'number' ? mat(m) : m);
   mesh.position.set(x, y, z);
-  const big = Math.max(w, h, d) > 0.4;
-  mesh.castShadow = big; mesh.receiveShadow = true;
+  mesh.castShadow = Math.max(w, h, d) > 0.4; mesh.receiveShadow = true;
   if (parent) parent.add(mesh);
   return mesh;
 }
+const cylGeos = new Map();
 function cyl(r, h, m, parent, x = 0, y = 0, z = 0, seg = 24, r2 = r) {
-  const mesh = new THREE.Mesh(new THREE.CylinderGeometry(r, r2, h, seg), typeof m === 'number' ? mat(m) : m);
+  const k = `${r},${h},${seg},${r2}`;
+  if (!cylGeos.has(k)) cylGeos.set(k, new THREE.CylinderGeometry(r, r2, h, seg));
+  const mesh = new THREE.Mesh(cylGeos.get(k), typeof m === 'number' ? mat(m) : m);
   mesh.position.set(x, y, z);
   mesh.castShadow = r > 0.2; mesh.receiveShadow = true;
   if (parent) parent.add(mesh);
@@ -91,8 +116,13 @@ function group(parent, x = 0, y = 0, z = 0, ry = 0) {
   return g;
 }
 function glow(color, i = 1.2) { return new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: i, roughness: 0.4 }); }
+function plane(w, d, m, x, y, z) {
+  const p = new THREE.Mesh(new THREE.PlaneGeometry(w, d), typeof m === 'number' ? mat(m) : m);
+  p.rotation.x = -Math.PI / 2; p.position.set(x, y, z); p.receiveShadow = true; scene.add(p);
+  return p;
+}
 
-/** Canvas-texture screen / sign. draw(ctx, w, h) paints it; call .redraw() to refresh. */
+/** Canvas-texture screen / sign. draw(ctx, w, h, ...args) paints it; call .redraw(...args) to refresh. */
 function screen(w, h, draw, parent, x, y, z, ry = 0, px = 256) {
   const cv = document.createElement('canvas');
   cv.width = px; cv.height = Math.round(px * h / w);
@@ -114,19 +144,24 @@ function sign(text, w, h, bg, fg, parent, x, y, z, ry = 0, font = 'bold 64px sys
     c.fillText(text, W / 2, H / 2 + 2);
   }, parent, x, y, z, ry, 512);
 }
-function person(parent, x, z, ry = 0, vest = 0x2563eb) {
+const skin = mat(0xd9a77f, { roughness: 0.7, metalness: 0 });
+const headGeo = new THREE.SphereGeometry(0.13, 16, 12);
+const capGeo = new THREE.SphereGeometry(0.14, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2);
+function person(parent, x, z, ry = 0, shirt = 0x3b6ea5) {
   const g = group(parent, x, 0, z, ry);
-  cyl(0.11, 0.85, dark, g, -0.1, 0.43, 0, 10); cyl(0.11, 0.85, dark, g, 0.1, 0.43, 0, 10);
-  box(0.5, 0.7, 0.3, vest, g, 0, 1.2, 0);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 12), mat(0xe0b48f, { roughness: 0.7, metalness: 0 }));
-  head.position.set(0, 1.72, 0); g.add(head);
-  const cap = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), mat(0xf8fafc));
-  cap.position.set(0, 1.75, 0); g.add(cap);
+  const pants = mat(0x2b3442, { roughness: 0.8, metalness: 0 });
+  cyl(0.085, 0.82, pants, g, -0.1, 0.43, 0, 10); cyl(0.085, 0.82, pants, g, 0.1, 0.43, 0, 10);
+  box(0.2, 0.08, 0.28, rubber, g, -0.1, 0.04, 0.04); box(0.2, 0.08, 0.28, rubber, g, 0.1, 0.04, 0.04);
+  box(0.46, 0.66, 0.26, mat(shirt, { roughness: 0.85, metalness: 0 }), g, 0, 1.18, 0);
+  cyl(0.06, 0.6, mat(shirt, { roughness: 0.85, metalness: 0 }), g, -0.29, 1.15, 0.05, 8);
+  cyl(0.06, 0.6, mat(shirt, { roughness: 0.85, metalness: 0 }), g, 0.29, 1.15, 0.05, 8);
+  const head = new THREE.Mesh(headGeo, skin); head.position.set(0, 1.66, 0); g.add(head);
+  const cap = new THREE.Mesh(capGeo, mat(0xf8fafc, { roughness: 0.6, metalness: 0 })); cap.position.set(0, 1.69, 0); g.add(cap);
   return g;
 }
 /** Planned (roadmap) items: amber, semi-transparent. */
-const planMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.45, roughness: 0.5, depthWrite: false });
-const planEdge = new THREE.LineDashedMaterial({ color: 0xfbbf24, dashSize: 0.4, gapSize: 0.25 });
+const planMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.32, roughness: 0.5, depthWrite: false });
+const planEdge = new THREE.LineDashedMaterial({ color: 0xf59e0b, dashSize: 0.4, gapSize: 0.25 });
 function planBox(w, h, d, parent, x, y, z) {
   const m = box(w, h, d, planMat, parent, x, y, z);
   m.castShadow = false;
@@ -134,11 +169,21 @@ function planBox(w, h, d, parent, x, y, z) {
   e.computeLineDistances(); m.add(e);
   return m;
 }
+/** Blue plastic tote with white label card (no logos). */
+const toteLabelMat = mat(0xf8fafc, { roughness: 0.8, metalness: 0 });
+function tote(parent, x = 0, y = 0, z = 0, w = 0.6, h = 0.26, d = 0.42, simple = false) {
+  const g = group(parent, x, y, z);
+  const b = box(w, h, d, toteMat, g, 0, h / 2, 0); b.castShadow = !simple;
+  if (simple) return g;
+  box(w + 0.02, 0.03, d + 0.02, mat(C.toteRim, { roughness: 0.5, metalness: 0 }), g, 0, h - 0.01, 0);
+  const l = box(0.16, 0.09, 0.005, toteLabelMat, g, 0, h * 0.5, d / 2 + 0.004); l.castShadow = false;
+  return g;
+}
 
 /* ---------------- labels ---------------- */
 const labels = {};
 let goTo = () => {};
-function label(id, num, text, kind, x, y, z) {
+function label(id, num, kind, x, y, z) {
   const el = document.createElement('div');
   el.className = 'lbl' + (kind === 'plan' ? ' plan' : '');
   el.innerHTML = `<b>${num}</b><span></span>`;
@@ -146,53 +191,73 @@ function label(id, num, text, kind, x, y, z) {
   const o = new CSS2DObject(el);
   o.position.set(x, y, z);
   scene.add(o);
-  labels[id] = { el, text };
+  labels[id] = { el };
   return o;
 }
-function smallLabel(text, x, y, z) {
+const smallLabels = [];
+function smallLabel(text, x, y, z, scenes = null) {
   const el = document.createElement('div');
   el.className = 'lbl small';
   el.textContent = text;
   const o = new CSS2DObject(el); o.position.set(x, y, z); scene.add(o);
+  smallLabels.push({ o, scenes });
   return o;
 }
 
 /* ---------------- hall ---------------- */
 const HALL = { x0: -40, x1: 40, z0: -26, z1: 22 };
 {
-  // outside ground
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), mat(0x1e293b, { roughness: 0.95, metalness: 0 }));
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), mat(0x2b3442, { roughness: 0.95, metalness: 0 }));
   ground.rotation.x = -Math.PI / 2; ground.position.y = -0.02; ground.receiveShadow = true; scene.add(ground);
-  // epoxy floor
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(HALL.x1 - HALL.x0, HALL.z1 - HALL.z0),
-    mat(0x64748b, { roughness: 0.32, metalness: 0.05, envMapIntensity: 1.1 }));
-  floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, (HALL.z0 + HALL.z1) / 2); floor.receiveShadow = true; scene.add(floor);
-  // green production zones under each line + walkway lines (yellow)
-  const zoneMat = mat(0x3f6f55, { roughness: 0.35, metalness: 0.05 });
-  for (const lx of [-15, 0, 15]) {
-    const z = new THREE.Mesh(new THREE.PlaneGeometry(8, 34), zoneMat);
-    z.rotation.x = -Math.PI / 2; z.position.set(lx, 0.01, -4); z.receiveShadow = true; scene.add(z);
-  }
-  const yellow = mat(0xfacc15, { roughness: 0.5, metalness: 0 });
-  const stripe = (x, z, w, d) => { const s = new THREE.Mesh(new THREE.PlaneGeometry(w, d), yellow); s.rotation.x = -Math.PI / 2; s.position.set(x, 0.02, z); scene.add(s); };
-  for (const lx of [-15, 0, 15]) { stripe(lx - 4, -4, 0.12, 34); stripe(lx + 4, -4, 0.12, 34); }
-  stripe(0, -23, 76, 0.12); stripe(0, 13.2, 46, 0.12);
-  // AMR lane (purple)
-  const amrZone = new THREE.Mesh(new THREE.PlaneGeometry(14, 30), mat(0x4c3d73, { roughness: 0.35, metalness: 0.05 }));
-  amrZone.rotation.x = -Math.PI / 2; amrZone.position.set(31, 0.01, -8); scene.add(amrZone);
+  // light epoxy floor (like the site photos)
+  plane(HALL.x1 - HALL.x0, HALL.z1 - HALL.z0, mat(C.floor, { roughness: 0.22, metalness: 0.02 }), 0, 0, (HALL.z0 + HALL.z1) / 2);
+  for (const lx of [-15, 0, 15]) plane(8, 34, mat(C.lineZone, { roughness: 0.25, metalness: 0.02 }), lx, 0.006, -4);
+  const yellow = mat(C.yellow, { roughness: 0.5, metalness: 0 });
+  const walk = mat(C.walkway, { roughness: 0.4, metalness: 0 });
+  const stripe = (x, z, w, d, m = yellow) => plane(w, d, m, x, 0.012, z);
+  for (const lx of [-15, 0, 15]) { stripe(lx - 4, -4, 0.1, 34); stripe(lx + 4, -4, 0.1, 34); }
+  stripe(0, -22.6, 76, 0.1); stripe(0, 13.2, 46, 0.1);
+  // green walkway along the front
+  plane(70, 1.2, walk, 0, 0.009, 21.0);
+  // AMR lane edges (dashed white)
+  // AMR / material zone floor (soft lilac)
+  plane(10, 30, mat(0xd7d2e8, { roughness: 0.25, metalness: 0.02 }), 32.5, 0.006, -8);
 
-  // walls: back + left full height, front + right low (open view)
-  const wall = mat(0xcbd5e1, { roughness: 0.8, metalness: 0.1 });
+  // walls: back + left full height (light), front + right low (open view)
+  const wall = mat(C.wall, { roughness: 0.85, metalness: 0 });
   box(80, 8, 0.4, wall, scene, 0, 4, HALL.z0);
   box(0.4, 8, 48, wall, scene, HALL.x0, 4, -2);
   box(0.4, 1, 48, wall, scene, HALL.x1, 0.5, -2);
   box(30, 1, 0.4, wall, scene, -27, 0.5, HALL.z1);
   box(42, 1, 0.4, wall, scene, 19, 0.5, HALL.z1);
-  // columns + roof trusses outline
-  for (let x = -40; x <= 40; x += 16) for (const z of [HALL.z0, HALL.z1]) box(0.6, 9, 0.6, steel, scene, x, 4.5, z);
-  for (let x = -40; x <= 40; x += 16) box(0.3, 0.5, 48, steel, scene, x, 9, -2);
-  // sign on back wall
-  sign('BRAKE BOOSTER PRODUCTION', 22, 2, '#0f172a', '#e2e8f0', scene, 0, 6.2, HALL.z0 + 0.22);
+  // skirting stripe on walls
+  box(80, 0.3, 0.42, mat(0x94a3b8), scene, 0, 0.15, HALL.z0);
+  box(0.42, 0.3, 48, mat(0x94a3b8), scene, HALL.x0, 0.15, -2);
+  // columns with yellow/black protection
+  const colMat = mat(C.column, { roughness: 0.7, metalness: 0.1 });
+  for (let x = -40; x <= 40; x += 16) for (const z of [HALL.z0, HALL.z1]) {
+    box(0.6, 9, 0.6, colMat, scene, x, 4.5, z);
+    box(0.68, 1.0, 0.68, mat(C.safety, { roughness: 0.5, metalness: 0.1 }), scene, x, 0.5, z);
+  }
+  for (let x = -40; x <= 40; x += 16) box(0.3, 0.5, 48, alu, scene, x, 9, -2);
+  sign('BRAKE BOOSTER PRODUCTION', 22, 2, '#1e293b', '#f1f5f9', scene, 0, 6.2, HALL.z0 + 0.22);
+  // ceiling light rows (LED battens) over the lines and aisles
+  const lampMat = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false });
+  const lampGeo = new THREE.BoxGeometry(0.22, 0.06, 2.4);
+  const lampXs = [-34, -21, -15, -8, 0, 7, 15, 22, 31];
+  const lamps = new THREE.InstancedMesh(lampGeo, lampMat, lampXs.length * 7);
+  const m4 = new THREE.Matrix4(); let li = 0;
+  for (const x of lampXs) for (let z = -21; z <= 15; z += 6) { m4.makeTranslation(x, 7.6, z); lamps.setMatrixAt(li++, m4); }
+  lamps.count = li; scene.add(lamps);
+  // material racks with blue totes along the back wall
+  for (const rx of [-28, 22]) {
+    const r = group(scene, rx, 0, HALL.z0 + 0.9);
+    for (const sx of [-1.6, 1.6]) for (const sz of [-0.35, 0.35]) box(0.06, 2.2, 0.06, alu, r, sx, 1.1, sz);
+    for (let lv = 0; lv < 4; lv++) {
+      box(3.3, 0.04, 0.8, alu, r, 0, 0.12 + lv * 0.55, 0);
+      for (let b = 0; b < 5; b++) tote(r, -1.3 + b * 0.65, 0.14 + lv * 0.55, 0, 0.58, 0.24, 0.6, true);
+    }
+  }
 }
 
 /* ---------------- production lines ---------------- */
@@ -203,61 +268,104 @@ const rollerTex = (() => {
   const cv = document.createElement('canvas'); cv.width = 64; cv.height = 64;
   const c = cv.getContext('2d');
   const g = c.createLinearGradient(0, 0, 0, 64);
-  g.addColorStop(0, '#6b7280'); g.addColorStop(0.5, '#e5e7eb'); g.addColorStop(1, '#6b7280');
+  g.addColorStop(0, '#7c8591'); g.addColorStop(0.5, '#eef1f4'); g.addColorStop(1, '#7c8591');
   c.fillStyle = g; c.fillRect(0, 0, 64, 64);
-  c.fillStyle = '#374151'; c.fillRect(0, 58, 64, 6);
+  c.fillStyle = '#4b5563'; c.fillRect(0, 58, 64, 6);
   const t = new THREE.CanvasTexture(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace;
   return t;
 })();
-const rollerTexes = [];
-/** Roller conveyor along Z (or X when alongX). Returns its group. */
-function conveyor(x, z, len, width = 1.1, alongX = false, h = 0.85) {
-  const g = group(scene, x, 0, z, alongX ? Math.PI / 2 : 0);
-  const t = rollerTex.clone(); t.needsUpdate = true; t.repeat.set(1, len * 3); rollerTexes.push(t);
-  const top = new THREE.Mesh(new THREE.PlaneGeometry(width, len), new THREE.MeshStandardMaterial({ map: t, roughness: 0.35, metalness: 0.7 }));
+const beltTex = (() => {
+  const cv = document.createElement('canvas'); cv.width = 64; cv.height = 64;
+  const c = cv.getContext('2d');
+  c.fillStyle = '#2f7d5e'; c.fillRect(0, 0, 64, 64);
+  c.fillStyle = 'rgba(0,0,0,.12)'; for (let i = 0; i < 64; i += 8) c.fillRect(0, i, 64, 2);
+  const t = new THREE.CanvasTexture(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+})();
+const movingTexes = [];
+/** Conveyor along local Z (ry rotates it). kind 'roller' | 'belt'. */
+function conveyor(x, z, len, width = 1.1, ry = 0, h = 0.85, kind = 'roller', parent = scene) {
+  const g = group(parent, x, 0, z, ry);
+  const t = (kind === 'belt' ? beltTex : rollerTex).clone(); t.needsUpdate = true;
+  t.repeat.set(1, len * (kind === 'belt' ? 1 : 3)); movingTexes.push(t);
+  const top = new THREE.Mesh(new THREE.PlaneGeometry(width, len),
+    new THREE.MeshStandardMaterial({ map: t, roughness: kind === 'belt' ? 0.7 : 0.35, metalness: kind === 'belt' ? 0 : 0.7 }));
   top.rotation.x = -Math.PI / 2; top.position.y = h; top.receiveShadow = true; g.add(top);
-  box(0.1, 0.18, len, steel, g, -width / 2 - 0.05, h - 0.02, 0);
-  box(0.1, 0.18, len, steel, g, width / 2 + 0.05, h - 0.02, 0);
-  for (let s = -len / 2 + 0.5; s < len / 2; s += 2) {
-    box(0.08, h, 0.08, dark, g, -width / 2, h / 2, s); box(0.08, h, 0.08, dark, g, width / 2, h / 2, s);
+  box(0.08, 0.16, len, steel, g, -width / 2 - 0.04, h - 0.03, 0);
+  box(0.08, 0.16, len, steel, g, width / 2 + 0.04, h - 0.03, 0);
+  for (let s = -len / 2 + 0.4; s < len / 2; s += 1.8) {
+    box(0.06, h, 0.06, alu, g, -width / 2, h / 2, s); box(0.06, h, 0.06, alu, g, width / 2, h / 2, s);
+    box(width, 0.05, 0.05, alu, g, 0, 0.15, s);
   }
+  if (kind === 'belt') box(0.3, 0.3, 0.3, steel, g, width / 2 + 0.2, h - 0.25, len / 2 - 0.3); // drive motor
   return g;
 }
 function lightTower(parent, x, y, z) {
   const g = group(parent, x, y, z);
-  cyl(0.03, 0.5, steel, g, 0, 0.25, 0, 8);
+  cyl(0.025, 0.4, steel, g, 0, 0.2, 0, 8);
   const cols = [0x22c55e, 0xf59e0b, 0xef4444];
-  g.lamps = cols.map((c, i) => { const l = cyl(0.07, 0.14, glow(c, i === 0 ? 1.6 : 0.08), g, 0, 0.58 + i * 0.15, 0, 16); return l; });
+  g.lamps = cols.map((c, i) => cyl(0.06, 0.12, glow(c, i === 0 ? 1.6 : 0.06), g, 0, 0.47 + i * 0.13, 0, 16));
+  return g;
+}
+/** Digital WI screen: work instruction picture + step text (replaces paper WI). */
+function digitalWI(parent, x, y, z, ry, line, st) {
+  const g = group(parent, x, y, z, ry);
+  cyl(0.025, 0.6, steel, g, 0, -0.35, 0, 8);
+  box(0.78, 0.5, 0.05, dark, g, 0, 0.05, -0.03);
+  const steps = ['Place booster housing', 'Insert diaphragm + seal', 'Fit push rod, check torque', 'Leak test & scan QR'];
+  const s = screen(0.72, 0.44, (c, W, H, k = 0) => {
+    c.fillStyle = '#f8fafc'; c.fillRect(0, 0, W, H);
+    c.fillStyle = '#0f4c81'; c.fillRect(0, 0, W, 30);
+    c.fillStyle = '#fff'; c.font = 'bold 17px system-ui'; c.fillText(`DIGITAL WI · L${line} ST${st}`, 8, 21);
+    c.textAlign = 'right'; c.fillText('QR ✓', W - 8, 21); c.textAlign = 'left';
+    // picture panel
+    c.fillStyle = '#e2e8f0'; c.fillRect(8, 38, W * 0.48, H - 70);
+    const cx = 8 + W * 0.24, cy = 38 + (H - 70) / 2;
+    c.fillStyle = '#475569'; c.beginPath(); c.arc(cx, cy, 34, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#94a3b8'; c.beginPath(); c.arc(cx, cy, 20, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#334155'; c.fillRect(cx - 4, cy - 52, 8, 24);
+    c.strokeStyle = '#ef4444'; c.lineWidth = 4; c.beginPath(); c.arc(cx, cy, 44, -0.6 + k, 0.6 + k); c.stroke();
+    // step text
+    c.fillStyle = '#0f172a'; c.font = 'bold 17px system-ui'; c.fillText(`Step ${k + 1} / 4`, W * 0.52, 58);
+    c.font = '15px system-ui';
+    const words = steps[k % 4].split(' '); let line2 = '', ly = 84;
+    for (const w of words) { if (c.measureText(line2 + w).width > W * 0.45) { c.fillText(line2, W * 0.52, ly); line2 = ''; ly += 20; } line2 += w + ' '; }
+    c.fillText(line2, W * 0.52, ly);
+    c.fillStyle = '#16a34a'; c.font = 'bold 15px system-ui'; c.fillText('● OK', W * 0.52, H - 44);
+    // progress
+    c.fillStyle = '#cbd5e1'; c.fillRect(8, H - 22, W - 16, 10);
+    c.fillStyle = '#0f4c81'; c.fillRect(8, H - 22, (W - 16) * (k + 1) / 4, 10);
+  }, g, 0, 0.05, 0.0, 0, 360);
+  g.screen = s;
+  // handheld scanner on a holder
+  box(0.06, 0.16, 0.06, mat(0xf59e0b), g, 0.46, -0.12, 0.05);
   return g;
 }
 function hmi(parent, x, y, z, ry, title, rows) {
   const g = group(parent, x, y, z, ry);
-  cyl(0.03, 0.5, steel, g, 0, -0.25, 0, 8);
-  box(0.62, 0.42, 0.05, dark, g, 0, 0.05, -0.02);
-  const s = screen(0.56, 0.36, (c, W, H, hl = -1) => {
+  cyl(0.025, 0.5, steel, g, 0, -0.25, 0, 8);
+  box(0.62, 0.42, 0.05, dark, g, 0, 0.05, -0.03);
+  g.screen = screen(0.56, 0.36, (c, W, H) => {
     c.fillStyle = '#0b1f33'; c.fillRect(0, 0, W, H);
-    c.fillStyle = '#1d4ed8'; c.fillRect(0, 0, W, 34);
+    c.fillStyle = '#0f4c81'; c.fillRect(0, 0, W, 34);
     c.fillStyle = '#fff'; c.font = 'bold 20px system-ui'; c.fillText(title, 10, 24);
     c.font = '17px system-ui';
     rows.forEach((r, i) => {
-      if (i === hl) { c.fillStyle = 'rgba(34,197,94,.35)'; c.fillRect(4, 42 + i * 26, W - 8, 24); }
       c.fillStyle = '#cbd5e1'; c.fillText(r[0], 10, 60 + i * 26);
       c.fillStyle = r[1] === 'OK' ? '#4ade80' : '#e2e8f0'; c.textAlign = 'right'; c.fillText(r[1], W - 10, 60 + i * 26); c.textAlign = 'left';
     });
-  }, g, 0, 0.05, 0.01, 0, 320);
-  g.screen = s;
+  }, g, 0, 0.05, 0.0, 0, 320);
   return g;
 }
-/** SATO-style thermal label printer (no logo). Returns group with .label strip to animate. */
-function printer(parent, x, y, z, ry = 0, bodyColor = 0xe5e7eb) {
+/** Thermal label printer (generic, no logo). Returns group with .label strip to animate. */
+function printer(parent, x, y, z, ry = 0, bodyColor = 0xeceef1) {
   const g = group(parent, x, y, z, ry);
-  box(0.5, 0.36, 0.6, bodyColor, g, 0, 0.18, 0);
-  box(0.5, 0.06, 0.6, 0x9ca3af, g, 0, 0.38, 0);
+  box(0.5, 0.36, 0.6, mat(bodyColor, { roughness: 0.45, metalness: 0.05 }), g, 0, 0.18, 0);
+  box(0.5, 0.06, 0.6, mat(0x6b7280), g, 0, 0.38, 0);
   box(0.18, 0.12, 0.02, dark, g, 0.12, 0.26, 0.31);
   g.led = box(0.04, 0.04, 0.02, glow(0x22c55e, 1.5), g, -0.16, 0.28, 0.31);
-  const lbl = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.001 + 0.2), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8, side: THREE.DoubleSide }));
+  const lbl = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.2), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8, side: THREE.DoubleSide }));
   lbl.rotation.x = -Math.PI / 2; lbl.position.set(0, 0.2, 0.31); lbl.scale.set(1, 0.01, 1);
-  // QR pattern on the label
   const cv = document.createElement('canvas'); cv.width = cv.height = 64; const c = cv.getContext('2d');
   c.fillStyle = '#fff'; c.fillRect(0, 0, 64, 64); c.fillStyle = '#000';
   for (let i = 0; i < 9; i++) for (let j = 0; j < 9; j++) if ((i * 7 + j * 13 + i * j) % 3 === 0) c.fillRect(14 + i * 4, 6 + j * 4, 4, 4);
@@ -268,114 +376,110 @@ function printer(parent, x, y, z, ry = 0, bodyColor = 0xe5e7eb) {
 }
 function plcCabinet(parent, x, z, ry = 0) {
   const g = group(parent, x, 0, z, ry);
-  box(0.9, 1.9, 0.5, 0xd1d5db, g, 0, 0.95, 0);
-  box(0.8, 1.7, 0.02, 0xc0c6cf, g, 0, 1.0, 0.26);
+  box(0.9, 1.9, 0.5, mat(0xd9dde2, { roughness: 0.5, metalness: 0.2 }), g, 0, 0.95, 0);
+  box(0.8, 1.7, 0.02, mat(0xcfd5dc, { roughness: 0.45, metalness: 0.2 }), g, 0, 1.0, 0.26);
   box(0.05, 0.3, 0.04, dark, g, 0.3, 1.1, 0.28);
   for (let i = 0; i < 4; i++) box(0.06, 0.06, 0.02, glow([0x22c55e, 0x22c55e, 0x38bdf8, 0xf59e0b][i], 1.4), g, -0.25 + i * 0.1, 1.65, 0.28);
   sign('PLC', 0.4, 0.16, '#111827', '#fbbf24', g, 0, 1.4, 0.275, 0, 'bold 80px system-ui');
   return g;
 }
-function machine(parent, x, z, side, color = 0xe2e8f0) {
-  // process machine beside the conveyor (side = -1 left / +1 right)
+/** Assembly / test machine: painted base, aluminium-profile guard with polycarbonate, control panel, light tower. */
+function machine(parent, x, z, side) {
   const g = group(parent, x + side * 1.75, 0, z);
-  box(1.9, 1.9, 2.0, color, g, 0, 0.95, 0);
-  box(1.95, 0.25, 2.05, 0x1e3a8a, g, 0, 1.95, 0);
-  // window
-  const win = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.7), new THREE.MeshStandardMaterial({ color: 0x93c5fd, transparent: true, opacity: 0.45, roughness: 0.1, metalness: 0.2 }));
-  win.position.set(-side * 0.96, 1.25, 0); win.rotation.y = -side * Math.PI / 2; g.add(win);
-  g.tower = lightTower(g, side * 0.7, 2.05, -0.8);
+  box(1.9, 0.95, 2.0, mat(C.machine, { roughness: 0.45, metalness: 0.1 }), g, 0, 0.475, 0);
+  box(1.92, 0.08, 2.02, mat(C.machineTrim), g, 0, 0.97, 0);
+  // aluminium frame + clear guards
+  for (const sx of [-0.92, 0.92]) for (const sz of [-0.97, 0.97]) box(0.05, 1.05, 0.05, alu, g, sx, 1.5, sz);
+  box(1.9, 0.05, 2.0, alu, g, 0, 2.02, 0);
+  const gd = box(1.82, 0.98, 1.92, glass, g, 0, 1.5, 0); gd.castShadow = false;
+  // internal fixture
+  box(0.6, 0.3, 0.6, mat(0x64748b, { roughness: 0.3, metalness: 0.7 }), g, 0, 1.15, 0);
+  cyl(0.06, 0.6, steel, g, 0, 1.6, 0, 12);
+  // control panel facing the aisle
+  const p = box(0.5, 0.4, 0.08, mat(C.panel), g, -side * 0.55, 1.25, 1.02);
+  p.rotation.x = -0.3;
+  box(0.06, 0.06, 0.03, glow(0x22c55e, 1.2), g, -side * 0.55 - 0.12, 1.25, 1.07);
+  box(0.06, 0.06, 0.03, glow(0xef4444, 1.0), g, -side * 0.55 + 0.12, 1.25, 1.07);
+  g.tower = lightTower(g, side * 0.75, 2.05, -0.8);
   return g;
 }
 
-const products = [];   // brake boosters on lines
-const boosterGeo = new THREE.CylinderGeometry(0.34, 0.34, 0.26, 28);
-const boosterMat = mat(0x374151, { roughness: 0.35, metalness: 0.8 });
-const studMat = mat(0x9ca3af, { roughness: 0.3, metalness: 0.9 });
+const products = [];
+const boosterGeo = new THREE.CylinderGeometry(0.34, 0.34, 0.26, 32);
+const boosterMat = mat(0x3a3f47, { roughness: 0.3, metalness: 0.85 });
+const studMat = mat(0xa8b0ba, { roughness: 0.3, metalness: 0.9 });
 function booster() {
   const g = new THREE.Group();
   const b = new THREE.Mesh(boosterGeo, boosterMat); b.castShadow = true; b.position.y = 0.13; g.add(b);
-  const s = cyl(0.07, 0.22, studMat, g, 0, 0.36, 0, 12);
-  s.castShadow = false;
+  cyl(0.07, 0.22, studMat, g, 0, 0.36, 0, 12);
   return g;
 }
 
-const towers = [], hmis = [], tracePrinters = [];
-let aepPrinter, aepPlc;
+const towers = [], wis = [], tracePrinters = [];
+let aepPrinter;
 LINES.forEach((lx, li) => {
   conveyor(lx, (LINE_Z0 + LINE_Z1) / 2, LINE_Z1 - LINE_Z0);
-  sign(`LINE ${li + 1}`, 3, 0.8, li === 1 ? '#7c3aed' : '#166534', '#ffffff', scene, lx, 4.6, LINE_Z0 - 1.6, 0);
-  { const p = group(scene, lx, 0, LINE_Z0 - 1.6); box(0.12, 4.2, 0.12, steel, p, -1.3, 2.1, 0); box(0.12, 4.2, 0.12, steel, p, 1.3, 2.1, 0); }
+  sign(`LINE ${li + 1}`, 3, 0.8, '#0f4c81', '#ffffff', scene, lx, 4.6, LINE_Z0 - 1.6, 0);
+  { const p = group(scene, lx, 0, LINE_Z0 - 1.6); box(0.1, 4.2, 0.1, alu, p, -1.3, 2.1, 0); box(0.1, 4.2, 0.1, alu, p, 1.3, 2.1, 0); }
   STATIONS.forEach((sz, si) => {
     const side = si % 2 === 0 ? -1 : 1;
-    const m = machine(scene, lx, sz, side, si === 0 ? 0xf1f5f9 : 0xe2e8f0);
+    const m = machine(scene, lx, sz, side);
     towers.push(m.tower);
-    // operator side opposite the machine, with WI screen + scanner
-    const os = -side;
-    const h = hmi(scene, lx + os * 1.2, 1.55, sz + 0.9, os * Math.PI / 2, 'WI · STATION ' + (si + 1), [
-      ['Scan QR', '✓'], ['Part No.', 'BB-' + (li + 1) + '0' + (si + 1)], ['Step', (si + 1) + ' / 4'], ['Result', 'OK']]);
-    hmis.push(h);
-    if (si !== 0) person(scene, lx + os * 2.1, sz + 0.2, os > 0 ? -Math.PI / 2 : Math.PI / 2, [0x2563eb, 0x0ea5e9, 0x16a34a][li]);
+    const os = -side; // operator side
+    const w = digitalWI(scene, lx + os * 1.2, 1.6, sz + 0.9, os * Math.PI / 2, li + 1, si + 1);
+    wis.push(w);
+    if (si !== 0) person(scene, lx + os * 2.0, sz + 0.2, os > 0 ? -Math.PI / 2 : Math.PI / 2, [0x3b6ea5, 0x4a7fb0, 0x3b6ea5][li]);
   });
-  // start station: SATO QR printer + PLC (traceability)
   const tp = printer(scene, lx + 1.25, 1.0, LINE_Z0 + 0.6, -Math.PI / 2);
   box(0.8, 1.0, 0.8, steel, scene, lx + 1.25, 0.5, LINE_Z0 + 0.6);
   tracePrinters.push(tp);
   plcCabinet(scene, lx - 2.4, LINE_Z0 - 0.4, 0);
-  // end of line: unload table
-  box(1.6, 0.85, 1.4, 0x94a3b8, scene, lx, 0.425, LINE_Z1 + 1.0);
-});
-
-// products moving along each line
-LINES.forEach((lx, li) => {
+  box(1.6, 0.85, 1.4, mat(C.stainless, { roughness: 0.3, metalness: 0.7 }), scene, lx, 0.425, LINE_Z1 + 1.0);
   for (let k = 0; k < 9; k++) {
     const p = booster(); scene.add(p);
-    products.push({ obj: p, x: lx, off: k / 9, speed: 0.022 + li * 0.002 });
+    products.push({ obj: p, x: lx, off: k / 9, speed: 0.02 + li * 0.002 });
   }
 });
 
-/* ---------------- traceability server / network cabinet (left) ---------------- */
+/* ---------------- network cabinet + traceability dashboard (left) ---------------- */
 const rackPos = new THREE.Vector3(-35.5, 0, -20);
 {
   const g = group(scene, rackPos.x, 0, rackPos.z, Math.PI / 2);
   for (let i = 0; i < 3; i++) {
     const r = group(g, (i - 1) * 0.75, 0, 0);
-    box(0.7, 2.1, 1.0, 0x111827, r, 0, 1.05, 0);
+    box(0.7, 2.1, 1.0, mat(0x1c2027, { roughness: 0.5, metalness: 0.4 }), r, 0, 1.05, 0);
     for (let u = 0; u < 9; u++) {
       box(0.58, 0.12, 0.02, 0x374151, r, 0, 0.35 + u * 0.18, 0.51);
       box(0.03, 0.03, 0.01, glow(u % 3 ? 0x22c55e : 0x38bdf8, 1.6), r, 0.22, 0.35 + u * 0.18, 0.525);
     }
   }
-  // traceability dashboard on wall
   screen(3.2, 1.8, (c, W, H) => {
     c.fillStyle = '#0b1f33'; c.fillRect(0, 0, W, H);
-    c.fillStyle = '#1d4ed8'; c.fillRect(0, 0, W, 44);
+    c.fillStyle = '#0f4c81'; c.fillRect(0, 0, W, 44);
     c.fillStyle = '#fff'; c.font = 'bold 26px system-ui'; c.fillText('TRACEABILITY · UNIT HISTORY', 14, 31);
     c.font = '20px system-ui';
-    const rows = [['Serial (QR)', 'BB-2-0001'], ['Line', 'Line 2'], ['Leak test', 'OK'], ['Process values (PLC)', 'OK'], ['WI steps', '4 / 4'], ['Customer label', 'Printed']];
+    const rows = [['Serial (QR)', 'BB-2-0001'], ['Line', 'Line 2'], ['Leak test', 'OK'], ['Process values (PLC)', 'OK'], ['Digital WI steps', '4 / 4'], ['Customer label', 'Printed']];
     rows.forEach((r, i) => { c.fillStyle = '#94a3b8'; c.fillText(r[0], 18, 82 + i * 34); c.fillStyle = r[1] === 'OK' ? '#4ade80' : '#e2e8f0'; c.textAlign = 'right'; c.fillText(r[1], W - 18, 82 + i * 34); c.textAlign = 'left'; });
     c.fillStyle = '#64748b'; c.font = '15px system-ui'; c.fillText('Sample screen — illustrative data', 18, H - 12);
   }, scene, HALL.x0 + 0.25, 3.4, -15, Math.PI / 2, 512);
 }
 
 /* ---------------- infrastructure: cable trays + wireless APs ---------------- */
-const aps = [];
 const rings = [];
 const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false });
+const trayY = 6.2;
 {
-  const trayMat = mat(0x94a3b8, { roughness: 0.4, metalness: 0.7 });
-  const trayY = 6.2;
-  box(72, 0.12, 0.5, trayMat, scene, -2, trayY, -23.5); // main trunk along back
+  const trayMat = mat(0xa9b4c0, { roughness: 0.4, metalness: 0.7 });
+  box(72, 0.12, 0.5, trayMat, scene, -2, trayY, -23.5);
   for (const lx of LINES) box(0.5, 0.12, 34, trayMat, scene, lx + 3.2, trayY, -6);
   box(0.5, 0.12, 4, trayMat, scene, rackPos.x + 1.0, trayY, -21.5);
-  // drops to stations
-  for (const lx of LINES) for (const sz of STATIONS) cyl(0.03, trayY - 2, mat(0x38bdf8, { roughness: 0.5, metalness: 0 }), scene, lx + 3.2, (trayY + 2) / 2, sz + 0.9, 6);
-  // APs
-  const apPos = [[-15, -10], [-15, 6], [0, -10], [0, 6], [15, -10], [15, 6], [31, -16], [31, 0], [-30, 0], [0, 17]];
+  const drop = mat(0x38bdf8, { roughness: 0.5, metalness: 0 });
+  for (const lx of LINES) for (const sz of STATIONS) cyl(0.025, trayY - 2.2, drop, scene, lx + 3.2, (trayY + 2.2) / 2, sz + 0.9, 6);
+  const apPos = [[-15, -10], [-15, 6], [0, -10], [0, 6], [15, -10], [15, 6], [29, -16], [29, 0], [-30, 0], [0, 17]];
   apPos.forEach(([x, z]) => {
     const g = group(scene, x + 3.2, trayY - 0.25, z);
-    cyl(0.22, 0.06, 0xf8fafc, g, 0, 0, 0, 24);
+    cyl(0.22, 0.06, mat(0xf8fafc, { roughness: 0.4, metalness: 0 }), g, 0, 0, 0, 24);
     box(0.05, 0.03, 0.02, glow(0x38bdf8, 2), g, 0, -0.04, 0.18);
-    aps.push(g);
     for (let r = 0; r < 2; r++) {
       const ring = new THREE.Mesh(new THREE.RingGeometry(0.9, 1.0, 40), ringMat.clone());
       ring.rotation.x = -Math.PI / 2; ring.position.set(x + 3.2, trayY - 0.4, z); ring.userData.phase = r * 0.5;
@@ -388,130 +492,208 @@ const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true
 {
   const lx = 15, sz = -2;
   box(0.8, 1.0, 0.8, steel, scene, lx + 1.2, 0.5, sz - 1.6);
-  aepPrinter = printer(scene, lx + 1.2, 1.0, sz - 1.6, -Math.PI / 2, 0xf3f4f6);
-  aepPlc = plcCabinet(scene, lx + 3.0, sz - 1.6, -Math.PI / 2);
+  aepPrinter = printer(scene, lx + 1.2, 1.0, sz - 1.6, -Math.PI / 2);
+  plcCabinet(scene, lx + 3.0, sz - 1.6, -Math.PI / 2);
 }
 
-/* ---------------- right side: conveyor + 3 AMRs ---------------- */
-const inBoxes = [];
-const PICK = new THREE.Vector3(29.6, 0, -14);
-const DROP = new THREE.Vector3(5.2, 0, -9);
+/* ---------------- material flow: 3 conveyor units → lane switch → X-lift → AMR + karakuri ---------------- */
+const UNIT_X = [30.6, 31.7, 32.8];
+const UNIT_Z0 = 4, UNIT_Z1 = -10.6;           // totes travel towards -Z
+const SWITCH_Z = -11.4;                        // lane switch (shuttle) moves along X
+const LIFT = new THREE.Vector3(31.7, 0, -12.7); // X-lift inside the yellow safety cage
+const PICK = new THREE.Vector3(31.7, 0, -14.75); // AMR stops here (cart side faces the lift)
+const DOCK = new THREE.Vector3(9.6, 0, -9);     // AMR docks at Line 2
+const unitTotes = [];
+let laneSwitch, xlift;
 {
-  // incoming conveyor from front-right to the transfer point
-  conveyor(33, -2, 26, 1.3, false, 0.75);
-  // transfer station (short powered conveyor across)
-  conveyor(31.3, -14, 2.2, 1.3, true, 0.75);
-  box(0.12, 1.6, 0.12, steel, scene, 30.2, 0.8, -15); box(0.12, 1.6, 0.12, steel, scene, 30.2, 0.8, -13);
-  box(0.12, 0.12, 2.1, steel, scene, 30.2, 1.6, -14);
-  smallLabel('Transfer point', 31.3, 2.2, -14);
-  // drop station at Line 2 (buffer table beside station 2)
-  box(1.4, 0.75, 1.4, 0x7c3aed, scene, DROP.x + 0.2, 0.375, DROP.z);
-  smallLabel('Line 2 process station', DROP.x, 2.4, DROP.z);
-  // incoming boxes on conveyor
-  for (let k = 0; k < 7; k++) {
-    const b = box(0.9, 0.6, 0.9, mat(0xb08350, { roughness: 0.9, metalness: 0 }));
-    scene.add(b); inBoxes.push({ obj: b, off: k / 7 });
+  UNIT_X.forEach((ux, i) => {
+    conveyor(ux, (UNIT_Z0 + UNIT_Z1) / 2, UNIT_Z0 - UNIT_Z1, 0.82, 0, 0.8, 'belt');
+    sign(`UNIT ${i + 1}`, 0.8, 0.3, '#0f4c81', '#fff', scene, ux, 1.25, UNIT_Z0 + 0.1, 0, 'bold 90px system-ui');
+    for (let k = 0; k < 4; k++) { const t = tote(scene, 0, 0, 0, 0.6, 0.26, 0.42); unitTotes.push({ obj: t, x: ux, off: (k / 4 + i * 0.13) % 1 }); }
+  });
+  // lane switch: a short belt on a shuttle that slides between the 3 units
+  laneSwitch = group(scene, UNIT_X[1], 0, SWITCH_Z);
+  box(3.6, 0.08, 0.12, steel, scene, UNIT_X[1], 0.3, SWITCH_Z - 0.45); // guide rail
+  box(3.6, 0.08, 0.12, steel, scene, UNIT_X[1], 0.3, SWITCH_Z + 0.45);
+  box(0.86, 0.12, 1.0, mat(C.belt, { roughness: 0.7, metalness: 0 }), laneSwitch, 0, 0.8, 0);
+  box(0.9, 0.5, 0.9, alu, laneSwitch, 0, 0.5, 0);
+  box(0.92, 0.04, 0.04, mat(C.safety), laneSwitch, 0, 0.9, -0.5);
+  laneSwitch.tote = tote(laneSwitch, 0, 0.86, 0, 0.6, 0.26, 0.42);
+  // X-lift (scissor lift) inside a yellow mesh safety cage
+  xlift = group(scene, LIFT.x, 0, LIFT.z);
+  box(1.0, 0.15, 1.0, steel, xlift, 0, 0.075, 0);
+  xlift.platform = group(xlift, 0, 0.8, 0);
+  box(0.95, 0.08, 0.95, mat(C.belt, { roughness: 0.7, metalness: 0 }), xlift.platform, 0, 0, 0);
+  xlift.tote = tote(xlift.platform, 0, 0.04, 0, 0.6, 0.26, 0.42);
+  xlift.arms = [];
+  for (const sx of [-0.4, 0.4]) for (const dir of [1, -1]) {
+    const a = box(0.05, 0.05, 1.0, mat(0x475569, { roughness: 0.4, metalness: 0.6 }), xlift, sx, 0.4, 0);
+    a.userData.dir = dir; xlift.arms.push(a);
   }
-  // dashed AMR route on floor
-  const pts = [[PICK.x - 1.6, -14], [27, -14], [27, -23.5], [8, -23.5], [8, -9], [DROP.x + 1.2, -9], [8, -9.01], [8.6, -23], [27.6, -23], [27.6, -14.01]];
-  const routeGeo = new THREE.BufferGeometry().setFromPoints(pts.map(([x, z]) => new THREE.Vector3(x, 0.04, z)));
-  const route = new THREE.Line(routeGeo, new THREE.LineDashedMaterial({ color: 0xc084fc, dashSize: 0.6, gapSize: 0.4 }));
+  const cageMat = new THREE.MeshStandardMaterial({ color: C.safety, transparent: true, opacity: 0.35, roughness: 0.5, metalness: 0.2, side: THREE.DoubleSide, depthWrite: false });
+  const cage = group(scene, LIFT.x, 0, LIFT.z);
+  const posts = [[-0.75, -0.65], [0.75, -0.65], [-0.75, 0.65], [0.75, 0.65]];
+  for (const [px, pz] of posts) box(0.07, 2.4, 0.07, mat(C.safety, { roughness: 0.45, metalness: 0.2 }), cage, px, 1.2, pz);
+  for (const [w, x, z, ry] of [[1.5, 0, -0.65, 0], [1.3, -0.75, 0, Math.PI / 2], [1.3, 0.75, 0, Math.PI / 2]]) {
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(w, 2.2), cageMat); p.position.set(x, 1.25, z); p.rotation.y = ry; cage.add(p);
+  }
+  box(1.55, 0.06, 0.06, mat(C.safety), cage, 0, 2.4, -0.65); box(1.55, 0.06, 0.06, mat(C.safety), cage, 0, 2.4, 0.65);
+  // red/white floor tape around the cage (person access zone)
+  const tape = mat(0xdc2626, { roughness: 0.5, metalness: 0 });
+  plane(1.9, 0.08, tape, LIFT.x, 0.014, LIFT.z - 0.95); plane(0.08, 1.9, tape, LIFT.x - 0.95, 0.014, LIFT.z); plane(0.08, 1.9, tape, LIFT.x + 0.95, 0.014, LIFT.z);
+  // safety light curtain + operator at the line end
+  box(0.05, 1.6, 0.05, glow(0xef4444, 0.6), scene, LIFT.x - 0.85, 0.8, LIFT.z - 1.0);
+  person(scene, 34.6, -12.2, -Math.PI / 2, 0x3b6ea5);
+  smallLabel('Lane switch', UNIT_X[1] - 2.2, 1.6, SWITCH_Z, ['amr']);
+  smallLabel('X-lift (safety cage)', LIFT.x + 1.8, 2.8, LIFT.z, ['amr']);
+  // AMR docking: line-side green belt conveyor into the Line 2 process station
+  conveyor(6.2, DOCK.z, 5.4, 1.3, Math.PI / 2, 0.8, 'belt');
+  smallLabel('Line 2 process station', 4.5, 2.4, DOCK.z, ['amr']);
+}
+const dockTotes = [0, 1, 2, 3].map((k) => ({ obj: tote(scene), off: k / 4, z: k % 2 ? -9.3 : -8.7 }));
+
+// AMR loop path (closed). Pick at the X-lift (heading -X), dock at Line 2 (heading +Z).
+const amrCurve = new THREE.CatmullRomCurve3([
+  new THREE.Vector3(PICK.x, 0, PICK.z), new THREE.Vector3(28.5, 0, -14.9), new THREE.Vector3(25.2, 0, -16.4),
+  new THREE.Vector3(24.4, 0, -20.5), new THREE.Vector3(21.5, 0, -23.6), new THREE.Vector3(13, 0, -23.8),
+  new THREE.Vector3(9.8, 0, -21.5), new THREE.Vector3(9.6, 0, -15), new THREE.Vector3(DOCK.x, 0, DOCK.z),
+  new THREE.Vector3(9.7, 0, -6.4), new THREE.Vector3(10.6, 0, -5.4), new THREE.Vector3(11.1, 0, -7.5),
+  new THREE.Vector3(11.1, 0, -18.5), new THREE.Vector3(13.5, 0, -21.6), new THREE.Vector3(33.5, 0, -21.6),
+  new THREE.Vector3(36.4, 0, -19.6), new THREE.Vector3(36.2, 0, -16.2), new THREE.Vector3(34.4, 0, -14.8),
+], true, 'catmullrom', 0.35);
+const AMR_LEN = amrCurve.getLength();
+const nearestU = (p) => { let best = 0, bd = 1e9; const v = new THREE.Vector3(); for (let i = 0; i < 2000; i++) { amrCurve.getPointAt(i / 2000, v); const d = v.distanceToSquared(p); if (d < bd) { bd = d; best = i / 2000; } } return best; };
+const PICK_U = nearestU(PICK), DOCK_U = nearestU(DOCK);
+{ // dashed route on floor
+  const pts = amrCurve.getSpacedPoints(300).map((p) => new THREE.Vector3(p.x, 0.03, p.z));
+  const route = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineDashedMaterial({ color: 0x8b5cf6, dashSize: 0.5, gapSize: 0.35 }));
   route.computeLineDistances(); scene.add(route);
 }
-// AMR loop path
-const amrCurve = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(28.0, 0, -14), new THREE.Vector3(27.2, 0, -18), new THREE.Vector3(26, 0, -23.2), new THREE.Vector3(18, 0, -23.6),
-  new THREE.Vector3(9, 0, -23), new THREE.Vector3(7.6, 0, -18), new THREE.Vector3(7.4, 0, -11), new THREE.Vector3(6.6, 0, -9),
-  new THREE.Vector3(8.6, 0, -8.2), new THREE.Vector3(9.4, 0, -14), new THREE.Vector3(10, 0, -21.6), new THREE.Vector3(18, 0, -22.2),
-  new THREE.Vector3(25.8, 0, -21.8), new THREE.Vector3(28.4, 0, -17.5),
-], true, 'catmullrom', 0.3);
-const DROP_T = 0.5, PICK_T = 0.0;
-function amr(color = 0xf8fafc) {
+
+/** Latent (lift-type) AMR carrying a karakuri cart: aluminium pipe frame, tilted shelves, 2 × 5 blue totes. */
+function amrWithCart() {
   const g = new THREE.Group();
-  box(0.9, 0.32, 1.3, color, g, 0, 0.26, 0);
-  box(0.92, 0.06, 1.32, 0x334155, g, 0, 0.1, 0);
-  box(0.7, 0.04, 1.0, 0x111827, g, 0, 0.44, 0);
-  const led = box(0.86, 0.04, 0.02, glow(0x22d3ee, 2), g, 0, 0.3, 0.66);
-  box(0.12, 0.08, 0.12, 0x0f172a, g, 0, 0.5, 0.48);
-  g.led = led;
-  const cargo = box(0.9, 0.6, 0.9, mat(0xb08350, { roughness: 0.9, metalness: 0 }), g, 0, 0.78, 0);
-  g.cargo = cargo;
+  // AMR body: dark chassis, white top, red side accent, wheels, bumper LEDs
+  box(0.78, 0.22, 1.1, mat(C.amrBody, { roughness: 0.5, metalness: 0.3 }), g, 0, 0.15, 0);
+  box(0.74, 0.08, 1.04, mat(C.amrTop, { roughness: 0.35, metalness: 0.05 }), g, 0, 0.29, 0);
+  box(0.79, 0.05, 0.5, mat(C.amrAccent, { roughness: 0.4, metalness: 0.1 }), g, 0, 0.19, -0.2);
+  for (const s of [-1, 1]) {
+    const w = cyl(0.09, 0.06, rubber, g, s * 0.4, 0.09, 0.1, 20); w.rotation.z = Math.PI / 2;
+    const hub = cyl(0.05, 0.065, mat(0xd97706, { roughness: 0.4, metalness: 0.3 }), g, s * 0.4, 0.09, 0.1, 16); hub.rotation.z = Math.PI / 2;
+  }
+  g.led = box(0.5, 0.04, 0.02, glow(0xfde68a, 2), g, 0, 0.17, 0.56);
+  box(0.12, 0.08, 0.04, rubber, g, 0, 0.22, 0.56); // lidar window
+  // karakuri cart (sits on the AMR lift)
+  const cart = group(g, 0, 0.34, 0);
+  const W = 1.3, D = 1.0, H = 1.95; // cart footprint: X across, Z along travel
+  for (const sx of [-W / 2, W / 2]) for (const sz of [-D / 2, D / 2]) cyl(0.022, H, alu, cart, sx, H / 2, sz, 10);
+  for (const sz of [-D / 2, D / 2]) { const r = cyl(0.022, W, alu, cart, 0, H, sz, 10); r.rotation.z = Math.PI / 2; }
+  for (const sx of [-W / 2, W / 2]) { const r = cyl(0.022, D, alu, cart, sx, H, 0, 10); r.rotation.x = Math.PI / 2; }
+  // yellow/black bumpers + push handle like the site photo
+  box(0.06, 0.25, 0.25, mat(C.safety), cart, W / 2 + 0.03, 0.12, D / 2 - 0.12);
+  box(0.06, 0.25, 0.25, mat(C.safety), cart, -W / 2 - 0.03, 0.12, D / 2 - 0.12);
+  { const hnd = cyl(0.018, 0.35, rubber, cart, W / 2 + 0.12, 0.35, -D / 2, 8); hnd.rotation.z = Math.PI / 2; }
+  // 5 tilted shelves (karakuri: slope towards -X so totes roll out at the dock)
+  g.totes = [];
+  for (let lv = 0; lv < 5; lv++) {
+    const shelf = group(cart, 0, 0.12 + lv * 0.36, 0);
+    shelf.rotation.z = 0.07;
+    for (const sz of [-D / 2, D / 2]) { const r = cyl(0.018, W, alu, shelf, 0, 0, sz, 8); r.rotation.z = Math.PI / 2; }
+    for (const sz of [-0.22, 0.22]) box(W - 0.05, 0.02, 0.04, steel, shelf, 0, 0.0, sz); // roller tracks
+    for (const col of [-0.24, 0.24]) g.totes.push(tote(shelf, 0, 0.02, col, 0.62, 0.26, 0.44));
+  }
+  // rotate each tote so its long side runs along X (columns along Z)
+  g.totes.forEach((t) => { t.rotation.y = Math.PI / 2; });
   g.castShadow = true;
   scene.add(g);
   return g;
 }
-const amrs = [0, 1, 2].map((i) => ({ obj: amr(), off: i / 3 }));
+const amrs = [0, 1, 2].map((i) => {
+  const u = (PICK_U + i / 3) % 1;
+  const a = { obj: amrWithCart(), u, dwell: 0, mode: '' };
+  // loaded if between pick and dock
+  const rel = (u - PICK_U + 1) % 1, relDock = (DOCK_U - PICK_U + 1) % 1;
+  a.loaded = rel > 0 && rel < relDock ? 10 : 0;
+  return a;
+});
 
 /* ---------------- end of line: 3 SATO label printers + packing ---------------- */
 const labelPrinters = [];
 {
   const z = 15.2;
   LINES.forEach((lx, i) => {
-    box(1.4, 0.9, 0.8, 0x94a3b8, scene, lx + 2.4, 0.45, z);
-    const pr = printer(scene, lx + 2.4, 0.9, z, Math.PI, 0xf3f4f6);
-    labelPrinters.push(pr);
-    hmi(scene, lx + 3.4, 1.7, z - 0.1, Math.PI, 'LABEL PRINT', [['Customer', '—'], ['Part No.', 'BB-' + (i + 1)], ['Tag card', 'Printed'], ['Verify', 'OK']]);
-    person(scene, lx + 2.6, z + 1.3, Math.PI, 0xf97316);
-    smallLabel('SATO #' + (i + 1), lx + 2.4, 2.1, z);
+    box(1.4, 0.9, 0.8, mat(C.stainless, { roughness: 0.3, metalness: 0.7 }), scene, lx + 2.4, 0.45, z);
+    labelPrinters.push(printer(scene, lx + 2.4, 0.9, z, Math.PI));
+    hmi(scene, lx + 3.4, 1.7, z - 0.1, Math.PI, 'LABEL PRINT', [['Format', 'Customer'], ['Part No.', 'BB-' + (i + 1)], ['Tag card', 'Printed'], ['Verify', 'OK']]);
+    person(scene, lx + 2.6, z + 1.3, Math.PI, 0x3b6ea5);
+    smallLabel('SATO #' + (i + 1), lx + 2.4, 2.1, z, ['label']);
   });
-  // customer label sample board
+  // generic label sample board (no customer names)
   screen(6, 1.3, (c, W, H) => {
-    c.fillStyle = '#111827'; c.fillRect(0, 0, W, H);
-    const names = ['Ford', 'Chevrolet', 'Nissan'];
-    names.forEach((n, i) => {
+    c.fillStyle = '#1e293b'; c.fillRect(0, 0, W, H);
+    ['FORMAT A', 'FORMAT B', 'FORMAT C'].forEach((n, i) => {
       const x = 12 + i * (W - 24) / 3, w = (W - 24) / 3 - 12;
       c.fillStyle = '#fff'; c.fillRect(x, 14, w, H - 28);
-      c.fillStyle = '#111'; c.font = 'bold 34px system-ui'; c.fillText(n.toUpperCase(), x + 14, 58);
-      c.font = '20px system-ui'; c.fillText('Customer label format', x + 14, 88);
-      for (let b = 0; b < 26; b++) c.fillRect(x + 14 + b * 6, 102, b % 3 ? 2 : 4, 26);
+      c.fillStyle = '#111'; c.font = 'bold 30px system-ui'; c.fillText('CUSTOMER LABEL', x + 14, 54);
+      c.font = '20px system-ui'; c.fillText(n + ' · tag card', x + 14, 84);
+      for (let b = 0; b < 26; b++) c.fillRect(x + 14 + b * 6, 100, b % 3 ? 2 : 4, 28);
+      c.fillRect(x + w - 70, 92, 50, 50); c.fillStyle = '#fff'; c.fillRect(x + w - 62, 100, 34, 34); c.fillStyle = '#111'; c.fillRect(x + w - 54, 108, 18, 18);
     });
   }, scene, 0, 3.3, 18.6, Math.PI, 768);
-  { const p = group(scene, 0, 0, 18.6); box(0.12, 4, 0.12, steel, p, -3.1, 2, 0); box(0.12, 4, 0.12, steel, p, 3.1, 2, 0); }
-  // packing: pallets with boxes
+  { const p = group(scene, 0, 0, 18.6); box(0.1, 4, 0.1, alu, p, -3.1, 2, 0); box(0.1, 4, 0.1, alu, p, 3.1, 2, 0); }
   for (const [x, zz] of [[-20, 18.5], [-9, 18.5], [9, 18.5], [20, 18.5]]) {
-    box(1.2, 0.15, 1.0, mat(0xa16207, { roughness: 0.9, metalness: 0 }), scene, x, 0.075, zz);
-    for (let a = 0; a < 2; a++) for (let b = 0; b < 2; b++) box(0.55, 0.45, 0.45, mat(0xc49a6c, { roughness: 0.9, metalness: 0 }), scene, x - 0.28 + a * 0.56, 0.38, zz - 0.23 + b * 0.46);
+    box(1.2, 0.15, 1.0, palletMat, scene, x, 0.075, zz);
+    for (let a = 0; a < 2; a++) for (let b = 0; b < 2; b++) box(0.55, 0.45, 0.45, cardMat, scene, x - 0.28 + a * 0.56, 0.38, zz - 0.23 + b * 0.46);
   }
-  sign('PACKING', 3, 0.7, '#0f172a', '#fde68a', scene, -14.5, 3, 20.5, Math.PI);
+  sign('PACKING', 3, 0.7, '#1e293b', '#fde68a', scene, -14.5, 3, 20.5, Math.PI);
 }
 
-/* ---------------- ROADMAP: e-Kanban + ESL flow rack (left) ---------------- */
+/* ---------------- ROADMAP: RFID e-Kanban + ESL flow rack (left) ---------------- */
 const esls = [];
-let kanbanBoard;
+let kanbanBoard, kanbanCard, kanbanPost;
 {
   const g = group(scene, -31, 0, 0, Math.PI / 2);
   for (let r = 0; r < 2; r++) {
     const rx = (r - 0.5) * 3.6;
-    // flow rack frame (real steel) + planned overlay
-    for (const sx of [-1.6, 1.6]) for (const sz of [-0.6, 0.6]) box(0.08, 1.9, 0.08, steel, g, rx + sx, 0.95, sz);
+    for (const sx of [-1.6, 1.6]) for (const sz of [-0.6, 0.6]) box(0.06, 1.9, 0.06, alu, g, rx + sx, 0.95, sz);
     for (let lv = 0; lv < 3; lv++) {
       const y = 0.45 + lv * 0.55;
-      const shelf = box(3.2, 0.04, 1.2, mat(0x9ca3af), g, rx, y, 0); shelf.rotation.x = 0.08;
+      const shelf = box(3.2, 0.04, 1.2, alu, g, rx, y, 0); shelf.rotation.x = 0.08;
       for (let b = 0; b < 4; b++) {
-        box(0.6, 0.3, 0.9, mat([0x2563eb, 0x16a34a, 0xdc2626, 0xf59e0b][b], { roughness: 0.6, metalness: 0 }), g, rx - 1.2 + b * 0.8, y + 0.18, 0);
-        // ESL tag (planned) on shelf front
+        tote(g, rx - 1.2 + b * 0.8, y + 0.03, 0, 0.6, 0.24, 0.9, true);
         const tag = screen(0.36, 0.16, (c, W, H, low = false) => {
           c.fillStyle = low ? '#fde68a' : '#f1f5f9'; c.fillRect(0, 0, W, H);
           c.fillStyle = '#111'; c.font = 'bold 26px system-ui'; c.fillText('P-' + (lv + 1) + (b + 1), 8, 30);
-          c.font = '20px system-ui'; c.fillText(low ? 'LOW · KANBAN' : 'QTY OK', 8, 54);
+          c.font = '20px system-ui'; c.fillText(low ? 'REFILL REQ.' : 'QTY OK', 8, 54);
         }, g, rx - 1.2 + b * 0.8, y - 0.05, 0.64, 0, 128);
-        const frame = box(0.4, 0.2, 0.02, 0x111827, g, rx - 1.2 + b * 0.8, y - 0.05, 0.62);
-        frame.castShadow = false;
+        box(0.4, 0.2, 0.02, 0x111827, g, rx - 1.2 + b * 0.8, y - 0.05, 0.62).castShadow = false;
         esls.push(tag);
       }
     }
     planBox(3.4, 2.1, 1.4, g, rx, 1.05, 0);
   }
+  // RFID kanban post: operator drops the RFID kanban card into the slot
+  kanbanPost = group(scene, -28.2, 0, 3.6);
+  const pm = glow(0xf59e0b, 0.25);
+  box(0.5, 1.1, 0.4, pm, kanbanPost, 0, 0.55, 0);
+  box(0.36, 0.03, 0.06, rubber, kanbanPost, 0, 1.08, 0.1);
+  box(0.3, 0.2, 0.02, mat(0x111827), kanbanPost, 0, 0.8, 0.21);
+  kanbanPost.wave = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.02, 8, 40), new THREE.MeshBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0.7, depthWrite: false }));
+  kanbanPost.wave.rotation.x = Math.PI / 2; kanbanPost.wave.position.y = 1.15; kanbanPost.add(kanbanPost.wave);
+  kanbanCard = box(0.18, 0.26, 0.01, mat(0xfef3c7, { roughness: 0.8, metalness: 0 }), scene, -28.2, 1.6, 3.7);
+  kanbanCard.castShadow = false;
+  person(scene, -28.2, 4.4, Math.PI, 0x3b6ea5);
   kanbanBoard = screen(2.6, 1.5, (c, W, H, n = 0) => {
     c.fillStyle = '#1c1206'; c.fillRect(0, 0, W, H);
     c.fillStyle = '#f59e0b'; c.fillRect(0, 0, W, 40);
-    c.fillStyle = '#1c1206'; c.font = 'bold 24px system-ui'; c.fillText('e-KANBAN (PLANNED)', 12, 28);
-    c.font = '20px system-ui';
-    ['Lane P-12 → refill', 'Lane P-23 → refill', 'Lane P-31 → OK', 'Lane P-34 → OK'].forEach((t, i) => {
+    c.fillStyle = '#1c1206'; c.font = 'bold 22px system-ui'; c.fillText('RFID e-KANBAN (PLANNED)', 12, 28);
+    c.font = '19px system-ui';
+    ['Card P-12 read → refill request', 'Card P-23 read → refill request', 'Lane P-31 → OK', 'Lane P-34 → OK'].forEach((t, i) => {
       c.fillStyle = i < 1 + (n % 3) ? '#fbbf24' : '#64748b'; c.fillText(t, 16, 76 + i * 32);
     });
   }, scene, -36.5, 2.7, 4.6, Math.PI / 2, 384);
-  { const p = group(scene, -36.5, 0, 4.6); box(0.1, 3.4, 0.1, steel, p, 0, 1.7, -1.35); box(0.1, 3.4, 0.1, steel, p, 0, 1.7, 1.35); }
+  { const p = group(scene, -36.5, 0, 4.6); box(0.1, 3.4, 0.1, alu, p, 0, 1.7, -1.35); box(0.1, 3.4, 0.1, alu, p, 0, 1.7, 1.35); }
+  smallLabel('RFID kanban post', -28.2, 1.9, 3.6, ['ekanban']);
 }
 
 /* ---------------- ROADMAP: RFID gate + FG warehouse ---------------- */
@@ -519,7 +701,6 @@ let rfidGate, rfidPallet;
 {
   const gx = -8, gz = HALL.z1;
   rfidGate = group(scene, gx, 0, gz);
-  // opening in front wall area: gate arch (planned)
   const pm = glow(0xf59e0b, 0.6); pm.transparent = true; pm.opacity = 0.85;
   box(0.35, 3.6, 0.35, pm, rfidGate, -2, 1.8, 0); box(0.35, 3.6, 0.35, pm, rfidGate, 2, 1.8, 0); box(4.35, 0.35, 0.35, pm, rfidGate, 0, 3.6, 0);
   for (const s of [-1, 1]) box(0.08, 0.5, 0.3, 0x111827, rfidGate, s * 1.78, 2.2, 0);
@@ -527,21 +708,18 @@ let rfidGate, rfidPallet;
     const w = new THREE.Mesh(new THREE.TorusGeometry(1.0, 0.03, 8, 40, Math.PI), new THREE.MeshBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0.6, depthWrite: false }));
     w.position.set(0, 0.2, 0); w.userData.phase = i / 3; rfidGate.add(w); return w;
   });
-  // FG warehouse annex (planned ghost)
   const fg = group(scene, -8, 0, 30);
   planBox(24, 4.2, 12, fg, 0, 2.1, 0);
   for (let r = 0; r < 3; r++) for (let lv = 0; lv < 3; lv++) {
     box(7, 0.1, 1.2, mat(0xf97316), fg, -7 + r * 7, 0.2 + lv * 1.25, 3);
-    for (let b = 0; b < 3; b++) box(1.1, 0.9, 1.0, mat(0xc49a6c, { roughness: 0.9, metalness: 0 }), fg, -9.2 + r * 7 + b * 2.2, 0.72 + lv * 1.25, 3);
+    for (let b = 0; b < 3; b++) box(1.1, 0.9, 1.0, cardMat, fg, -9.2 + r * 7 + b * 2.2, 0.72 + lv * 1.25, 3);
   }
   sign('FG WAREHOUSE (PLANNED)', 8, 1.1, '#f59e0b', '#1c1206', scene, -8, 4.9, 23.9, 0);
-  // pallet that crosses the gate
   rfidPallet = group(scene, gx, 0, 18);
-  box(1.2, 0.15, 1.0, mat(0xa16207, { roughness: 0.9, metalness: 0 }), rfidPallet, 0, 0.075, 0);
-  for (let a = 0; a < 2; a++) for (let b = 0; b < 2; b++) box(0.55, 0.45, 0.45, mat(0xc49a6c, { roughness: 0.9, metalness: 0 }), rfidPallet, -0.28 + a * 0.56, 0.38, -0.23 + b * 0.46);
-  const tag = box(0.2, 0.12, 0.02, 0xfbbf24, rfidPallet, 0, 0.35, 0.51); tag.castShadow = false;
-  // pallet jack driver
-  rfidPallet.add(person(null, 0, -1.0, 0, 0xf59e0b));
+  box(1.2, 0.15, 1.0, palletMat, rfidPallet, 0, 0.075, 0);
+  for (let a = 0; a < 2; a++) for (let b = 0; b < 2; b++) box(0.55, 0.45, 0.45, cardMat, rfidPallet, -0.28 + a * 0.56, 0.38, -0.23 + b * 0.46);
+  box(0.2, 0.12, 0.02, 0xfbbf24, rfidPallet, 0, 0.35, 0.51).castShadow = false;
+  rfidPallet.add(person(null, 0, -1.0, 0, 0x3b6ea5));
 }
 
 /* ---------------- data flows (shown in "connected" + relevant scenes) ---------------- */
@@ -552,30 +730,28 @@ function flow(points, color, tags) {
     new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.55, depthWrite: false }));
   scene.add(line);
   const dots = [0, 1, 2].map(() => { const d = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 8), new THREE.MeshBasicMaterial({ color })); scene.add(d); return d; });
-  const f = { curve, line, dots, tags, vis: 0 };
-  flows.push(f);
-  return f;
+  flows.push({ curve, line, dots, tags, vis: 0 });
 }
 const R = [rackPos.x + 1, 6.2, rackPos.z];
 LINES.forEach((lx) => {
-  flow([[lx + 1.25, 1.6, LINE_Z0 + 0.6], [lx + 1.6, 6.0, LINE_Z0 - 1], [lx + 3.2, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0x38bdf8, ['trace', 'connected']);
-  flow([[lx - 2.4, 2.0, LINE_Z0 - 0.4], [lx - 2.4, 6.0, -22.5], [lx - 2.4, 6.3, -23.6], [R[0], 6.3, -23.6], [R[0] + 0.3, 2.2, R[2]]], 0x22c55e, ['trace', 'connected']);
-  flow([[lx + 3.2, 6.2, 5.9], [lx + 3.2, 6.2, -23.5], [R[0], 6.25, -23.5], [R[0], 2.2, R[2] + 0.3]], 0x60a5fa, ['infra', 'connected']);
-  flow([[lx + 2.4, 1.4, 15.2], [lx + 3.2, 6.2, 13], [lx + 3.2, 6.2, -23.4], [R[0], 6.2, -23.4], [R[0], 2.2, R[2] - 0.3]], 0xf472b6, ['label', 'connected']);
+  flow([[lx + 1.25, 1.6, LINE_Z0 + 0.6], [lx + 1.6, 6.0, LINE_Z0 - 1], [lx + 3.2, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0x0ea5e9, ['trace', 'connected']);
+  flow([[lx - 2.4, 2.0, LINE_Z0 - 0.4], [lx - 2.4, 6.0, -22.5], [lx - 2.4, 6.3, -23.6], [R[0], 6.3, -23.6], [R[0] + 0.3, 2.2, R[2]]], 0x16a34a, ['trace', 'connected']);
+  flow([[lx + 3.2, 6.2, 5.9], [lx + 3.2, 6.2, -23.5], [R[0], 6.25, -23.5], [R[0], 2.2, R[2] + 0.3]], 0x3b82f6, ['infra', 'connected']);
+  flow([[lx + 2.4, 1.4, 15.2], [lx + 3.2, 6.2, 13], [lx + 3.2, 6.2, -23.4], [R[0], 6.2, -23.4], [R[0], 2.2, R[2] - 0.3]], 0xdb2777, ['label', 'connected']);
 });
-flow([[16.2, 1.6, -3.6], [18.2, 6.0, -3.6], [18.2, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0xa3e635, ['aep', 'connected']);
-flow([[-31, 2.4, 0], [-31, 6.2, -10], [R[0], 6.2, -20], [R[0], 2.2, R[2]]], 0xf59e0b, ['ekanban', 'connected']);
+flow([[16.2, 1.6, -3.6], [18.2, 6.0, -3.6], [18.2, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0x65a30d, ['aep', 'connected']);
+flow([[-28.2, 1.2, 3.6], [-28.2, 6.2, -2], [R[0], 6.2, -20], [R[0], 2.2, R[2]]], 0xf59e0b, ['ekanban', 'connected']);
 flow([[-8, 3.8, 22], [-8, 6.2, 14], [-12, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0xf59e0b, ['rfid', 'connected']);
 
 /* ---------------- labels (numbered hotspots) ---------------- */
-label('amr', '1', 'amr', 'done', 30, 4.2, -9);
-label('trace', '2', 'trace', 'done', -15, 4.0, LINE_Z0 + 0.6);
-label('infra', '3', 'infra', 'done', rackPos.x + 1, 4.4, rackPos.z + 2);
-label('aep', '4', 'aep', 'done', 16.4, 3.4, -3.6);
-label('label', '5', 'label', 'done', 0, 5.4, 18.6);
-label('ekanban', '6', 'ekanban', 'plan', -31, 3.8, 0);
-label('rfid', '7', 'rfid', 'plan', -8, 5.2, HALL.z1);
-for (const [i, lx] of LINES.entries()) smallLabel(`Line ${i + 1}`, lx, 1.8, LINE_Z1 + 1.6);
+label('amr', '1', 'done', 31.7, 4.0, -9);
+label('trace', '2', 'done', -15, 4.0, LINE_Z0 + 0.6);
+label('infra', '3', 'done', rackPos.x + 1, 4.4, rackPos.z + 2);
+label('aep', '4', 'done', 16.4, 3.4, -3.6);
+label('label', '5', 'done', 0, 5.4, 18.6);
+label('ekanban', '6', 'plan', -31, 3.8, 0);
+label('rfid', '7', 'plan', -8, 5.2, HALL.z1);
+for (const [i, lx] of LINES.entries()) smallLabel(`Line ${i + 1}`, lx, 1.8, LINE_Z1 + 1.6, ['overview', 'label', 'connected']);
 
 /* ---------------- UI / i18n / scenes ---------------- */
 let lang = 'en';
@@ -596,10 +772,7 @@ function renderUI() {
     if (i === current) li.classList.add('active');
     $(s.kind === 'done' ? 'listDone' : s.kind === 'plan' ? 'listPlan' : 'listMisc').appendChild(li);
   });
-  for (const [id, l] of Object.entries(labels)) {
-    const s = SCENES.find((x) => x.id === id);
-    l.el.querySelector('span').textContent = s[lang].name;
-  }
+  for (const [id, l] of Object.entries(labels)) l.el.querySelector('span').textContent = SCENES.find((x) => x.id === id)[lang].name;
   const s = SCENES[current];
   const tag = $('capTag');
   tag.className = 'tag ' + (s.kind === 'done' ? '' : s.kind);
@@ -613,20 +786,22 @@ goTo = (i) => {
   if (i < 0 || i >= SCENES.length) return;
   current = i;
   const s = SCENES[i];
-  const cam = isMobile ? s.cam.map((v, k) => (k === 1 ? v * 1.25 : v + (v - s.tgt[k]) * 0.35)) : s.cam;
+  const cam = isMobile ? s.cam.map((v, k) => (k === 1 ? v * 1.2 : v + (v - s.tgt[k]) * 0.35)) : s.cam;
   gsap.to(camera.position, { x: cam[0], y: cam[1], z: cam[2], duration: 2.2, ease: 'power2.inOut' });
   gsap.to(controls.target, { x: s.tgt[0], y: s.tgt[1], z: s.tgt[2], duration: 2.2, ease: 'power2.inOut' });
   for (const [id, l] of Object.entries(labels)) {
     const on = s.focus.includes(id);
     l.el.classList.toggle('focus', on && s.focus.length === 1);
     l.el.classList.toggle('dim', !on);
+    l.el.style.visibility = on || s.focus.length > 1 ? '' : 'hidden';
   }
+  for (const sl of smallLabels) sl.o.visible = !sl.scenes || sl.scenes.includes(s.id);
   renderUI();
 };
 function stopTour() { if (tourTimer) { clearInterval(tourTimer); tourTimer = null; renderUI(); } }
 $('btnTour').onclick = () => {
   if (tourTimer) return stopTour();
-  tourTimer = setInterval(() => goTo((current + 1) % SCENES.length), 10000);
+  tourTimer = setInterval(() => goTo((current + 1) % SCENES.length), 11000);
   goTo((current + 1) % SCENES.length);
 };
 $('btnLang').onclick = () => { lang = lang === 'en' ? 'th' : 'en'; renderUI(); };
@@ -640,8 +815,7 @@ function resize() {
   const w = innerWidth, h = innerHeight;
   renderer.setSize(w, h); labelRenderer.setSize(w, h);
   const top = $('topbar').offsetHeight;
-  const cap = $('caption').getBoundingClientRect();
-  const capH = h - cap.top;
+  const capH = h - $('caption').getBoundingClientRect().top;
   const side = isMobile ? 0 : $('sidebar').getBoundingClientRect().right;
   const dy = Math.max(0, capH - top);
   camera.aspect = w / h;
@@ -654,63 +828,98 @@ new ResizeObserver(resize).observe($('caption'));
 /* ---------------- animation ---------------- */
 const clock = new THREE.Clock();
 const tmp = new THREE.Vector3(), tmp2 = new THREE.Vector3();
-let printPhase = 0;
+const smooth = (x) => x * x * (3 - 2 * x);
+const AMR_SPEED = 1.1, DWELL = 6;
 function tick() {
   const dt = Math.min(clock.getDelta(), 0.05);
   const t = clock.elapsedTime;
-  // rollers
-  for (const r of rollerTexes) r.offset.y -= dt * 0.8;
-  // products: travel with short dwell at each station
+  for (const r of movingTexes) r.offset.y -= dt * 0.8;
+  // products on the lines
   for (const p of products) {
     p.off = (p.off + dt * p.speed) % 1;
-    const z = LINE_Z0 + 0.4 + p.off * (LINE_Z1 - LINE_Z0 - 0.8);
-    p.obj.position.set(p.x, 0.86, z);
+    p.obj.position.set(p.x, 0.86, LINE_Z0 + 0.4 + p.off * (LINE_Z1 - LINE_Z0 - 0.8));
     p.obj.visible = p.off > 0.02 && p.off < 0.98;
   }
-  // incoming boxes on right conveyor (towards -Z, ending at transfer)
-  for (const b of inBoxes) {
-    b.off = (b.off + dt * 0.035) % 1;
-    b.obj.position.set(33, 0.75 + 0.3, 11 - b.off * 24);
-    b.obj.visible = b.off < 0.96;
+  // totes on the 3 conveyor units (towards the transfer point)
+  for (const b of unitTotes) {
+    b.off = (b.off + dt * 0.05) % 1;
+    b.obj.position.set(b.x, 0.8, UNIT_Z0 - 0.3 - b.off * (UNIT_Z0 - UNIT_Z1 - 0.6));
+    b.obj.visible = b.off < 0.97;
   }
-  // AMRs on loop: carry cargo from PICK to DROP
+  // lane switch: step between the 3 units (2.4 s per lane)
+  const ls = (t / 2.4) % 3, lane = Math.floor(ls), f = ls - lane;
+  const nextLane = (lane + 1) % 3;
+  const mv = f > 0.7 ? smooth((f - 0.7) / 0.3) : 0;
+  laneSwitch.position.x = UNIT_X[lane] + (UNIT_X[nextLane] - UNIT_X[lane]) * mv;
+  laneSwitch.tote.visible = f < 0.55;
+  // X-lift: lift tote to a shelf level, then lower (scissor arms follow)
+  const lp = (t % 4.8) / 4.8;
+  const lh = lp < 0.45 ? smooth(lp / 0.45) : lp < 0.6 ? 1 : 1 - smooth((lp - 0.6) / 0.4);
+  const level = 0.3 + (Math.floor(t / 4.8) % 5) * 0.36;
+  const py = 0.8 + lh * (level + 0.25);
+  xlift.platform.position.y = py;
+  xlift.tote.visible = lp < 0.55;
+  const ang = Math.asin(Math.min(0.98, (py - 0.15) / 1.0));
+  for (const a of xlift.arms) { a.rotation.x = a.userData.dir * ang; a.position.y = 0.15 + (py - 0.15) / 2; }
+  // AMRs on the loop, dwelling to load at the X-lift and unload at Line 2
   for (const a of amrs) {
-    a.off = (a.off + dt * 0.018) % 1;
-    amrCurve.getPointAt(a.off, tmp);
-    amrCurve.getTangentAt(a.off, tmp2);
+    if (a.dwell > 0) {
+      a.dwell -= dt;
+      const k = Math.max(0, a.dwell / DWELL);
+      a.loaded = a.mode === 'pick' ? Math.round(10 * (1 - k)) : Math.round(10 * k);
+    } else {
+      const prev = a.u;
+      a.u = (a.u + dt * AMR_SPEED / AMR_LEN) % 1;
+      const crossed = (target) => (prev <= target && a.u >= target) || (prev > a.u && (target >= prev || target <= a.u));
+      if (crossed(PICK_U)) { a.u = PICK_U; a.dwell = DWELL; a.mode = 'pick'; }
+      else if (crossed(DOCK_U)) { a.u = DOCK_U; a.dwell = DWELL; a.mode = 'dock'; }
+    }
+    amrCurve.getPointAt(a.u, tmp);
+    amrCurve.getTangentAt(a.u, tmp2);
     a.obj.position.copy(tmp);
     a.obj.rotation.y = Math.atan2(tmp2.x, tmp2.z);
-    a.obj.cargo.visible = a.off > PICK_T + 0.02 && a.off < DROP_T;
-    a.obj.led.material.emissiveIntensity = 1.2 + Math.sin(t * 6 + a.off * 20) * 0.8;
+    a.obj.totes.forEach((tt, i) => { tt.visible = i < a.loaded; });
+    a.obj.led.material.emissiveIntensity = a.dwell > 0 ? 0.6 + Math.sin(t * 8) * 0.5 : 2;
+  }
+  // totes leaving the karakuri cart onto the line-side conveyor at Line 2
+  for (const d of dockTotes) {
+    d.off = (d.off + dt * 0.09) % 1;
+    d.obj.position.set(8.6 - d.off * 5.0, 0.8, d.z);
+    d.obj.rotation.y = Math.PI / 2;
+    d.obj.visible = d.off < 0.96;
   }
   // light towers: occasional amber blink
   towers.forEach((tw, i) => {
     const amber = Math.sin(t * 0.7 + i * 1.9) > 0.93;
     tw.lamps[0].material.emissiveIntensity = amber ? 0.1 : 1.6;
-    tw.lamps[1].material.emissiveIntensity = amber ? (Math.sin(t * 10) > 0 ? 2 : 0.2) : 0.08;
+    tw.lamps[1].material.emissiveIntensity = amber ? (Math.sin(t * 10) > 0 ? 2 : 0.2) : 0.06;
   });
   // printers: label feed loop
-  printPhase = (t % 3) / 3;
   const feed = (pr, ph) => { const s = Math.min(1, Math.max(0.01, (ph - 0.1) / 0.5)); pr.label.scale.y = s; pr.label.position.z = 0.31 + s * 0.1; pr.led.material.emissiveIntensity = ph < 0.6 ? 2.5 : 0.6; };
-  tracePrinters.forEach((p, i) => feed(p, (printPhase + i * 0.33) % 1));
-  labelPrinters.forEach((p, i) => feed(p, (printPhase + 0.5 + i * 0.33) % 1));
-  feed(aepPrinter, ((t % 4) / 4));
-  // WI screens: highlight the scanned row cycle
-  if (Math.floor(t * 1.5) !== tick.lastHmi) {
-    tick.lastHmi = Math.floor(t * 1.5);
-    const h = hmis[tick.lastHmi % hmis.length];
-    h.screen.redraw(tick.lastHmi % 4);
-  }
+  const pp = (t % 3) / 3;
+  tracePrinters.forEach((p, i) => feed(p, (pp + i * 0.33) % 1));
+  labelPrinters.forEach((p, i) => feed(p, (pp + 0.5 + i * 0.33) % 1));
+  feed(aepPrinter, (t % 4) / 4);
+  // Digital WI screens: step through the instruction (one screen redrawn per tick)
+  const wk = Math.floor(t * 2);
+  if (wk !== tick.lastWi) { tick.lastWi = wk; const w = wis[wk % wis.length]; w.screen.redraw(Math.floor(t / 3 + wk) % 4); }
   // wireless rings
+  const sid = SCENES[current].id;
   for (const r of rings) {
-    const ph = ((t * 0.5 + r.userData.phase) % 1);
+    const ph = (t * 0.5 + r.userData.phase) % 1;
     r.scale.setScalar(0.3 + ph * 3.2);
-    r.material.opacity = 0.45 * (1 - ph) * (SCENES[current].id === 'infra' || SCENES[current].id === 'connected' ? 1.6 : 0.5);
+    r.material.opacity = 0.45 * (1 - ph) * (sid === 'infra' || sid === 'connected' ? 1.6 : 0.4);
   }
-  // ESL + kanban
-  if (Math.floor(t / 2) !== tick.lastEsl) {
-    tick.lastEsl = Math.floor(t / 2);
-    esls.forEach((e, i) => e.redraw(((i * 7 + tick.lastEsl) % 11) === 0));
+  // RFID e-Kanban: card drops into the post → reader pulse → ESL shows refill
+  const kp = (t % 5) / 5;
+  kanbanCard.position.y = kp < 0.4 ? 1.6 - smooth(kp / 0.4) * 0.5 : 1.1;
+  kanbanCard.visible = kp < 0.42;
+  const pulse = kp > 0.4 && kp < 0.8 ? (kp - 0.4) / 0.4 : 0;
+  kanbanPost.wave.scale.setScalar(1 + pulse * 2.2);
+  kanbanPost.wave.material.opacity = pulse ? 0.8 * (1 - pulse) : 0;
+  if (Math.floor(t / 5) !== tick.lastEsl) {
+    tick.lastEsl = Math.floor(t / 5);
+    esls.forEach((e, i) => e.redraw(((i * 5 + tick.lastEsl) % 9) === 0));
     kanbanBoard.redraw(tick.lastEsl);
   }
   // RFID pallet passes through the gate into FG
@@ -724,16 +933,12 @@ function tick() {
     w.material.opacity = (near ? 0.9 : 0.3) * (1 - ph);
   });
   // data flows: fade in for the relevant scene
-  const sid = SCENES[current].id;
-  for (const f of flows) {
-    const want = f.tags.includes(sid) ? 1 : 0;
-    f.vis += (want - f.vis) * Math.min(1, dt * 3);
-    const on = f.vis > 0.02;
-    f.line.visible = on; f.line.material.opacity = 0.5 * f.vis;
-    f.dots.forEach((d, i) => {
-      d.visible = on;
-      if (on) { f.curve.getPointAt((t * 0.18 + i / 3) % 1, tmp); d.position.copy(tmp); }
-    });
+  for (const fl of flows) {
+    const want = fl.tags.includes(sid) ? 1 : 0;
+    fl.vis += (want - fl.vis) * Math.min(1, dt * 3);
+    const on = fl.vis > 0.02;
+    fl.line.visible = on; fl.line.material.opacity = 0.5 * fl.vis;
+    fl.dots.forEach((d, i) => { d.visible = on; if (on) { fl.curve.getPointAt((t * 0.18 + i / 3) % 1, tmp); d.position.copy(tmp); } });
   }
   controls.update();
   renderer.render(scene, camera);
