@@ -16,6 +16,7 @@ import { UI, SCENES } from './content.js';
 const gsap = window.gsap;
 gsap.ticker.lagSmoothing(0); // keep camera moves time-accurate even on slow GPUs
 const isMobile = matchMedia('(max-width: 760px)').matches;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------------- palette (clean, light factory like the site photos) ---------------- */
 const C = {
@@ -357,21 +358,39 @@ function hmi(parent, x, y, z, ry, title, rows) {
   }, g, 0, 0.05, 0.0, 0, 320);
   return g;
 }
-/** Thermal label printer (generic, no logo). Returns group with .label strip to animate. */
-function printer(parent, x, y, z, ry = 0, bodyColor = 0xeceef1) {
+/** Industrial thermal label printer modelled on the SATO CL4NX Plus form factor (271 W × 321 H × 457 D mm):
+ *  charcoal body, light-grey hinged media cover, 3.5" colour LCD + keys at the front top, media exit slot. No logo.
+ *  Front faces local +Z. Returns group with .label (strip leaving the slot) and .led. */
+const prBody = mat(0x2b2e33, { roughness: 0.45, metalness: 0.25 });
+const prCover = mat(0xc9cdd2, { roughness: 0.35, metalness: 0.3 });
+const prBezel = mat(0x16181b, { roughness: 0.5, metalness: 0.2 });
+const prLcdDraw = (c, W, H) => {
+  c.fillStyle = '#0b3d91'; c.fillRect(0, 0, W, H);
+  c.fillStyle = '#fff'; c.font = 'bold 22px system-ui'; c.fillText('ONLINE', 10, 30);
+  c.font = '15px system-ui'; c.fillText('Qty 0001', 10, 54);
+  c.fillStyle = '#22c55e'; c.fillRect(W - 26, 12, 14, 14);
+};
+function printer(parent, x, y, z, ry = 0) {
   const g = group(parent, x, y, z, ry);
-  box(0.5, 0.36, 0.6, mat(bodyColor, { roughness: 0.45, metalness: 0.05 }), g, 0, 0.18, 0);
-  box(0.5, 0.06, 0.6, mat(0x6b7280), g, 0, 0.38, 0);
-  box(0.18, 0.12, 0.02, dark, g, 0.12, 0.26, 0.31);
-  g.led = box(0.04, 0.04, 0.02, glow(0x22c55e, 1.5), g, -0.16, 0.28, 0.31);
-  const lbl = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.2), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8, side: THREE.DoubleSide }));
-  lbl.rotation.x = -Math.PI / 2; lbl.position.set(0, 0.2, 0.31); lbl.scale.set(1, 0.01, 1);
+  const W = 0.271, H = 0.321, D = 0.457;
+  box(W, H * 0.62, D, prBody, g, 0, H * 0.31, 0);                     // lower body
+  box(W * 0.98, H * 0.4, D * 0.88, prCover, g, 0, H * 0.79, -D * 0.05); // hinged media cover
+  box(W, H * 0.98, 0.03, prBezel, g, 0, H * 0.49, D / 2 - 0.005);        // front bezel
+  box(W + 0.004, 0.012, D * 0.9, prBody, g, 0, H * 0.6, -D * 0.04);      // cover seam
+  screen(0.072, 0.054, prLcdDraw, g, 0.06, H * 0.78, D / 2 + 0.012, 0, 128);  // 3.5" colour LCD
+  for (let i = 0; i < 4; i++) box(0.018, 0.012, 0.008, mat(0x9aa3ad), g, -0.075 + i * 0.024, H * 0.72, D / 2 + 0.012);
+  g.led = box(0.012, 0.012, 0.006, glow(0x22c55e, 1.5), g, -0.085, H * 0.84, D / 2 + 0.012);
+  box(0.16, 0.008, 0.01, rubber, g, 0, H * 0.2, D / 2 + 0.012);         // media exit slot
+  for (const sx of [-1, 1]) box(0.02, 0.012, 0.06, rubber, g, sx * 0.1, 0.006, D / 2 - 0.05); // feet
+  const lbl = new THREE.Mesh(new THREE.PlaneGeometry(0.1, 0.12), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8, side: THREE.DoubleSide }));
+  lbl.rotation.x = -Math.PI / 2; lbl.position.set(0, H * 0.2, D / 2 + 0.02); lbl.scale.set(1, 0.01, 1);
   const cv = document.createElement('canvas'); cv.width = cv.height = 64; const c = cv.getContext('2d');
   c.fillStyle = '#fff'; c.fillRect(0, 0, 64, 64); c.fillStyle = '#000';
   for (let i = 0; i < 9; i++) for (let j = 0; j < 9; j++) if ((i * 7 + j * 13 + i * j) % 3 === 0) c.fillRect(14 + i * 4, 6 + j * 4, 4, 4);
   [[14, 6], [42, 6], [14, 34]].forEach(([a, b]) => { c.fillRect(a, b, 10, 10); c.fillStyle = '#fff'; c.fillRect(a + 2, b + 2, 6, 6); c.fillStyle = '#000'; c.fillRect(a + 4, b + 4, 2, 2); });
   lbl.material.map = new THREE.CanvasTexture(cv);
-  g.add(lbl); g.label = lbl;
+  g.add(lbl); g.label = lbl; g.labelZ = D / 2 + 0.02;
+  g.scale.setScalar(1.25); // slightly enlarged so it reads at plant scale
   return g;
 }
 function plcCabinet(parent, x, z, ry = 0) {
@@ -416,6 +435,8 @@ function booster() {
 }
 
 const towers = [], wis = [], tracePrinters = [];
+const rfidPads = [];
+const rfidMat = glow(0xf59e0b, 0.55);
 let aepPrinter;
 LINES.forEach((lx, li) => {
   conveyor(lx, (LINE_Z0 + LINE_Z1) / 2, LINE_Z1 - LINE_Z0);
@@ -428,17 +449,33 @@ LINES.forEach((lx, li) => {
     const os = -side; // operator side
     const w = digitalWI(scene, lx + os * 1.2, 1.6, sz + 0.9, os * Math.PI / 2, li + 1, si + 1);
     wis.push(w);
+    // RFID antenna for e-Kanban production cards (planned → amber)
+    const pad = group(scene, lx + os * 1.25, 0, sz - 0.25);
+    cyl(0.025, 1.1, steel, pad, 0, 0.55, 0, 8);
+    box(0.34, 0.05, 0.26, rfidMat, pad, 0, 1.12, 0);
+    box(0.24, 0.012, 0.16, mat(0x111827), pad, 0, 1.15, 0);
+    pad.position.y = 0; pad.userData.top = 1.15;
+    rfidPads.push({ position: new THREE.Vector3(lx + os * 1.25, 1.15, sz - 0.25) });
     if (si !== 0) person(scene, lx + os * 2.0, sz + 0.2, os > 0 ? -Math.PI / 2 : Math.PI / 2, [0x3b6ea5, 0x4a7fb0, 0x3b6ea5][li]);
   });
   const tp = printer(scene, lx + 1.25, 1.0, LINE_Z0 + 0.6, -Math.PI / 2);
   box(0.8, 1.0, 0.8, steel, scene, lx + 1.25, 0.5, LINE_Z0 + 0.6);
   tracePrinters.push(tp);
+  if (li === 1) smallLabel('SATO · QR', lx + 1.25, 1.75, LINE_Z0 + 0.6, ['trace']);
   plcCabinet(scene, lx - 2.4, LINE_Z0 - 0.4, 0);
   box(1.6, 0.85, 1.4, mat(C.stainless, { roughness: 0.3, metalness: 0.7 }), scene, lx, 0.425, LINE_Z1 + 1.0);
   for (let k = 0; k < 9; k++) {
     const p = booster(); scene.add(p);
     products.push({ obj: p, x: lx, off: k / 9, speed: 0.02 + li * 0.002 });
   }
+});
+
+const rfidCards = LINES.map(() => {
+  const c = box(0.12, 0.012, 0.18, mat(0xfef3c7, { roughness: 0.8, metalness: 0 }), scene);
+  c.castShadow = false;
+  c.ring = new THREE.Mesh(new THREE.RingGeometry(0.16, 0.19, 32), new THREE.MeshBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }));
+  c.ring.rotation.x = -Math.PI / 2; scene.add(c.ring);
+  return c;
 });
 
 /* ---------------- network cabinet + traceability dashboard (left) ---------------- */
@@ -493,73 +530,91 @@ const trayY = 6.2;
   const lx = 15, sz = -2;
   box(0.8, 1.0, 0.8, steel, scene, lx + 1.2, 0.5, sz - 1.6);
   aepPrinter = printer(scene, lx + 1.2, 1.0, sz - 1.6, -Math.PI / 2);
+  smallLabel('SATO · AEP Print', lx + 1.2, 1.75, sz - 1.6, ['aep']);
   plcCabinet(scene, lx + 3.0, sz - 1.6, -Math.PI / 2);
 }
 
-/* ---------------- material flow: 3 conveyor units → lane switch → X-lift → AMR + karakuri ---------------- */
+/* ---------------- material flow (right side) ----------------
+ * Tail (z≈+9):  operator pushes a trolley of stacked totes (4–5 high) in → X-lift raises the stack to belt level
+ *               → lane switch shifts it to unit 1 / 2 / 3.
+ * Units:        3 belt conveyors carry the stacks towards the head (−Z).
+ * Head (z≈−9):  AMR + karakuri cart waits; totes are loaded shelf by shelf, then the AMR serves the Line 2 station. */
 const UNIT_X = [30.6, 31.7, 32.8];
-const UNIT_Z0 = 4, UNIT_Z1 = -10.6;           // totes travel towards -Z
-const SWITCH_Z = -11.4;                        // lane switch (shuttle) moves along X
-const LIFT = new THREE.Vector3(31.7, 0, -12.7); // X-lift inside the yellow safety cage
-const PICK = new THREE.Vector3(31.7, 0, -14.75); // AMR stops here (cart side faces the lift)
-const DOCK = new THREE.Vector3(9.6, 0, -9);     // AMR docks at Line 2
-const unitTotes = [];
-let laneSwitch, xlift;
+const UNIT_Z0 = 5.0, UNIT_Z1 = -8.6;            // tail → head (stacks travel towards −Z)
+const SWITCH_Z = 6.0;                            // lane switch (shuttle) slides along X
+const LIFT = new THREE.Vector3(31.7, 0, 7.5);    // X-lift inside the yellow safety cage
+const TROLLEY_Z0 = 11.8, TROLLEY_Z1 = 8.75;      // operator pushes the trolley from z0 to z1
+const PICK = new THREE.Vector3(31.7, 0, -9.4);   // AMR stops at the conveyor head (cart side faces the belts)
+const DOCK = new THREE.Vector3(9.6, 0, -9);      // AMR docks at Line 2
+const STACK_N = 4;
+const unitStacks = [];
+let laneSwitch, xlift, trolley, inStack;
+/** Stack of N totes (simple meshes; top one keeps its label). */
+function toteStack(parent, n = STACK_N) {
+  const g = group(parent);
+  for (let i = 0; i < n; i++) tote(g, 0, i * 0.265, 0, 0.6, 0.26, 0.42, i < n - 1);
+  return g;
+}
 {
   UNIT_X.forEach((ux, i) => {
     conveyor(ux, (UNIT_Z0 + UNIT_Z1) / 2, UNIT_Z0 - UNIT_Z1, 0.82, 0, 0.8, 'belt');
-    sign(`UNIT ${i + 1}`, 0.8, 0.3, '#0f4c81', '#fff', scene, ux, 1.25, UNIT_Z0 + 0.1, 0, 'bold 90px system-ui');
-    for (let k = 0; k < 4; k++) { const t = tote(scene, 0, 0, 0, 0.6, 0.26, 0.42); unitTotes.push({ obj: t, x: ux, off: (k / 4 + i * 0.13) % 1 }); }
+    sign(`UNIT ${i + 1}`, 0.8, 0.3, '#0f4c81', '#fff', scene, ux, 0.5, UNIT_Z1 - 0.06, Math.PI, 'bold 90px system-ui');
+    for (let k = 0; k < 3; k++) unitStacks.push({ obj: toteStack(scene), x: ux, off: (k / 3 + i * 0.11) % 1 });
   });
-  // lane switch: a short belt on a shuttle that slides between the 3 units
+  // lane switch: short belt on a shuttle that slides across the 3 unit entries
   laneSwitch = group(scene, UNIT_X[1], 0, SWITCH_Z);
-  box(3.6, 0.08, 0.12, steel, scene, UNIT_X[1], 0.3, SWITCH_Z - 0.45); // guide rail
+  box(3.6, 0.08, 0.12, steel, scene, UNIT_X[1], 0.3, SWITCH_Z - 0.45);
   box(3.6, 0.08, 0.12, steel, scene, UNIT_X[1], 0.3, SWITCH_Z + 0.45);
   box(0.86, 0.12, 1.0, mat(C.belt, { roughness: 0.7, metalness: 0 }), laneSwitch, 0, 0.8, 0);
   box(0.9, 0.5, 0.9, alu, laneSwitch, 0, 0.5, 0);
-  box(0.92, 0.04, 0.04, mat(C.safety), laneSwitch, 0, 0.9, -0.5);
-  laneSwitch.tote = tote(laneSwitch, 0, 0.86, 0, 0.6, 0.26, 0.42);
-  // X-lift (scissor lift) inside a yellow mesh safety cage
+  box(0.92, 0.04, 0.04, mat(C.safety), laneSwitch, 0, 0.9, 0.5);
+  // X-lift (scissor lift): low position receives the trolley stack, rises to belt level
   xlift = group(scene, LIFT.x, 0, LIFT.z);
-  box(1.0, 0.15, 1.0, steel, xlift, 0, 0.075, 0);
-  xlift.platform = group(xlift, 0, 0.8, 0);
+  box(1.0, 0.12, 1.0, steel, xlift, 0, 0.06, 0);
+  xlift.platform = group(xlift, 0, 0.2, 0);
   box(0.95, 0.08, 0.95, mat(C.belt, { roughness: 0.7, metalness: 0 }), xlift.platform, 0, 0, 0);
-  xlift.tote = tote(xlift.platform, 0, 0.04, 0, 0.6, 0.26, 0.42);
   xlift.arms = [];
   for (const sx of [-0.4, 0.4]) for (const dir of [1, -1]) {
-    const a = box(0.05, 0.05, 1.0, mat(0x475569, { roughness: 0.4, metalness: 0.6 }), xlift, sx, 0.4, 0);
+    const a = box(0.05, 0.05, 1.0, mat(0x475569, { roughness: 0.4, metalness: 0.6 }), xlift, sx, 0.15, 0);
     a.userData.dir = dir; xlift.arms.push(a);
   }
+  // yellow mesh safety cage: side panels only, open at the tail (trolley in) and towards the switch
   const cageMat = new THREE.MeshStandardMaterial({ color: C.safety, transparent: true, opacity: 0.35, roughness: 0.5, metalness: 0.2, side: THREE.DoubleSide, depthWrite: false });
   const cage = group(scene, LIFT.x, 0, LIFT.z);
-  const posts = [[-0.75, -0.65], [0.75, -0.65], [-0.75, 0.65], [0.75, 0.65]];
-  for (const [px, pz] of posts) box(0.07, 2.4, 0.07, mat(C.safety, { roughness: 0.45, metalness: 0.2 }), cage, px, 1.2, pz);
-  for (const [w, x, z, ry] of [[1.5, 0, -0.65, 0], [1.3, -0.75, 0, Math.PI / 2], [1.3, 0.75, 0, Math.PI / 2]]) {
-    const p = new THREE.Mesh(new THREE.PlaneGeometry(w, 2.2), cageMat); p.position.set(x, 1.25, z); p.rotation.y = ry; cage.add(p);
-  }
-  box(1.55, 0.06, 0.06, mat(C.safety), cage, 0, 2.4, -0.65); box(1.55, 0.06, 0.06, mat(C.safety), cage, 0, 2.4, 0.65);
-  // red/white floor tape around the cage (person access zone)
+  for (const [px, pz] of [[-0.75, -0.65], [0.75, -0.65], [-0.75, 0.65], [0.75, 0.65]]) box(0.07, 2.4, 0.07, mat(C.safety, { roughness: 0.45, metalness: 0.2 }), cage, px, 1.2, pz);
+  for (const sx of [-0.75, 0.75]) { const pn = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 2.2), cageMat); pn.position.set(sx, 1.25, 0); pn.rotation.y = Math.PI / 2; cage.add(pn); }
+  for (const sz of [-0.65, 0.65]) box(1.55, 0.06, 0.06, mat(C.safety), cage, 0, 2.4, sz);
+  // light curtain at the person entry + red floor tape (person access zone)
+  box(0.05, 1.6, 0.05, glow(0xef4444, 0.6), scene, LIFT.x - 0.75, 0.8, LIFT.z + 0.75);
+  box(0.05, 1.6, 0.05, glow(0xef4444, 0.6), scene, LIFT.x + 0.75, 0.8, LIFT.z + 0.75);
   const tape = mat(0xdc2626, { roughness: 0.5, metalness: 0 });
-  plane(1.9, 0.08, tape, LIFT.x, 0.014, LIFT.z - 0.95); plane(0.08, 1.9, tape, LIFT.x - 0.95, 0.014, LIFT.z); plane(0.08, 1.9, tape, LIFT.x + 0.95, 0.014, LIFT.z);
-  // safety light curtain + operator at the line end
-  box(0.05, 1.6, 0.05, glow(0xef4444, 0.6), scene, LIFT.x - 0.85, 0.8, LIFT.z - 1.0);
-  person(scene, 34.6, -12.2, -Math.PI / 2, 0x3b6ea5);
-  smallLabel('Lane switch', UNIT_X[1] - 2.2, 1.6, SWITCH_Z, ['amr']);
-  smallLabel('X-lift (safety cage)', LIFT.x + 1.8, 2.8, LIFT.z, ['amr']);
+  plane(0.08, 5, tape, LIFT.x - 1.0, 0.014, LIFT.z + 2.2); plane(0.08, 5, tape, LIFT.x + 1.0, 0.014, LIFT.z + 2.2);
+  // operator + push trolley (stack of totes rides on it until the X-lift takes it)
+  trolley = group(scene, LIFT.x, 0, TROLLEY_Z0);
+  box(0.75, 0.05, 0.6, alu, trolley, 0, 0.2, 0);
+  for (const [wx, wz] of [[-0.3, -0.24], [0.3, -0.24], [-0.3, 0.24], [0.3, 0.24]]) cyl(0.06, 0.04, rubber, trolley, wx, 0.07, wz, 12).rotation.z = Math.PI / 2;
+  for (const hx of [-0.3, 0.3]) cyl(0.018, 0.9, alu, trolley, hx, 0.65, 0.3, 8);
+  { const h = cyl(0.018, 0.62, rubber, trolley, 0, 1.1, 0.3, 8); h.rotation.z = Math.PI / 2; }
+  trolley.add(person(null, 0, 0.85, Math.PI, 0x3b6ea5));
+  inStack = toteStack(scene);
+  smallLabel('Trolley in · stacked totes', LIFT.x + 1.9, 1.8, TROLLEY_Z0 - 0.6, ['amr']);
+  smallLabel('X-lift (raise to belt)', LIFT.x - 1.9, 2.6, LIFT.z, ['amr']);
+  smallLabel('Lane switch', UNIT_X[2] + 1.7, 1.3, SWITCH_Z, ['amr']);
+  smallLabel('Head · AMR + karakuri', PICK.x - 2.6, 2.6, PICK.z, ['amr']);
   // AMR docking: line-side green belt conveyor into the Line 2 process station
   conveyor(6.2, DOCK.z, 5.4, 1.3, Math.PI / 2, 0.8, 'belt');
   smallLabel('Line 2 process station', 4.5, 2.4, DOCK.z, ['amr']);
 }
 const dockTotes = [0, 1, 2, 3].map((k) => ({ obj: tote(scene), off: k / 4, z: k % 2 ? -9.3 : -8.7 }));
 
-// AMR loop path (closed). Pick at the X-lift (heading -X), dock at Line 2 (heading +Z).
+// AMR loop path (closed). Pick at the conveyor head (heading -X), dock at Line 2 (heading +Z).
 const amrCurve = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(PICK.x, 0, PICK.z), new THREE.Vector3(28.5, 0, -14.9), new THREE.Vector3(25.2, 0, -16.4),
-  new THREE.Vector3(24.4, 0, -20.5), new THREE.Vector3(21.5, 0, -23.6), new THREE.Vector3(13, 0, -23.8),
+  new THREE.Vector3(PICK.x, 0, PICK.z), new THREE.Vector3(28.6, 0, -9.5), new THREE.Vector3(26.4, 0, -11.6),
+  new THREE.Vector3(25.4, 0, -16), new THREE.Vector3(24.4, 0, -20.5), new THREE.Vector3(21.5, 0, -23.6), new THREE.Vector3(13, 0, -23.8),
   new THREE.Vector3(9.8, 0, -21.5), new THREE.Vector3(9.6, 0, -15), new THREE.Vector3(DOCK.x, 0, DOCK.z),
   new THREE.Vector3(9.7, 0, -6.4), new THREE.Vector3(10.6, 0, -5.4), new THREE.Vector3(11.1, 0, -7.5),
   new THREE.Vector3(11.1, 0, -18.5), new THREE.Vector3(13.5, 0, -21.6), new THREE.Vector3(33.5, 0, -21.6),
-  new THREE.Vector3(36.4, 0, -19.6), new THREE.Vector3(36.2, 0, -16.2), new THREE.Vector3(34.4, 0, -14.8),
+  new THREE.Vector3(36.4, 0, -19.6), new THREE.Vector3(36.5, 0, -12.5), new THREE.Vector3(35.6, 0, -9.9), new THREE.Vector3(34.2, 0, -9.45),
 ], true, 'catmullrom', 0.35);
 const AMR_LEN = amrCurve.getLength();
 const nearestU = (p) => { let best = 0, bd = 1e9; const v = new THREE.Vector3(); for (let i = 0; i < 2000; i++) { amrCurve.getPointAt(i / 2000, v); const d = v.distanceToSquared(p); if (d < bd) { bd = d; best = i / 2000; } } return best; };
@@ -624,9 +679,9 @@ const labelPrinters = [];
   LINES.forEach((lx, i) => {
     box(1.4, 0.9, 0.8, mat(C.stainless, { roughness: 0.3, metalness: 0.7 }), scene, lx + 2.4, 0.45, z);
     labelPrinters.push(printer(scene, lx + 2.4, 0.9, z, Math.PI));
+    smallLabel('SATO CL4NX Plus', lx + 2.4, 1.55, z, ['label']);
     hmi(scene, lx + 3.4, 1.7, z - 0.1, Math.PI, 'LABEL PRINT', [['Format', 'Customer'], ['Part No.', 'BB-' + (i + 1)], ['Tag card', 'Printed'], ['Verify', 'OK']]);
     person(scene, lx + 2.6, z + 1.3, Math.PI, 0x3b6ea5);
-    smallLabel('SATO #' + (i + 1), lx + 2.4, 2.1, z, ['label']);
   });
   // generic label sample board (no customer names)
   screen(6, 1.3, (c, W, H) => {
@@ -650,7 +705,7 @@ const labelPrinters = [];
 
 /* ---------------- ROADMAP: RFID e-Kanban + ESL flow rack (left) ---------------- */
 const esls = [];
-let kanbanBoard, kanbanCard, kanbanPost;
+let kanbanBoard;
 {
   const g = group(scene, -31, 0, 0, Math.PI / 2);
   for (let r = 0; r < 2; r++) {
@@ -672,28 +727,17 @@ let kanbanBoard, kanbanCard, kanbanPost;
     }
     planBox(3.4, 2.1, 1.4, g, rx, 1.05, 0);
   }
-  // RFID kanban post: operator drops the RFID kanban card into the slot
-  kanbanPost = group(scene, -28.2, 0, 3.6);
-  const pm = glow(0xf59e0b, 0.25);
-  box(0.5, 1.1, 0.4, pm, kanbanPost, 0, 0.55, 0);
-  box(0.36, 0.03, 0.06, rubber, kanbanPost, 0, 1.08, 0.1);
-  box(0.3, 0.2, 0.02, mat(0x111827), kanbanPost, 0, 0.8, 0.21);
-  kanbanPost.wave = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.02, 8, 40), new THREE.MeshBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0.7, depthWrite: false }));
-  kanbanPost.wave.rotation.x = Math.PI / 2; kanbanPost.wave.position.y = 1.15; kanbanPost.add(kanbanPost.wave);
-  kanbanCard = box(0.18, 0.26, 0.01, mat(0xfef3c7, { roughness: 0.8, metalness: 0 }), scene, -28.2, 1.6, 3.7);
-  kanbanCard.castShadow = false;
-  person(scene, -28.2, 4.4, Math.PI, 0x3b6ea5);
   kanbanBoard = screen(2.6, 1.5, (c, W, H, n = 0) => {
     c.fillStyle = '#1c1206'; c.fillRect(0, 0, W, H);
     c.fillStyle = '#f59e0b'; c.fillRect(0, 0, W, 40);
-    c.fillStyle = '#1c1206'; c.font = 'bold 22px system-ui'; c.fillText('RFID e-KANBAN (PLANNED)', 12, 28);
+    c.fillStyle = '#1c1206'; c.font = 'bold 22px system-ui'; c.fillText('RFID e-KANBAN · ORDERS (PLANNED)', 12, 28);
     c.font = '19px system-ui';
-    ['Card P-12 read → refill request', 'Card P-23 read → refill request', 'Lane P-31 → OK', 'Lane P-34 → OK'].forEach((t, i) => {
+    ['L1 ST1 card read → start order', 'L2 ST1 card read → start order', 'L3 ST2 → in progress', 'Lane P-31 → refill (ESL)'].forEach((t, i) => {
       c.fillStyle = i < 1 + (n % 3) ? '#fbbf24' : '#64748b'; c.fillText(t, 16, 76 + i * 32);
     });
   }, scene, -36.5, 2.7, 4.6, Math.PI / 2, 384);
   { const p = group(scene, -36.5, 0, 4.6); box(0.1, 3.4, 0.1, alu, p, 0, 1.7, -1.35); box(0.1, 3.4, 0.1, alu, p, 0, 1.7, 1.35); }
-  smallLabel('RFID kanban post', -28.2, 1.9, 3.6, ['ekanban']);
+  smallLabel('ESL flow rack (planned)', -31, 2.6, 2.4, ['ekanban', 'overview']);
 }
 
 /* ---------------- ROADMAP: RFID gate + FG warehouse ---------------- */
@@ -729,7 +773,7 @@ function flow(points, color, tags) {
   const line = new THREE.Mesh(new THREE.TubeGeometry(curve, 80, 0.035, 6, false),
     new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.55, depthWrite: false }));
   scene.add(line);
-  const dots = [0, 1, 2].map(() => { const d = new THREE.Mesh(new THREE.SphereGeometry(0.14, 12, 8), new THREE.MeshBasicMaterial({ color })); scene.add(d); return d; });
+  const dots = [0, 1, 2].map(() => { const d = new THREE.Mesh(new THREE.SphereGeometry(0.1, 12, 8), new THREE.MeshBasicMaterial({ color })); scene.add(d); return d; });
   flows.push({ curve, line, dots, tags, vis: 0 });
 }
 const R = [rackPos.x + 1, 6.2, rackPos.z];
@@ -740,7 +784,8 @@ LINES.forEach((lx) => {
   flow([[lx + 2.4, 1.4, 15.2], [lx + 3.2, 6.2, 13], [lx + 3.2, 6.2, -23.4], [R[0], 6.2, -23.4], [R[0], 2.2, R[2] - 0.3]], 0xdb2777, ['label', 'connected']);
 });
 flow([[16.2, 1.6, -3.6], [18.2, 6.0, -3.6], [18.2, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0x65a30d, ['aep', 'connected']);
-flow([[-28.2, 1.2, 3.6], [-28.2, 6.2, -2], [R[0], 6.2, -20], [R[0], 2.2, R[2]]], 0xf59e0b, ['ekanban', 'connected']);
+flow([[-13.75, 1.2, -2.25], [-11.8, 6.2, -2.25], [-11.8, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0xf59e0b, ['ekanban', 'connected']);
+flow([[-31, 2.2, 0], [-31, 6.2, -10], [R[0], 6.2, -20], [R[0], 2.3, R[2]]], 0xf59e0b, ['ekanban', 'connected']);
 flow([[-8, 3.8, 22], [-8, 6.2, 14], [-12, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0xf59e0b, ['rfid', 'connected']);
 
 /* ---------------- labels (numbered hotspots) ---------------- */
@@ -749,7 +794,7 @@ label('trace', '2', 'done', -15, 4.0, LINE_Z0 + 0.6);
 label('infra', '3', 'done', rackPos.x + 1, 4.4, rackPos.z + 2);
 label('aep', '4', 'done', 16.4, 3.4, -3.6);
 label('label', '5', 'done', 0, 5.4, 18.6);
-label('ekanban', '6', 'plan', -31, 3.8, 0);
+label('ekanban', '6', 'plan', -13.75, 2.6, -2.25);
 label('rfid', '7', 'plan', -8, 5.2, HALL.z1);
 for (const [i, lx] of LINES.entries()) smallLabel(`Line ${i + 1}`, lx, 1.8, LINE_Z1 + 1.6, ['overview', 'label', 'connected']);
 
@@ -769,6 +814,9 @@ function renderUI() {
     const li = document.createElement('li');
     li.innerHTML = `<span class="num ${s.kind === 'plan' ? 'plan' : s.kind === 'misc' ? 'misc' : ''}">${s.num}</span><span>${s[lang].name}</span>`;
     li.onclick = () => { stopTour(); goTo(i); };
+    li.tabIndex = 0; li.setAttribute('role', 'button');
+    li.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); li.onclick(); } };
+    if (i === current) li.setAttribute('aria-current', 'step');
     if (i === current) li.classList.add('active');
     $(s.kind === 'done' ? 'listDone' : s.kind === 'plan' ? 'listPlan' : 'listMisc').appendChild(li);
   });
@@ -787,8 +835,8 @@ goTo = (i) => {
   current = i;
   const s = SCENES[i];
   const cam = isMobile ? s.cam.map((v, k) => (k === 1 ? v * 1.2 : v + (v - s.tgt[k]) * 0.35)) : s.cam;
-  gsap.to(camera.position, { x: cam[0], y: cam[1], z: cam[2], duration: 2.2, ease: 'power2.inOut' });
-  gsap.to(controls.target, { x: s.tgt[0], y: s.tgt[1], z: s.tgt[2], duration: 2.2, ease: 'power2.inOut' });
+  gsap.to(camera.position, { x: cam[0], y: cam[1], z: cam[2], duration: reduceMotion ? 0.3 : 2.2, ease: 'power2.inOut' });
+  gsap.to(controls.target, { x: s.tgt[0], y: s.tgt[1], z: s.tgt[2], duration: reduceMotion ? 0.3 : 2.2, ease: 'power2.inOut' });
   for (const [id, l] of Object.entries(labels)) {
     const on = s.focus.includes(id);
     l.el.classList.toggle('focus', on && s.focus.length === 1);
@@ -840,27 +888,39 @@ function tick() {
     p.obj.position.set(p.x, 0.86, LINE_Z0 + 0.4 + p.off * (LINE_Z1 - LINE_Z0 - 0.8));
     p.obj.visible = p.off > 0.02 && p.off < 0.98;
   }
-  // totes on the 3 conveyor units (towards the transfer point)
-  for (const b of unitTotes) {
-    b.off = (b.off + dt * 0.05) % 1;
-    b.obj.position.set(b.x, 0.8, UNIT_Z0 - 0.3 - b.off * (UNIT_Z0 - UNIT_Z1 - 0.6));
-    b.obj.visible = b.off < 0.97;
+  // tote stacks on the 3 conveyor units (tail → head)
+  for (const b of unitStacks) {
+    b.off = (b.off + dt * 0.045) % 1;
+    b.obj.position.set(b.x, 0.8, UNIT_Z0 - 0.4 - b.off * (UNIT_Z0 - UNIT_Z1 - 0.8));
+    b.obj.visible = b.off > 0.03 && b.off < 0.97;
   }
-  // lane switch: step between the 3 units (2.4 s per lane)
-  const ls = (t / 2.4) % 3, lane = Math.floor(ls), f = ls - lane;
-  const nextLane = (lane + 1) % 3;
-  const mv = f > 0.7 ? smooth((f - 0.7) / 0.3) : 0;
-  laneSwitch.position.x = UNIT_X[lane] + (UNIT_X[nextLane] - UNIT_X[lane]) * mv;
-  laneSwitch.tote.visible = f < 0.55;
-  // X-lift: lift tote to a shelf level, then lower (scissor arms follow)
-  const lp = (t % 4.8) / 4.8;
-  const lh = lp < 0.45 ? smooth(lp / 0.45) : lp < 0.6 ? 1 : 1 - smooth((lp - 0.6) / 0.4);
-  const level = 0.3 + (Math.floor(t / 4.8) % 5) * 0.36;
-  const py = 0.8 + lh * (level + 0.25);
-  xlift.platform.position.y = py;
-  xlift.tote.visible = lp < 0.55;
-  const ang = Math.asin(Math.min(0.98, (py - 0.15) / 1.0));
-  for (const a of xlift.arms) { a.rotation.x = a.userData.dir * ang; a.position.y = 0.15 + (py - 0.15) / 2; }
+  // tail cycle (7.2 s): trolley in → stack onto X-lift → lift to belt → lane switch → chosen unit
+  const CY = 7.2, cp = (t % CY) / CY, lane = Math.floor(t / CY) % 3;
+  const lowY = 0.2, beltY = 0.8;
+  let liftY = lowY, swX = UNIT_X[1];
+  if (cp < 0.35) {                                   // operator pushes the trolley in
+    trolley.position.z = TROLLEY_Z0 - smooth(cp / 0.35) * (TROLLEY_Z0 - TROLLEY_Z1);
+    inStack.position.set(LIFT.x, 0.23, trolley.position.z);
+  } else if (cp < 0.45) {                            // stack slides onto the lowered X-lift
+    trolley.position.z = TROLLEY_Z1;
+    inStack.position.set(LIFT.x, lowY + 0.04, TROLLEY_Z1 - smooth((cp - 0.35) / 0.1) * (TROLLEY_Z1 - LIFT.z));
+  } else if (cp < 0.65) {                            // X-lift raises the stack to belt level
+    liftY = lowY + smooth((cp - 0.45) / 0.2) * (beltY - lowY);
+    inStack.position.set(LIFT.x, liftY + 0.04, LIFT.z);
+  } else if (cp < 0.78) {                            // onto the lane switch
+    liftY = beltY;
+    inStack.position.set(LIFT.x, beltY + 0.06, LIFT.z - smooth((cp - 0.65) / 0.13) * (LIFT.z - SWITCH_Z));
+  } else {                                           // switch shifts to the chosen unit
+    liftY = beltY - smooth((cp - 0.78) / 0.22) * (beltY - lowY);
+    swX = UNIT_X[1] + smooth(Math.min(1, (cp - 0.78) / 0.12)) * (UNIT_X[lane] - UNIT_X[1]);
+    inStack.position.set(swX, beltY + 0.06, SWITCH_Z - (cp > 0.9 ? smooth((cp - 0.9) / 0.1) * 0.9 : 0));
+  }
+  if (cp >= 0.35) trolley.position.z = cp < 0.5 ? TROLLEY_Z1 : TROLLEY_Z1 + smooth((cp - 0.5) / 0.5) * (TROLLEY_Z0 - TROLLEY_Z1);
+  inStack.visible = cp < 0.985;
+  laneSwitch.position.x = swX;
+  xlift.platform.position.y = liftY;
+  const ang = Math.asin(Math.min(0.98, (liftY - 0.06) / 1.0));
+  for (const a of xlift.arms) { a.rotation.x = a.userData.dir * ang; a.position.y = 0.06 + (liftY - 0.06) / 2; }
   // AMRs on the loop, dwelling to load at the X-lift and unload at Line 2
   for (const a of amrs) {
     if (a.dwell > 0) {
@@ -895,7 +955,7 @@ function tick() {
     tw.lamps[1].material.emissiveIntensity = amber ? (Math.sin(t * 10) > 0 ? 2 : 0.2) : 0.06;
   });
   // printers: label feed loop
-  const feed = (pr, ph) => { const s = Math.min(1, Math.max(0.01, (ph - 0.1) / 0.5)); pr.label.scale.y = s; pr.label.position.z = 0.31 + s * 0.1; pr.led.material.emissiveIntensity = ph < 0.6 ? 2.5 : 0.6; };
+  const feed = (pr, ph) => { const s = Math.min(1, Math.max(0.01, (ph - 0.1) / 0.5)); pr.label.scale.y = s; pr.label.position.z = pr.labelZ + s * 0.06; pr.led.material.emissiveIntensity = ph < 0.6 ? 2.5 : 0.6; };
   const pp = (t % 3) / 3;
   tracePrinters.forEach((p, i) => feed(p, (pp + i * 0.33) % 1));
   labelPrinters.forEach((p, i) => feed(p, (pp + 0.5 + i * 0.33) % 1));
@@ -910,13 +970,17 @@ function tick() {
     r.scale.setScalar(0.3 + ph * 3.2);
     r.material.opacity = 0.45 * (1 - ph) * (sid === 'infra' || sid === 'connected' ? 1.6 : 0.4);
   }
-  // RFID e-Kanban: card drops into the post → reader pulse → ESL shows refill
-  const kp = (t % 5) / 5;
-  kanbanCard.position.y = kp < 0.4 ? 1.6 - smooth(kp / 0.4) * 0.5 : 1.1;
-  kanbanCard.visible = kp < 0.42;
-  const pulse = kp > 0.4 && kp < 0.8 ? (kp - 0.4) / 0.4 : 0;
-  kanbanPost.wave.scale.setScalar(1 + pulse * 2.2);
-  kanbanPost.wave.material.opacity = pulse ? 0.8 * (1 - pulse) : 0;
+  // RFID e-Kanban: on each line a kanban card is tapped on the station antenna, station by station
+  rfidCards.forEach((cd, li) => {
+    const kt = t / 3 + li * 0.7, st = Math.floor(kt) % STATIONS.length, kp = kt % 1;
+    const pad = rfidPads[li * STATIONS.length + st];
+    cd.position.set(pad.position.x, pad.position.y + 0.06 + (kp < 0.35 ? (1 - smooth(kp / 0.35)) * 0.4 : kp > 0.7 ? smooth((kp - 0.7) / 0.3) * 0.4 : 0), pad.position.z);
+    cd.visible = true;
+    const pulse = kp > 0.3 && kp < 0.75 ? (kp - 0.3) / 0.45 : 0;
+    cd.ring.position.set(pad.position.x, pad.position.y + 0.05, pad.position.z);
+    cd.ring.scale.setScalar(0.4 + pulse * 2.2);
+    cd.ring.material.opacity = pulse ? 0.9 * (1 - pulse) : 0;
+  });
   if (Math.floor(t / 5) !== tick.lastEsl) {
     tick.lastEsl = Math.floor(t / 5);
     esls.forEach((e, i) => e.redraw(((i * 5 + tick.lastEsl) % 9) === 0));

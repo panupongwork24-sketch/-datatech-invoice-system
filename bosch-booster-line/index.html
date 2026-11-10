@@ -4,6 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Brake Booster Line 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="tokens.css">
   <link rel="stylesheet" href="styles.css">
   <script type="importmap">
     { "imports": {
@@ -26,16 +29,16 @@
     </div>
   </header>
 
-  <nav id="sidebar">
+  <nav id="sidebar" aria-label="Scenes">
     <div class="group" data-i18n="delivered"></div>
     <ol id="listDone"></ol>
     <div class="group plan" data-i18n="roadmap"></div>
     <ol id="listPlan"></ol>
-    <div class="group" data-i18n="views"></div>
+    <div class="group misc" data-i18n="views"></div>
     <ol id="listMisc"></ol>
   </nav>
 
-  <section id="caption">
+  <section id="caption" aria-live="polite">
     <div class="cap-head">
       <span id="capTag" class="tag"></span>
       <h2 id="capTitle"></h2>
@@ -43,9 +46,9 @@
     <p id="capText"></p>
     <ul id="capPoints"></ul>
     <div class="cap-nav">
-      <button id="btnPrev" class="pill">‹</button>
+      <button id="btnPrev" class="pill" aria-label="Previous scene">‹</button>
       <span id="capStep"></span>
-      <button id="btnNext" class="pill">›</button>
+      <button id="btnNext" class="pill" aria-label="Next scene">›</button>
     </div>
   </section>
 

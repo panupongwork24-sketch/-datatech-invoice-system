@@ -19,6 +19,7 @@ const out = await build({
 const esc = (s) => s.replace(/<\/script/gi, '<\\/script');
 let html = read(p('index.html'));
 const swap = (from, to) => { if (!html.includes(from)) throw new Error('index.html changed: ' + from); html = html.replace(from, () => to); };
+swap('<link rel="stylesheet" href="tokens.css">', `<style>\n${read(p('tokens.css'))}\n</style>`);
 swap('<link rel="stylesheet" href="styles.css">', `<style>\n${read(p('styles.css'))}\n</style>`);
 html = html.replace(/<script type="importmap">[\s\S]*?<\/script>\s*/, '');
 swap('<script src="../smart-factory/vendor/gsap.min.js"></script>', `<script>${esc(read(resolve(VENDOR, 'gsap.min.js')))}</script>`);

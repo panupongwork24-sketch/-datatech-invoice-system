@@ -1,0 +1,49 @@
+/* Hallmark · tokens · genre: modern-minimal · tone: technical · theme: custom (vibe: "plant control-room, cobalt on ink")
+ * paper oklch(17% 0.02 255) · accent oklch(72% 0.12 235) cobalt · display/body: IBM Plex Sans (+ Plex Sans Thai) · mono: IBM Plex Mono
+ * axes: dark / grotesk-sans / cool */
+:root {
+  /* colour */
+  --color-paper: oklch(17% 0.02 255);
+  --color-paper-2: oklch(21% 0.022 255 / 0.9);
+  --color-paper-3: oklch(27% 0.025 255);
+  --color-ink: oklch(95% 0.008 250);
+  --color-ink-2: oklch(80% 0.015 250);
+  --color-ink-3: oklch(66% 0.02 250);
+  --color-rule: oklch(42% 0.025 255 / 0.55);
+  --color-accent: oklch(72% 0.12 235);
+  --color-accent-soft: oklch(72% 0.12 235 / 0.16);
+  --color-on-accent: oklch(18% 0.03 250);
+  --color-done: oklch(74% 0.16 150);
+  --color-on-done: oklch(22% 0.05 150);
+  --color-plan: oklch(78% 0.15 70);
+  --color-on-plan: oklch(25% 0.06 70);
+  --color-muted-chip: oklch(42% 0.02 255);
+  --color-focus: oklch(82% 0.13 235);
+
+  /* type */
+  --font-sans: "IBM Plex Sans", "IBM Plex Sans Thai", "Noto Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --text-xs: 0.6875rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.3125rem;
+
+  /* space (4 pt) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  /* shape + motion */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --rule-hair: 1px solid var(--color-rule);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in: cubic-bezier(0.55, 0, 1, 0.45);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 120ms;
+  --dur-med: 220ms;
+}
