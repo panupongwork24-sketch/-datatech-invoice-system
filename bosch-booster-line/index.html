@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Brake Booster Line 3D</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="importmap">
+    { "imports": {
+      "three": "../smart-factory/vendor/three.module.min.js",
+      "three/addons/": "../smart-factory/vendor/addons/"
+    } }
+  </script>
+</head>
+<body>
+  <div id="app"></div>
+
+  <header id="topbar">
+    <div class="brand">
+      <div class="title" data-i18n="title"></div>
+      <div class="sub" data-i18n="subtitle"></div>
+    </div>
+    <div class="tools">
+      <button id="btnTour" class="pill" data-i18n="tour"></button>
+      <button id="btnLang" class="pill">TH</button>
+    </div>
+  </header>
+
+  <nav id="sidebar">
+    <div class="group" data-i18n="delivered"></div>
+    <ol id="listDone"></ol>
+    <div class="group plan" data-i18n="roadmap"></div>
+    <ol id="listPlan"></ol>
+    <div class="group" data-i18n="views"></div>
+    <ol id="listMisc"></ol>
+  </nav>
+
+  <section id="caption">
+    <div class="cap-head">
+      <span id="capTag" class="tag"></span>
+      <h2 id="capTitle"></h2>
+    </div>
+    <p id="capText"></p>
+    <ul id="capPoints"></ul>
+    <div class="cap-nav">
+      <button id="btnPrev" class="pill">‹</button>
+      <span id="capStep"></span>
+      <button id="btnNext" class="pill">›</button>
+    </div>
+  </section>
+
+  <div id="loading">Loading 3D…</div>
+
+  <script src="../smart-factory/vendor/gsap.min.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
