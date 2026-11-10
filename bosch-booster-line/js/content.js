@@ -18,7 +18,7 @@ export const UI = {
 };
 
 // kind: done | plan | misc.  cam: [x,y,z] camera, tgt: [x,y,z] look-at.  focus: label ids to highlight.
-const ALL = ['amr', 'trace', 'infra', 'aep', 'label', 'ekanban', 'rfid'];
+const ALL = ['amr', 'trace', 'infra', 'aep', 'label', 'ekanban', 'esl', 'rfid'];
 export const SCENES = [
   {
     id: 'overview', kind: 'misc', num: '◎',
@@ -82,17 +82,27 @@ export const SCENES = [
   },
   {
     id: 'ekanban', kind: 'plan', num: '6',
-    cam: [-9.4, 3.6, 3.6], tgt: [-14.2, 1.2, -4.5], focus: ['ekanban'],
-    en: { name: 'RFID e-Kanban + ESL', title: 'Roadmap: RFID e-Kanban replaces paper production kanban',
-      text: 'Planned: each production kanban card carries an RFID tag. RFID antennas sit at every station of all three lines — the operator taps the card at the station and the production order is started and tracked automatically, with no paper card. Electronic Shelf Labels on a small flow rack show part, quantity and refill status.',
-      points: ['RFID antenna at every station (Line 1–3)', 'Tap the kanban card → production order starts', 'Order progress tracked station by station', 'ESL flow rack: part, qty and refill status'] },
-    th: { name: 'RFID e-Kanban + ESL', title: 'แผนงาน: RFID e-Kanban แทน Kanban กระดาษสั่งผลิต',
-      text: 'แผนงาน: การ์ด Kanban สั่งผลิตแต่ละใบติด RFID Tag มีเสาอากาศ RFID ทุกสเตชันของทั้ง 3 ไลน์ พนักงานแตะการ์ดที่สเตชัน ระบบเริ่มและติดตามคำสั่งผลิตอัตโนมัติ ไม่ต้องใช้การ์ดกระดาษ และมีป้าย ESL ที่ Flow Rack ขนาดเล็กแสดง Part, จำนวน และสถานะการเติม',
-      points: ['เสา RFID ทุกสเตชัน (Line 1–3)', 'แตะการ์ด Kanban → เริ่มคำสั่งผลิต', 'ติดตามคำสั่งผลิตทีละสเตชัน', 'ESL ที่ Flow Rack: Part, จำนวน, สถานะเติม'] },
+    cam: [-9.6, 3.4, 3.4], tgt: [-14.2, 1.3, -4.5], focus: ['ekanban'],
+    en: { name: 'RFID e-Kanban', title: 'Roadmap: RFID e-Kanban replaces paper production kanban',
+      text: 'Planned: each production kanban card carries an RFID tag. A panel antenna and fixed reader sit at every station of all three lines — the operator taps the card at the antenna and the production order is started and tracked automatically, with no paper card.',
+      points: ['Panel antenna + fixed reader at every station', 'Tap the kanban card → production order starts', 'Order progress tracked station by station', 'Runs on the existing network and traceability'] },
+    th: { name: 'RFID e-Kanban', title: 'แผนงาน: RFID e-Kanban แทน Kanban กระดาษสั่งผลิต',
+      text: 'แผนงาน: การ์ด Kanban สั่งผลิตแต่ละใบติด RFID Tag ทุกสเตชันของทั้ง 3 ไลน์มีเสาอากาศแบบแผง (Panel antenna) และเครื่องอ่าน (Reader) พนักงานแตะการ์ดที่เสาอากาศ ระบบเริ่มและติดตามคำสั่งผลิตอัตโนมัติ ไม่ต้องใช้การ์ดกระดาษ',
+      points: ['Panel antenna + Reader ทุกสเตชัน', 'แตะการ์ด Kanban → เริ่มคำสั่งผลิต', 'ติดตามคำสั่งผลิตทีละสเตชัน', 'ใช้ Network และ Traceability ที่มีอยู่'] },
   },
   {
-    id: 'rfid', kind: 'plan', num: '7',
-    cam: [4, 10, 8], tgt: [-8, 1, 25], focus: ['rfid'],
+    id: 'esl', kind: 'plan', num: '7',
+    cam: [-26.4, 3, 4], tgt: [-31.6, 1.0, 0.4], focus: ['esl'],
+    en: { name: 'ESL flow rack', title: 'Roadmap: Electronic Shelf Labels on a small flow rack',
+      text: 'Planned for a small flow-rack area inside production: an e-paper Electronic Shelf Label on every lane shows the part, the quantity and the refill status. Tags are updated wirelessly from an ESL access point, so lane labels never need reprinting.',
+      points: ['e-paper ESL on every flow-rack lane', 'Part, quantity and refill status at a glance', 'Updated wirelessly via ESL access point', 'Small scope first — one flow rack area'] },
+    th: { name: 'ESL Flow Rack', title: 'แผนงาน: ป้าย ESL บน Flow Rack ขนาดเล็ก',
+      text: 'แผนสำหรับ Flow Rack ขนาดเล็กในพื้นที่ผลิต: ป้าย ESL แบบ e-paper ทุกช่องแสดง Part, จำนวน และสถานะการเติม อัปเดตแบบไร้สายผ่าน ESL Access Point ไม่ต้องพิมพ์ป้ายใหม่',
+      points: ['ป้าย ESL e-paper ทุกช่องของ Flow Rack', 'เห็น Part, จำนวน, สถานะเติม ได้ทันที', 'อัปเดตไร้สายผ่าน ESL Access Point', 'เริ่มจากพื้นที่เล็ก — Flow Rack เดียว'] },
+  },
+  {
+    id: 'rfid', kind: 'plan', num: '8',
+    cam: [-3.2, 5, 14], tgt: [-8, 1.3, 22], focus: ['rfid'],
     en: { name: 'RFID: Production → FG', title: 'Roadmap: RFID at the hand-over to the FG warehouse',
       text: 'Planned RFID gate at the point where finished goods leave production for the FG warehouse. Pallets are read automatically as they pass, so the hand-over is recorded without manual scanning.',
       points: ['RFID gate at production exit', 'Pallets read automatically when passing', 'Hand-over record to FG warehouse', 'Linked to the unit / label data'] },

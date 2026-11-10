@@ -237,6 +237,7 @@ const HALL = { x0: -40, x1: 40, z0: -26, z1: 22 };
   // columns with yellow/black protection
   const colMat = mat(C.column, { roughness: 0.7, metalness: 0.1 });
   for (let x = -40; x <= 40; x += 16) for (const z of [HALL.z0, HALL.z1]) {
+    if (x === -8 && z === HALL.z1) continue; // keep the RFID gate opening clear
     box(0.6, 9, 0.6, colMat, scene, x, 4.5, z);
     box(0.68, 1.0, 0.68, mat(C.safety, { roughness: 0.5, metalness: 0.1 }), scene, x, 0.5, z);
   }
@@ -358,39 +359,72 @@ function hmi(parent, x, y, z, ry, title, rows) {
   }, g, 0, 0.05, 0.0, 0, 320);
   return g;
 }
-/** Industrial thermal label printer modelled on the SATO CL4NX Plus form factor (271 W × 321 H × 457 D mm):
- *  charcoal body, light-grey hinged media cover, 3.5" colour LCD + keys at the front top, media exit slot. No logo.
- *  Front faces local +Z. Returns group with .label (strip leaving the slot) and .led. */
-const prBody = mat(0x2b2e33, { roughness: 0.45, metalness: 0.25 });
-const prCover = mat(0xc9cdd2, { roughness: 0.35, metalness: 0.3 });
-const prBezel = mat(0x16181b, { roughness: 0.5, metalness: 0.2 });
-const prLcdDraw = (c, W, H) => {
-  c.fillStyle = '#0b3d91'; c.fillRect(0, 0, W, H);
-  c.fillStyle = '#fff'; c.font = 'bold 22px system-ui'; c.fillText('ONLINE', 10, 30);
-  c.font = '15px system-ui'; c.fillText('Qty 0001', 10, 54);
-  c.fillStyle = '#22c55e'; c.fillRect(W - 26, 12, 14, 14);
-};
+/** SATO CL4NX Plus (from the product photo): 271 W × 321 H × 457 D mm.
+ *  Charcoal front with a left control column (SATO / CL4NX Plus wordmark text, colour LCD, D-pad), large front door,
+ *  silver side cover with a media window, tear bar + label exit across the front. Front faces local +Z. */
+const prFront = mat(0x2c2f35, { roughness: 0.45, metalness: 0.2 });
+const prSilver = mat(0xb9bec4, { roughness: 0.32, metalness: 0.65 });
+const prSilverLow = mat(0x8e949b, { roughness: 0.38, metalness: 0.6 });
+const prWindow = new THREE.MeshStandardMaterial({ color: 0x3a3f47, roughness: 0.15, metalness: 0.3, transparent: true, opacity: 0.85 });
+const prFaceTex = (() => {
+  const cv = document.createElement('canvas'); cv.width = 271 * 2; cv.height = 321 * 2;
+  const c = cv.getContext('2d'); const W = cv.width, H = cv.height, colW = W * 0.31;
+  c.fillStyle = '#2b2e34'; c.fillRect(0, 0, W, H);
+  // control column
+  c.fillStyle = '#25282d'; c.fillRect(0, 0, colW, H);
+  c.fillStyle = '#d9dde2'; c.font = 'italic 900 34px Arial, sans-serif'; c.fillText('SATO', 26, 62);
+  c.font = '600 21px Arial, sans-serif'; c.fillText('CL4NX', 26, 92);
+  c.fillStyle = '#d9dde2'; c.fillRect(100, 76, 46, 20); c.fillStyle = '#25282d'; c.font = '700 15px Arial'; c.fillText('Plus', 106, 92);
+  c.fillStyle = '#3a3e45'; c.fillRect(22, 118, colW - 44, 30);                    // power key bar
+  c.fillStyle = '#17191c'; c.fillRect(16, 172, colW - 32, 300);                   // LCD bezel + keypad
+  c.fillStyle = '#2f7fd6'; c.fillRect(28, 190, colW - 56, 130);                   // colour LCD
+  c.fillStyle = '#7fb8f0'; c.fillRect(28, 190, colW - 56, 18);
+  c.fillStyle = '#e8f2fd'; c.font = '600 16px Arial'; c.fillText('Online', 64, 232);
+  c.strokeStyle = '#e8f2fd'; c.lineWidth = 3; c.strokeRect(70, 246, 54, 34);
+  c.fillStyle = '#3b8ff0'; c.fillRect(28, 340, colW - 56, 4);
+  c.fillStyle = '#5d636c';
+  c.beginPath(); c.arc(colW / 2, 384, 15, 0, Math.PI * 2); c.fill();               // D-pad centre
+  for (const [dx, dy] of [[0, -36], [0, 36], [-36, 0], [36, 0]]) { c.beginPath(); c.arc(colW / 2 + dx, 420 + dy * 0.6, 9, 0, Math.PI * 2); c.fill(); }
+  for (const dx of [-62, 62]) c.fillRect(colW / 2 + dx - 8, 410, 16, 28);
+  c.fillStyle = '#3a3e45'; c.fillRect(22, H - 70, 44, 18);                        // USB port
+  // front door
+  c.fillStyle = '#30343a'; c.fillRect(colW + 8, 12, W - colW - 20, H * 0.56);
+  c.strokeStyle = '#1d2024'; c.lineWidth = 4; c.strokeRect(colW + 8, 12, W - colW - 20, H * 0.56);
+  // tear bar / label exit band
+  c.fillStyle = '#1b1d21'; c.fillRect(colW, H * 0.6, W - colW, 46);
+  c.fillStyle = '#c5cad0'; c.fillRect(colW + 18, H * 0.6 + 12, W - colW - 50, 14);
+  c.fillStyle = '#2f6fd0'; c.fillRect(W - 30, H * 0.6 + 8, 10, 22);
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
+  return t;
+})();
+const prFaceMat = new THREE.MeshStandardMaterial({ map: prFaceTex, roughness: 0.5, metalness: 0.15 });
 function printer(parent, x, y, z, ry = 0) {
   const g = group(parent, x, y, z, ry);
-  const W = 0.271, H = 0.321, D = 0.457;
-  box(W, H * 0.62, D, prBody, g, 0, H * 0.31, 0);                     // lower body
-  box(W * 0.98, H * 0.4, D * 0.88, prCover, g, 0, H * 0.79, -D * 0.05); // hinged media cover
-  box(W, H * 0.98, 0.03, prBezel, g, 0, H * 0.49, D / 2 - 0.005);        // front bezel
-  box(W + 0.004, 0.012, D * 0.9, prBody, g, 0, H * 0.6, -D * 0.04);      // cover seam
-  screen(0.072, 0.054, prLcdDraw, g, 0.06, H * 0.78, D / 2 + 0.012, 0, 128);  // 3.5" colour LCD
-  for (let i = 0; i < 4; i++) box(0.018, 0.012, 0.008, mat(0x9aa3ad), g, -0.075 + i * 0.024, H * 0.72, D / 2 + 0.012);
-  g.led = box(0.012, 0.012, 0.006, glow(0x22c55e, 1.5), g, -0.085, H * 0.84, D / 2 + 0.012);
-  box(0.16, 0.008, 0.01, rubber, g, 0, H * 0.2, D / 2 + 0.012);         // media exit slot
-  for (const sx of [-1, 1]) box(0.02, 0.012, 0.06, rubber, g, sx * 0.1, 0.006, D / 2 - 0.05); // feet
-  const lbl = new THREE.Mesh(new THREE.PlaneGeometry(0.1, 0.12), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8, side: THREE.DoubleSide }));
-  lbl.rotation.x = -Math.PI / 2; lbl.position.set(0, H * 0.2, D / 2 + 0.02); lbl.scale.set(1, 0.01, 1);
-  const cv = document.createElement('canvas'); cv.width = cv.height = 64; const c = cv.getContext('2d');
-  c.fillStyle = '#fff'; c.fillRect(0, 0, 64, 64); c.fillStyle = '#000';
-  for (let i = 0; i < 9; i++) for (let j = 0; j < 9; j++) if ((i * 7 + j * 13 + i * j) % 3 === 0) c.fillRect(14 + i * 4, 6 + j * 4, 4, 4);
-  [[14, 6], [42, 6], [14, 34]].forEach(([a, b]) => { c.fillRect(a, b, 10, 10); c.fillStyle = '#fff'; c.fillRect(a + 2, b + 2, 6, 6); c.fillStyle = '#000'; c.fillRect(a + 4, b + 4, 2, 2); });
+  const W = 0.271, H = 0.321, D = 0.457, FD = 0.07; // FD = depth of the charcoal front frame
+  box(W, H, FD, prFront, g, 0, H / 2, D / 2 - FD / 2);                              // front frame
+  box(W + 0.004, H * 0.68, D - FD, prSilver, g, 0, H * 0.66, -FD / 2);               // silver side cover (top + sides)
+  box(W, H * 0.33, D - FD, prSilverLow, g, 0, H * 0.165, -FD / 2);                   // lower body
+  box(W + 0.006, 0.006, D - FD, prFront, g, 0, H * 0.325, -FD / 2);                  // seam
+  for (const sx of [-1, 1]) {                                                         // media windows on both sides
+    const w = new THREE.Mesh(new THREE.PlaneGeometry(D * 0.32, H * 0.36), prWindow);
+    w.position.set(sx * (W / 2 + 0.0035), H * 0.66, D * 0.05); w.rotation.y = sx * Math.PI / 2; g.add(w);
+  }
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(W, H), prFaceMat);
+  face.position.set(0, H / 2, D / 2 + 0.001); g.add(face);
+  g.led = box(0.01, 0.01, 0.004, glow(0x3b8ff0, 1.6), g, W / 2 - 0.02, H * 0.37, D / 2 + 0.004);
+  for (const sx of [-1, 1]) box(0.03, 0.012, 0.05, rubber, g, sx * 0.1, 0.006, D / 2 - 0.06); // feet
+  // label leaving the exit and hanging down the front (QR + barcode)
+  const lbl = new THREE.Mesh(new THREE.PlaneGeometry(0.15, 0.12), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8, side: THREE.DoubleSide }));
+  lbl.position.set(0.04, H * 0.37, D / 2 + 0.012); lbl.rotation.x = -0.35;
+  const cv = document.createElement('canvas'); cv.width = 128; cv.height = 102; const c = cv.getContext('2d');
+  c.fillStyle = '#fff'; c.fillRect(0, 0, 128, 102); c.fillStyle = '#000';
+  for (let i = 0; i < 7; i++) for (let j = 0; j < 7; j++) if ((i * 7 + j * 13 + i * j) % 3 === 0) c.fillRect(8 + i * 4, 8 + j * 4, 4, 4);
+  for (let b = 0; b < 30; b++) c.fillRect(44 + b * 2.6, 10, b % 3 ? 1 : 2, 24);
+  for (let b = 0; b < 44; b++) c.fillRect(10 + b * 2.5, 52, b % 4 ? 1 : 2, 30);
   lbl.material.map = new THREE.CanvasTexture(cv);
-  g.add(lbl); g.label = lbl; g.labelZ = D / 2 + 0.02;
-  g.scale.setScalar(1.25); // slightly enlarged so it reads at plant scale
+  lbl.geometry.translate(0, -0.06, 0); // hinge at the top edge (exit slot)
+  g.add(lbl); g.label = lbl;
+  g.scale.setScalar(1.25);
   return g;
 }
 function plcCabinet(parent, x, z, ry = 0) {
@@ -436,7 +470,9 @@ function booster() {
 
 const towers = [], wis = [], tracePrinters = [];
 const rfidPads = [];
-const rfidMat = glow(0xf59e0b, 0.55);
+const rfidMat = glow(0xf59e0b, 0.9);
+const rfidPanelMat = mat(0xeef0f2, { roughness: 0.55, metalness: 0 });
+const rfidReaderMat = mat(0x3a3f47, { roughness: 0.45, metalness: 0.3 });
 let aepPrinter;
 LINES.forEach((lx, li) => {
   conveyor(lx, (LINE_Z0 + LINE_Z1) / 2, LINE_Z1 - LINE_Z0);
@@ -449,13 +485,19 @@ LINES.forEach((lx, li) => {
     const os = -side; // operator side
     const w = digitalWI(scene, lx + os * 1.2, 1.6, sz + 0.9, os * Math.PI / 2, li + 1, si + 1);
     wis.push(w);
-    // RFID antenna for e-Kanban production cards (planned → amber)
-    const pad = group(scene, lx + os * 1.25, 0, sz - 0.25);
-    cyl(0.025, 1.1, steel, pad, 0, 0.55, 0, 8);
-    box(0.34, 0.05, 0.26, rfidMat, pad, 0, 1.12, 0);
-    box(0.24, 0.012, 0.16, mat(0x111827), pad, 0, 1.15, 0);
-    pad.position.y = 0; pad.userData.top = 1.15;
-    rfidPads.push({ position: new THREE.Vector3(lx + os * 1.25, 1.15, sz - 0.25) });
+    // RFID e-Kanban (planned): panel antenna on an arm facing the operator + fixed reader box on the post
+    const ax = lx + os * 1.25, az = sz - 0.3;
+    const pad = group(scene, ax, 0, az, os * Math.PI / 2);
+    box(0.06, 1.55, 0.06, alu, pad, 0, 0.775, -0.05);                    // aluminium profile post
+    box(0.24, 0.32, 0.03, rfidReaderMat, pad, 0, 0.95, -0.02);           // fixed reader (in front of the post)
+    box(0.05, 0.02, 0.005, glow(0x22c55e, 1.2), pad, -0.06, 1.06, 0.0);
+    box(0.05, 0.02, 0.005, rfidMat, pad, 0.02, 1.06, 0.0);               // amber = planned
+    const ant = group(pad, 0, 1.5, 0.02); ant.rotation.x = -0.35;
+    box(0.27, 0.27, 0.045, rfidPanelMat, ant, 0, 0, 0);                  // panel antenna (white radome)
+    box(0.2, 0.012, 0.004, rfidMat, ant, 0, -0.11, 0.024);               // planned status strip
+    { const cbl = cyl(0.008, 0.5, rubber, pad, 0.1, 1.22, -0.03, 6); cbl.rotation.z = 0.05; } // coax to reader
+    const nrm = new THREE.Vector3(os, 0, 0);
+    rfidPads.push({ position: new THREE.Vector3(ax + os * 0.04, 1.5, az), normal: nrm, os });
     if (si !== 0) person(scene, lx + os * 2.0, sz + 0.2, os > 0 ? -Math.PI / 2 : Math.PI / 2, [0x3b6ea5, 0x4a7fb0, 0x3b6ea5][li]);
   });
   const tp = printer(scene, lx + 1.25, 1.0, LINE_Z0 + 0.6, -Math.PI / 2);
@@ -471,10 +513,10 @@ LINES.forEach((lx, li) => {
 });
 
 const rfidCards = LINES.map(() => {
-  const c = box(0.12, 0.012, 0.18, mat(0xfef3c7, { roughness: 0.8, metalness: 0 }), scene);
+  const c = box(0.012, 0.18, 0.12, mat(0xfef3c7, { roughness: 0.8, metalness: 0 }), scene); // kanban card with RFID tag
   c.castShadow = false;
   c.ring = new THREE.Mesh(new THREE.RingGeometry(0.16, 0.19, 32), new THREE.MeshBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }));
-  c.ring.rotation.x = -Math.PI / 2; scene.add(c.ring);
+  c.ring.rotation.y = Math.PI / 2; scene.add(c.ring);
   return c;
 });
 
@@ -716,12 +758,15 @@ let kanbanBoard;
       const shelf = box(3.2, 0.04, 1.2, alu, g, rx, y, 0); shelf.rotation.x = 0.08;
       for (let b = 0; b < 4; b++) {
         tote(g, rx - 1.2 + b * 0.8, y + 0.03, 0, 0.6, 0.24, 0.9, true);
-        const tag = screen(0.36, 0.16, (c, W, H, low = false) => {
-          c.fillStyle = low ? '#fde68a' : '#f1f5f9'; c.fillRect(0, 0, W, H);
-          c.fillStyle = '#111'; c.font = 'bold 26px system-ui'; c.fillText('P-' + (lv + 1) + (b + 1), 8, 30);
-          c.font = '20px system-ui'; c.fillText(low ? 'REFILL REQ.' : 'QTY OK', 8, 54);
-        }, g, rx - 1.2 + b * 0.8, y - 0.05, 0.64, 0, 128);
-        box(0.4, 0.2, 0.02, 0x111827, g, rx - 1.2 + b * 0.8, y - 0.05, 0.62).castShadow = false;
+        const tag = screen(0.3, 0.13, (c, W, H, low = false) => {   // 2.9" e-paper ESL (black / white / red)
+          c.fillStyle = '#e9e9e4'; c.fillRect(0, 0, W, H);
+          c.fillStyle = '#111'; c.font = 'bold 24px Arial'; c.fillText('P-' + (lv + 1) + (b + 1), 8, 26);
+          c.font = '15px Arial'; c.fillText('Booster part · bin ' + (b + 1), 8, 46);
+          for (let k = 0; k < 22; k++) c.fillRect(8 + k * 3, H - 16, k % 3 ? 1 : 2, 10);
+          c.fillStyle = low ? '#c81e1e' : '#111'; c.font = 'bold 20px Arial'; c.textAlign = 'right';
+          c.fillText(low ? 'REFILL' : 'QTY 24', W - 8, H - 8); c.textAlign = 'left';
+        }, g, rx - 1.2 + b * 0.8, y - 0.05, 0.645, 0, 160);
+        box(0.33, 0.16, 0.02, mat(0xf3f4f6, { roughness: 0.5, metalness: 0 }), g, rx - 1.2 + b * 0.8, y - 0.05, 0.625).castShadow = false;
         esls.push(tag);
       }
     }
@@ -732,12 +777,17 @@ let kanbanBoard;
     c.fillStyle = '#f59e0b'; c.fillRect(0, 0, W, 40);
     c.fillStyle = '#1c1206'; c.font = 'bold 22px system-ui'; c.fillText('RFID e-KANBAN · ORDERS (PLANNED)', 12, 28);
     c.font = '19px system-ui';
-    ['L1 ST1 card read → start order', 'L2 ST1 card read → start order', 'L3 ST2 → in progress', 'Lane P-31 → refill (ESL)'].forEach((t, i) => {
+    ['L1 ST1 card read → start order', 'L2 ST1 card read → start order', 'L3 ST2 → in progress', 'L1 ST4 → order complete'].forEach((t, i) => {
       c.fillStyle = i < 1 + (n % 3) ? '#fbbf24' : '#64748b'; c.fillText(t, 16, 76 + i * 32);
     });
   }, scene, -36.5, 2.7, 4.6, Math.PI / 2, 384);
   { const p = group(scene, -36.5, 0, 4.6); box(0.1, 3.4, 0.1, alu, p, 0, 1.7, -1.35); box(0.1, 3.4, 0.1, alu, p, 0, 1.7, 1.35); }
-  smallLabel('ESL flow rack (planned)', -31, 2.6, 2.4, ['ekanban', 'overview']);
+  // ESL access point (ceiling / wall base station that updates the tags)
+  const ap = group(scene, -36.4, 3.2, -0.2);
+  box(0.12, 0.3, 0.22, mat(0xf3f4f6, { roughness: 0.5, metalness: 0 }), ap, 0, 0, 0);
+  box(0.01, 0.04, 0.04, glow(0x22c55e, 1.4), ap, 0.065, 0.1, 0);
+  smallLabel('ESL access point', -36.2, 3.7, -0.2, ['esl']);
+  smallLabel('ESL flow rack', -31, 2.6, 2.4, ['esl']);
 }
 
 /* ---------------- ROADMAP: RFID gate + FG warehouse ---------------- */
@@ -745,9 +795,20 @@ let rfidGate, rfidPallet;
 {
   const gx = -8, gz = HALL.z1;
   rfidGate = group(scene, gx, 0, gz);
-  const pm = glow(0xf59e0b, 0.6); pm.transparent = true; pm.opacity = 0.85;
-  box(0.35, 3.6, 0.35, pm, rfidGate, -2, 1.8, 0); box(0.35, 3.6, 0.35, pm, rfidGate, 2, 1.8, 0); box(4.35, 0.35, 0.35, pm, rfidGate, 0, 3.6, 0);
-  for (const s of [-1, 1]) box(0.08, 0.5, 0.3, 0x111827, rfidGate, s * 1.78, 2.2, 0);
+  for (const s of [-1, 1]) {
+    const post = group(rfidGate, s * 1.9, 0, 0);
+    box(0.5, 0.06, 0.5, steel, post, 0, 0.03, 0);                         // base plate
+    box(0.1, 2.4, 0.1, mat(0x9aa1a9, { roughness: 0.35, metalness: 0.7 }), post, 0, 1.2, 0);
+    for (const ay of [0.85, 1.75]) {                                      // upper + lower panel antennas, facing the lane
+      box(0.06, 0.45, 0.45, rfidPanelMat, post, -s * 0.09, ay, 0);
+      box(0.004, 0.03, 0.3, rfidMat, post, -s * 0.122, ay - 0.18, 0);     // planned strip
+    }
+    const sl = group(post, 0, 2.4, 0);                                    // stack light: green / red
+    cyl(0.05, 0.1, glow(0x22c55e, 1.4), sl, 0, 0.1, 0, 16); cyl(0.05, 0.1, glow(0xef4444, 0.15), sl, 0, 0.21, 0, 16);
+    if (s === 1) box(0.3, 0.4, 0.12, rfidReaderMat, post, 0.12, 1.3, -0.12); // fixed reader
+  }
+  // amber floor marking for the planned read zone
+  plane(3.4, 0.1, rfidMat, gx, 0.015, gz - 1.2); plane(3.4, 0.1, rfidMat, gx, 0.015, gz + 1.2);
   rfidGate.waves = [0, 1, 2].map((i) => {
     const w = new THREE.Mesh(new THREE.TorusGeometry(1.0, 0.03, 8, 40, Math.PI), new THREE.MeshBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0.6, depthWrite: false }));
     w.position.set(0, 0.2, 0); w.userData.phase = i / 3; rfidGate.add(w); return w;
@@ -785,7 +846,7 @@ LINES.forEach((lx) => {
 });
 flow([[16.2, 1.6, -3.6], [18.2, 6.0, -3.6], [18.2, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0x65a30d, ['aep', 'connected']);
 flow([[-13.75, 1.2, -2.25], [-11.8, 6.2, -2.25], [-11.8, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0xf59e0b, ['ekanban', 'connected']);
-flow([[-31, 2.2, 0], [-31, 6.2, -10], [R[0], 6.2, -20], [R[0], 2.3, R[2]]], 0xf59e0b, ['ekanban', 'connected']);
+flow([[-36.4, 3.2, -0.2], [-36.4, 6.2, -10], [R[0], 6.2, -20], [R[0], 2.3, R[2]]], 0xf59e0b, ['esl', 'connected']);
 flow([[-8, 3.8, 22], [-8, 6.2, 14], [-12, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0xf59e0b, ['rfid', 'connected']);
 
 /* ---------------- labels (numbered hotspots) ---------------- */
@@ -795,7 +856,8 @@ label('infra', '3', 'done', rackPos.x + 1, 4.4, rackPos.z + 2);
 label('aep', '4', 'done', 16.4, 3.4, -3.6);
 label('label', '5', 'done', 0, 5.4, 18.6);
 label('ekanban', '6', 'plan', -13.75, 2.6, -2.25);
-label('rfid', '7', 'plan', -8, 5.2, HALL.z1);
+label('esl', '7', 'plan', -31, 3.6, 0);
+label('rfid', '8', 'plan', -8, 3.6, HALL.z1);
 for (const [i, lx] of LINES.entries()) smallLabel(`Line ${i + 1}`, lx, 1.8, LINE_Z1 + 1.6, ['overview', 'label', 'connected']);
 
 /* ---------------- UI / i18n / scenes ---------------- */
@@ -955,7 +1017,7 @@ function tick() {
     tw.lamps[1].material.emissiveIntensity = amber ? (Math.sin(t * 10) > 0 ? 2 : 0.2) : 0.06;
   });
   // printers: label feed loop
-  const feed = (pr, ph) => { const s = Math.min(1, Math.max(0.01, (ph - 0.1) / 0.5)); pr.label.scale.y = s; pr.label.position.z = pr.labelZ + s * 0.06; pr.led.material.emissiveIntensity = ph < 0.6 ? 2.5 : 0.6; };
+  const feed = (pr, ph) => { const s = Math.min(1, Math.max(0.01, (ph - 0.1) / 0.5)); pr.label.scale.y = s; pr.led.material.emissiveIntensity = ph < 0.6 ? 2.5 : 0.6; };
   const pp = (t % 3) / 3;
   tracePrinters.forEach((p, i) => feed(p, (pp + i * 0.33) % 1));
   labelPrinters.forEach((p, i) => feed(p, (pp + 0.5 + i * 0.33) % 1));
@@ -974,10 +1036,10 @@ function tick() {
   rfidCards.forEach((cd, li) => {
     const kt = t / 3 + li * 0.7, st = Math.floor(kt) % STATIONS.length, kp = kt % 1;
     const pad = rfidPads[li * STATIONS.length + st];
-    cd.position.set(pad.position.x, pad.position.y + 0.06 + (kp < 0.35 ? (1 - smooth(kp / 0.35)) * 0.4 : kp > 0.7 ? smooth((kp - 0.7) / 0.3) * 0.4 : 0), pad.position.z);
-    cd.visible = true;
+    const d = 0.05 + (kp < 0.35 ? (1 - smooth(kp / 0.35)) * 0.45 : kp > 0.7 ? smooth((kp - 0.7) / 0.3) * 0.45 : 0);
+    cd.position.set(pad.position.x + pad.os * d, pad.position.y - 0.05 + d * 0.3, pad.position.z);
     const pulse = kp > 0.3 && kp < 0.75 ? (kp - 0.3) / 0.45 : 0;
-    cd.ring.position.set(pad.position.x, pad.position.y + 0.05, pad.position.z);
+    cd.ring.position.set(pad.position.x + pad.os * 0.03, pad.position.y, pad.position.z);
     cd.ring.scale.setScalar(0.4 + pulse * 2.2);
     cd.ring.material.opacity = pulse ? 0.9 * (1 - pulse) : 0;
   });
