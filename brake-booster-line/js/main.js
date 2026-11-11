@@ -512,6 +512,38 @@ LINES.forEach((lx, li) => {
   }
 });
 
+/* ---------------- Digital checklist: leader with a handheld tablet walks the lines ---------------- */
+const CK_A = new THREE.Vector3(-10.35, 0, -9), CK_B = new THREE.Vector3(-3.35, 0, -2); // L1 ST2 (faces -X) · L2 ST3 (faces +X)
+const inspector = person(null, 0, 0, 0, 0x0f766e);
+const tablet = group(inspector, 0, 1.18, 0.34);
+tablet.rotation.x = -1.25;
+box(0.27, 0.19, 0.012, mat(0x1f2328, { roughness: 0.4, metalness: 0.3 }), tablet, 0, 0, 0);
+const ckItems = [['Air pressure', 'Safety cover closed', 'Light curtain test', 'E-stop test', 'Tooling condition'],
+  ['Area clean (5S)', 'Walkway clear', 'PPE worn', 'Labels in place', 'Fire extinguisher']];
+const drawChecklist = (c, W, H, set = 0, done = 0) => {
+  c.fillStyle = '#f8fafc'; c.fillRect(0, 0, W, H);
+  c.fillStyle = '#0f766e'; c.fillRect(0, 0, W, 30);
+  c.fillStyle = '#fff'; c.font = 'bold 15px Arial';
+  c.fillText(set ? 'DIGITAL CHECKLIST · 5S / SAFETY' : 'DIGITAL CHECKLIST · START-UP', 8, 20);
+  c.font = '14px Arial';
+  ckItems[set].forEach((it, i) => {
+    const y = 50 + i * 22, ok = i < done;
+    c.strokeStyle = '#94a3b8'; c.lineWidth = 2; c.strokeRect(10, y - 13, 15, 15);
+    if (ok) { c.fillStyle = '#16a34a'; c.fillRect(12, y - 11, 11, 11); }
+    c.fillStyle = '#0f172a'; c.fillText(it, 34, y);
+    c.fillStyle = ok ? '#16a34a' : '#94a3b8'; c.textAlign = 'right'; c.fillText(ok ? 'OK' : '—', W - 10, y); c.textAlign = 'left';
+  });
+  c.fillStyle = done >= 5 ? '#16a34a' : '#cbd5e1'; c.fillRect(8, H - 18, W - 16, 12);
+  c.fillStyle = done >= 5 ? '#fff' : '#334155'; c.font = 'bold 11px Arial';
+  c.fillText(done >= 5 ? 'SAVED TO SERVER ✓' : `${done} / 5 checked`, 14, H - 8);
+};
+const tabletScreen = screen(0.25, 0.17, drawChecklist, tablet, 0, 0, 0.007, 0, 256);
+// enlarged callout of the tablet screen (billboard), only in the checklist scene
+const ckCallout = screen(1.05, 0.714, drawChecklist, scene, 0, 0, 0, 0, 256);
+ckCallout.material.transparent = true;
+const ckLeader = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]), new THREE.LineBasicMaterial({ color: 0x0d9488 }));
+scene.add(ckLeader);
+
 const rfidCards = LINES.map(() => {
   const c = box(0.012, 0.18, 0.12, mat(0xfef3c7, { roughness: 0.8, metalness: 0 }), scene); // kanban card with RFID tag
   c.castShadow = false;
@@ -845,6 +877,7 @@ LINES.forEach((lx) => {
   flow([[lx + 2.4, 1.4, 15.2], [lx + 3.2, 6.2, 13], [lx + 3.2, 6.2, -23.4], [R[0], 6.2, -23.4], [R[0], 2.2, R[2] - 0.3]], 0xdb2777, ['label', 'connected']);
 });
 flow([[16.2, 1.6, -3.6], [18.2, 6.0, -3.6], [18.2, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0x65a30d, ['aep', 'connected']);
+flow([[CK_A.x, 1.3, CK_A.z], [-11.8, 5.9, -10], [-11.8, 6.25, -23.4], [R[0], 6.25, -23.4], [R[0], 2.3, R[2] + 0.2]], 0x0d9488, ['checklist', 'connected']);
 flow([[-13.75, 1.2, -2.25], [-11.8, 6.2, -2.25], [-11.8, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0xf59e0b, ['ekanban', 'connected']);
 flow([[-36.4, 3.2, -0.2], [-36.4, 6.2, -10], [R[0], 6.2, -20], [R[0], 2.3, R[2]]], 0xf59e0b, ['esl', 'connected']);
 flow([[-8, 3.8, 22], [-8, 6.2, 14], [-12, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0xf59e0b, ['rfid', 'connected']);
@@ -855,9 +888,10 @@ label('trace', '2', 'done', -15, 4.0, LINE_Z0 + 0.6);
 label('infra', '3', 'done', rackPos.x + 1, 4.4, rackPos.z + 2);
 label('aep', '4', 'done', 16.4, 3.4, -3.6);
 label('label', '5', 'done', 0, 5.4, 18.6);
-label('ekanban', '6', 'plan', -13.75, 2.6, -2.25);
-label('esl', '7', 'plan', -31, 3.6, 0);
-label('rfid', '8', 'plan', -8, 3.6, HALL.z1);
+label('checklist', '6', 'done', -7.4, 2.6, -6.4);
+label('ekanban', '7', 'plan', -13.75, 2.6, -2.25);
+label('esl', '8', 'plan', -31, 3.6, 0);
+label('rfid', '9', 'plan', -8, 3.6, HALL.z1);
 for (const [i, lx] of LINES.entries()) smallLabel(`Line ${i + 1}`, lx, 1.8, LINE_Z1 + 1.6, ['overview', 'label', 'connected']);
 
 /* ---------------- UI / i18n / scenes ---------------- */
@@ -1030,7 +1064,28 @@ function tick() {
   for (const r of rings) {
     const ph = (t * 0.5 + r.userData.phase) % 1;
     r.scale.setScalar(0.3 + ph * 3.2);
-    r.material.opacity = 0.45 * (1 - ph) * (sid === 'infra' || sid === 'connected' ? 1.6 : 0.4);
+    r.material.opacity = 0.45 * (1 - ph) * (sid === 'infra' || sid === 'connected' || sid === 'checklist' ? 1.6 : 0.4);
+  }
+  // Digital checklist: stand at A (start-up check) → walk → stand at B (5S / safety) → walk back (20 s loop)
+  {
+    const cp = (t % 20) / 20; let pos, face, set = 0, done = 0, walking = false;
+    if (cp < 0.4) { pos = CK_A; face = -Math.PI / 2; set = 0; done = Math.min(5, Math.floor(cp / 0.4 * 6.5)); }
+    else if (cp < 0.55) { walking = true; const k = smooth((cp - 0.4) / 0.15); pos = tmp.copy(CK_A).lerp(CK_B, k); face = Math.atan2(CK_B.x - CK_A.x, CK_B.z - CK_A.z); }
+    else if (cp < 0.8) { pos = CK_B; face = Math.PI / 2; set = 1; done = Math.min(5, Math.floor((cp - 0.55) / 0.25 * 6.5)); }
+    else { walking = true; const k = smooth((cp - 0.8) / 0.2); pos = tmp.copy(CK_B).lerp(CK_A, k); face = Math.atan2(CK_A.x - CK_B.x, CK_A.z - CK_B.z); }
+    inspector.position.set(pos.x, walking ? Math.abs(Math.sin(t * 7)) * 0.03 : 0, pos.z);
+    inspector.rotation.y = face;
+    const key = set * 10 + done;
+    if (key !== tick.lastCk) { tick.lastCk = key; tabletScreen.redraw(set, done); ckCallout.redraw(set, done); }
+    const showCk = SCENES[current].id === 'checklist';
+    ckCallout.visible = ckLeader.visible = showCk;
+    if (showCk) {
+      tablet.getWorldPosition(tmp2);
+      ckCallout.position.set(tmp2.x + 0.25, 2.35, tmp2.z + 0.55);
+      ckCallout.quaternion.copy(camera.quaternion);
+      const lp = ckLeader.geometry.attributes.position;
+      lp.setXYZ(0, tmp2.x, tmp2.y + 0.02, tmp2.z); lp.setXYZ(1, ckCallout.position.x, ckCallout.position.y - 0.36, ckCallout.position.z); lp.needsUpdate = true;
+    }
   }
   // RFID e-Kanban: on each line a kanban card is tapped on the station antenna, station by station
   rfidCards.forEach((cd, li) => {

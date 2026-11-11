@@ -20,7 +20,7 @@ export const UI = {
 };
 
 // kind: done | plan | misc.  cam: [x,y,z] camera, tgt: [x,y,z] look-at.  focus: label ids to highlight.
-const ALL = ['amr', 'trace', 'infra', 'aep', 'label', 'ekanban', 'esl', 'rfid'];
+const ALL = ['amr', 'trace', 'infra', 'aep', 'label', 'checklist', 'ekanban', 'esl', 'rfid'];
 export const SCENES = [
   {
     id: 'overview', kind: 'misc', num: '◎',
@@ -83,7 +83,17 @@ export const SCENES = [
       points: ['SATO 3 ตัวที่ท้ายไลน์', 'รูปแบบฉลากตามลูกค้าแต่ละราย', 'พิมพ์จากข้อมูลชิ้นงานที่ Trace แล้ว', 'แปะฉลากแล้วเข้าแพ็คกิ้งทันที'] },
   },
   {
-    id: 'ekanban', kind: 'plan', num: '6',
+    id: 'checklist', kind: 'done', num: '6',
+    cam: [-6.2, 3.6, -4.6], tgt: [-9.9, 1.5, -8.6], focus: ['checklist'],
+    en: { name: 'Digital checklist', title: 'Digital checklist — start-up check and 5S / safety audit on a tablet',
+      text: 'Paper check sheets are replaced by a digital checklist on a handheld tablet. Before each shift the leader walks the lines and checks every machine (start-up check), and runs the 5S / safety audit in the same app. Each result is saved to the server over the plant Wi-Fi with time and name, so records can be searched any time instead of filed on paper.',
+      points: ['Handheld tablet, walk-around use', 'Machine start-up check before each shift', '5S / safety / audit checklists', 'Results saved to the server — no paper records'] },
+    th: { name: 'Digital Checklist', title: 'Digital Checklist — ตรวจเครื่องก่อนเริ่มกะ และ 5S / Safety บนแท็บเล็ต',
+      text: 'เปลี่ยนใบเช็คกระดาษเป็น Digital Checklist บนแท็บเล็ตถือเดิน ก่อนเริ่มกะหัวหน้าเดินตรวจเครื่องจักรทุกสเตชัน (Start-up check) และทำ 5S / Safety Audit ในแอปเดียวกัน ผลการตรวจบันทึกเข้า Server ผ่าน Wi-Fi พร้อมเวลาและชื่อผู้ตรวจ ค้นย้อนหลังได้ทันที ไม่ต้องเก็บแฟ้มกระดาษ',
+      points: ['แท็บเล็ตถือเดินตรวจ', 'ตรวจเครื่องก่อนเริ่มกะทุกสเตชัน', 'เช็คลิสต์ 5S / Safety / Audit', 'บันทึกเข้า Server — เลิกใช้ใบเช็คกระดาษ'] },
+  },
+  {
+    id: 'ekanban', kind: 'plan', num: '7',
     cam: [-9.6, 3.4, 3.4], tgt: [-14.2, 1.3, -4.5], focus: ['ekanban'],
     en: { name: 'RFID e-Kanban', title: 'Roadmap: RFID e-Kanban replaces paper production kanban',
       text: 'Planned: each production kanban card carries an RFID tag. A panel antenna and fixed reader sit at every station of all three lines — the operator taps the card at the antenna and the production order is started and tracked automatically, with no paper card.',
@@ -93,7 +103,7 @@ export const SCENES = [
       points: ['Panel antenna + Reader ทุกสเตชัน', 'แตะการ์ด Kanban → เริ่มคำสั่งผลิต', 'ติดตามคำสั่งผลิตทีละสเตชัน', 'ใช้ Network และ Traceability ที่มีอยู่'] },
   },
   {
-    id: 'esl', kind: 'plan', num: '7',
+    id: 'esl', kind: 'plan', num: '8',
     cam: [-26.4, 3, 4], tgt: [-31.6, 1.0, 0.4], focus: ['esl'],
     en: { name: 'ESL flow rack', title: 'Roadmap: Electronic Shelf Labels on a small flow rack',
       text: 'Planned for a small flow-rack area inside production: an e-paper Electronic Shelf Label on every lane shows the part, the quantity and the refill status. Tags are updated wirelessly from an ESL access point, so lane labels never need reprinting.',
@@ -103,7 +113,7 @@ export const SCENES = [
       points: ['ป้าย ESL e-paper ทุกช่องของ Flow Rack', 'เห็น Part, จำนวน, สถานะเติม ได้ทันที', 'อัปเดตไร้สายผ่าน ESL Access Point', 'เริ่มจากพื้นที่เล็ก — Flow Rack เดียว'] },
   },
   {
-    id: 'rfid', kind: 'plan', num: '8',
+    id: 'rfid', kind: 'plan', num: '9',
     cam: [-3.2, 5, 14], tgt: [-8, 1.3, 22], focus: ['rfid'],
     en: { name: 'RFID: Production → FG', title: 'Roadmap: RFID at the hand-over to the FG warehouse',
       text: 'Planned RFID gate at the point where finished goods leave production for the FG warehouse. Pallets are read automatically as they pass, so the hand-over is recorded without manual scanning.',
@@ -116,10 +126,10 @@ export const SCENES = [
     id: 'connected', kind: 'misc', num: '∞',
     cam: [-10, 48, 52], tgt: [-4, 2, -2], focus: ALL,
     en: { name: 'Everything connected', title: 'One connected line — from material to finished goods',
-      text: 'Material flow (conveyor, X-lift, AMR + karakuri), unit data (QR + PLC), operator guidance (Digital WI) and printing (AEP + customer labels) all run on the same infrastructure. The roadmap extends the same data to RFID e-Kanban and the FG hand-over.',
-      points: ['Material: X-lift → conveyor → AMR → Line 2', 'Data: SATO QR + PLC → traceability', 'People: Digital WI at every scan', 'Next: RFID e-Kanban at stations, ESL, RFID to FG'] },
+      text: 'Material flow (conveyor, X-lift, AMR + karakuri), unit data (QR + PLC), operator guidance (Digital WI), checks (digital checklist) and printing (AEP + customer labels) all run on the same infrastructure. The roadmap extends the same data to RFID e-Kanban and the FG hand-over.',
+      points: ['Material: X-lift → conveyor → AMR → Line 2', 'Data: SATO QR + PLC → traceability', 'People: Digital WI + digital checklist', 'Next: RFID e-Kanban at stations, ESL, RFID to FG'] },
     th: { name: 'ทุกอย่างเชื่อมกัน', title: 'ไลน์ที่เชื่อมต่อกันทั้งหมด — ตั้งแต่วัตถุดิบถึงสินค้าสำเร็จรูป',
-      text: 'การลำเลียง (Conveyor, X-Lift, AMR + Karakuri), ข้อมูลชิ้นงาน (QR + PLC), การแนะนำพนักงาน (Digital WI) และงานพิมพ์ (AEP + ฉลากลูกค้า) ทำงานบนอินฟราเดียวกัน แผนงานถัดไปต่อยอดข้อมูลเดียวกันไปสู่ RFID e-Kanban และการส่งมอบเข้าคลัง FG',
-      points: ['วัตถุดิบ: X-Lift → Conveyor → AMR → Line 2', 'ข้อมูล: QR SATO + PLC → Traceability', 'คน: Digital WI ทุกจุดสแกน', 'ถัดไป: RFID e-Kanban / ESL และ RFID เข้าคลัง FG'] },
+      text: 'การลำเลียง (Conveyor, X-Lift, AMR + Karakuri), ข้อมูลชิ้นงาน (QR + PLC), การแนะนำพนักงาน (Digital WI), การตรวจเช็ค (Digital Checklist) และงานพิมพ์ (AEP + ฉลากลูกค้า) ทำงานบนอินฟราเดียวกัน แผนงานถัดไปต่อยอดข้อมูลเดียวกันไปสู่ RFID e-Kanban และการส่งมอบเข้าคลัง FG',
+      points: ['วัตถุดิบ: X-Lift → Conveyor → AMR → Line 2', 'ข้อมูล: QR SATO + PLC → Traceability', 'คน: Digital WI + Digital Checklist', 'ถัดไป: RFID e-Kanban / ESL และ RFID เข้าคลัง FG'] },
   },
 ];
