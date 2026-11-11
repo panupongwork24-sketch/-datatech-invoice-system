@@ -755,31 +755,18 @@ let reprintPrinter, reprintMon;
   smallLabel('Reprint station · rugged handheld', x0, 2.05, z0, ['reprint']);
 }
 
-/* ---------------- 10 · OEE & NG label (Line 3, station 4) ---------------- */
-let ngPrinter, oeeBoard, ngLabel, ngBin;
+/* ---------------- 10 · OEE monitoring (Line 3, station 4) ---------------- */
+let oeeBoard;
 {
   const sbx = 17.76, z = 5;                                                       // signal box on the machine side
   box(0.12, 0.26, 0.22, mat(0xcbd5e1, { roughness: 0.5, metalness: 0.3 }), scene, sbx, 1.35, z + 0.4);
   box(0.005, 0.03, 0.03, glow(0x22c55e, 1.6), scene, sbx + 0.062, 1.42, z + 0.4);
   cable([[sbx, 1.5, z + 0.4], [sbx - 0.3, 2.3, z + 0.1], [16.75 + 0.75, 2.1, z - 0.8]], scene, 0.008);   // to the light tower
-  // NG print stand + reject bin
-  box(0.7, 1.0, 0.7, steel, scene, 19.3, 0.5, 4.6);
-  ngPrinter = printer(scene, 19.3, 1.0, 4.6, 0);
-  cable([[sbx + 0.06, 1.3, z + 0.4], [18.6, 1.1, 4.7], [19.0, 1.1, 4.4]], scene, 0.01);
-  ngBin = group(scene, 19.3, 0, 6.0);
-  const red = mat(0xdc2626, { roughness: 0.55, metalness: 0 });
-  box(0.8, 0.05, 0.6, red, ngBin, 0, 0.05, 0);
-  box(0.8, 0.6, 0.04, red, ngBin, 0, 0.32, 0.28); box(0.8, 0.6, 0.04, red, ngBin, 0, 0.32, -0.28);
-  box(0.04, 0.6, 0.6, red, ngBin, 0.38, 0.32, 0); box(0.04, 0.6, 0.6, red, ngBin, -0.38, 0.32, 0);
-  ngBin.parts = [0, 1, 2].map((i) => { const b = booster(); b.position.set(-0.2 + i * 0.2, 0.08, 0); b.scale.setScalar(0.6); ngBin.add(b); return b; });
-  ngLabel = screen(0.42, 0.3, (c, W, H) => {
-    drawLabel(c, W, H, 'NG', ['Part No. 12345-AB', 'Qty 1', 'Reason: Leak test'], '#dc2626');
-  }, ngBin, 0, 0.36, 0.302, 0, 300);
   // OEE dashboard on a stand
   const dg = group(scene, 21.4, 0, 3.6, 0.4);
   for (const sx of [-1.0, 1.0]) box(0.07, 2.2, 0.07, alu, dg, sx, 1.1, -0.05);
   box(2.3, 1.35, 0.06, dark, dg, 0, 2.55, -0.04);
-  oeeBoard = screen(2.2, 1.25, (c, W, H, ng = 3, alarm = false) => {
+  oeeBoard = screen(2.2, 1.25, (c, W, H, act = 412) => {
     c.fillStyle = '#0b1f33'; c.fillRect(0, 0, W, H);
     c.fillStyle = '#0B5ED7'; c.fillRect(0, 0, W, 40);
     c.fillStyle = '#fff'; c.font = 'bold 24px Arial'; c.fillText('OEE · LINE 3 · ST4', 14, 28);
@@ -795,16 +782,21 @@ let ngPrinter, oeeBoard, ngLabel, ngBin;
     c.fillStyle = '#94a3b8'; c.font = '13px Arial'; c.fillText('Output / hour', bx, by + 10);
     [0.7, 0.85, 0.9, 0.6, 0.88, 0.92, 0.8].forEach((v, i) => { c.fillStyle = v < 0.7 ? '#f59e0b' : '#3b82f6'; c.fillRect(bx + i * 34, by + 20 + bh * (1 - v), 24, bh * v); });
     // tiles
-    const tiles = [['RUN', '85%', '#16a34a'], ['STOP', '10%', '#f59e0b'], ['NG', String(ng), alarm ? '#ef4444' : '#7f1d1d']];
-    tiles.forEach((tl, i) => {
-      const tx = 14 + i * 160, ty = H - 66;
-      c.fillStyle = tl[2]; c.fillRect(tx, ty, 150, 54);
+    const tgt = 450, diff = act - tgt;
+    [['RUN', '85%', '#16a34a'], ['STOP', '10%', '#f59e0b']].forEach((tl, i) => {
+      const tx = 14 + i * 120, ty = H - 66;
+      c.fillStyle = tl[2]; c.fillRect(tx, ty, 110, 54);
       c.fillStyle = '#fff'; c.font = 'bold 15px Arial'; c.fillText(tl[0], tx + 10, ty + 20); c.font = 'bold 22px Arial'; c.fillText(tl[1], tx + 10, ty + 45);
     });
-    if (alarm) { c.fillStyle = '#ef4444'; c.font = 'bold 18px Arial'; c.fillText('NG event → NG label printed', 14, H - 78); }
+    { const tx = 254, ty = H - 66, w = W - tx - 14;
+      c.fillStyle = '#1e3a5f'; c.fillRect(tx, ty, w, 54);
+      [['ACTUAL', String(act), '#fff'], ['TARGET', String(tgt), '#cbd5e1'], ['DIFF', (diff > 0 ? '+' : '') + diff, diff < 0 ? '#fbbf24' : '#4ade80']].forEach((v, i) => {
+        const x = tx + 10 + i * (w / 3);
+        c.fillStyle = '#94a3b8'; c.font = 'bold 13px Arial'; c.fillText(v[0], x, ty + 20);
+        c.fillStyle = v[2]; c.font = 'bold 22px Arial'; c.fillText(v[1], x, ty + 45);
+      }); }
   }, dg, 0, 2.55, 0.0, 0, 512);
   smallLabel('Signal box', sbx + 0.1, 1.75, z + 0.4, ['oee']);
-  smallLabel('NG label printer + reject bin', 19.3, 1.8, 5.3, ['oee']);
 }
 
 /* ---------------- material flow (right side) ----------------
@@ -1087,8 +1079,8 @@ flow([[-8, 3.8, 22], [-8, 6.2, 14], [-12, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0]
 flow([[-18.6, 1.4, 21.0], [-18.6, 6.2, 19.5], [-18.6, 6.2, -23.4], [R[0], 6.2, -23.4], [R[0], 2.2, R[2] - 0.2]], 0x7c3aed, ['shipping', 'connected']);
 flow([[-18.3, 1.8, -12.6], [-18.3, 6.2, -13.5], [-18.3, 6.25, -23.5], [R[0], 6.25, -23.5], [R[0], 2.2, R[2] + 0.1]], 0x0891b2, ['frontlabel', 'connected']);
 flow([[7.25, 1.4, 8.2], [7.25, 6.2, 8.2], [3.2, 6.2, 8.2], [3.2, 6.2, -23.45], [R[0], 6.2, -23.45], [R[0], 2.2, R[2]]], 0xea580c, ['reprint', 'connected']);
-flow([[17.76, 1.5, 5.4], [18.2, 6.2, 5.4], [18.2, 6.2, -23.45], [R[0], 6.2, -23.45], [R[0], 2.25, R[2]]], 0xdc2626, ['oee', 'connected']);
-flow([[17.76, 1.5, 5.4], [19.6, 3.0, 4.6], [21.4, 2.6, 3.6]], 0xdc2626, ['oee']);
+flow([[17.76, 1.5, 5.4], [18.2, 6.2, 5.4], [18.2, 6.2, -23.45], [R[0], 6.2, -23.45], [R[0], 2.25, R[2]]], 0x16a34a, ['oee', 'connected']);
+flow([[17.76, 1.5, 5.4], [19.6, 3.0, 4.6], [21.4, 2.6, 3.6]], 0x16a34a, ['oee']);
 
 /* ---------------- labels (numbered hotspots) ---------------- */
 label('amr', '1', 'done', 31.7, 4.0, -9);
@@ -1100,7 +1092,7 @@ label('checklist', '6', 'done', -7.4, 2.6, -6.4);
 label('shipping', '7', 'done', -18.6, 2.9, 20.7);
 label('frontlabel', '8', 'done', -18.3, 2.9, -12.5);
 label('reprint', '9', 'done', 7.6, 2.9, 8.3);
-label('oee', '10', 'done', 21.4, 4.0, 3.6);
+label('oee', '10', 'done', 20.2, 4.3, 3.1);
 label('ekanban', '11', 'plan', -13.75, 2.6, -2.25);
 label('esl', '12', 'plan', -31, 3.6, 0);
 label('rfid', '13', 'plan', -8, 3.6, HALL.z1);
@@ -1275,15 +1267,8 @@ function tick(vdt, vt, noRender) {
   { const k = (t % 7) / 7, st = k < 0.3 ? 0 : k < 0.6 ? 1 : 2; if (st !== tick.lastRe) { tick.lastRe = st; reprintMon.screen.redraw(st); } feed(reprintPrinter, st === 2 ? (k - 0.6) / 0.4 * 0.7 : 0.99); }
   // shipping desk: step the selected Excel row
   { const r = Math.floor(t / 6) % 6; if (r !== tick.lastShip) { tick.lastShip = r; shipMon.screen.redraw(r); } }
-  // OEE: NG event every 10 s → tower red, NG label printed, NG count up
-  { const k = (t % 10) / 10, alarm = k < 0.35, n = 3 + Math.floor(t / 10) % 5, key = n * 2 + (alarm ? 1 : 0);
-    if (key !== tick.lastOee) { tick.lastOee = key; oeeBoard.redraw(n, alarm); }
-    const tw = towers[11];
-    if (alarm) { tw.lamps[0].material.emissiveIntensity = 0.1; tw.lamps[1].material.emissiveIntensity = 0.06; tw.lamps[2].material.emissiveIntensity = Math.sin(t * 10) > 0 ? 2.4 : 0.3; }
-    else tw.lamps[2].material.emissiveIntensity = 0.06;
-    feed(ngPrinter, alarm ? k / 0.35 * 0.7 : 0.99);
-    ngLabel.scale.setScalar(alarm && Math.sin(t * 8) > 0 ? 1.06 : 1);
-  }
+  // OEE: actual count climbs towards the target (sample data)
+  { const act = 400 + Math.floor((t / 2) % 60); if (act !== tick.lastOee) { tick.lastOee = act; oeeBoard.redraw(act); } }
   // Digital WI screens: step through the instruction (one screen redrawn per tick)
   const wk = Math.floor(t * 2);
   if (wk !== tick.lastWi) { tick.lastWi = wk; const w = wis[wk % wis.length]; w.screen.redraw(Math.floor(t / 3 + wk) % 4); }
