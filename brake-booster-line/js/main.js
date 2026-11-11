@@ -1214,6 +1214,11 @@ function videoFrame(T, noRender = false) {
       const from = vSegs[i - 1].type === 'card' ? (() => { const p = poseOf(vSegs[i - 1].id, 0), off = p.cam.clone().sub(p.tgt); off.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.06); return { cam: p.tgt.clone().add(off), tgt: p.tgt }; })() : endPose(i - 1);
       const e = smooth(lt / TR);
       pose = { cam: from.cam.clone().lerp(target.cam, e), tgt: from.tgt.clone().lerp(target.tgt, e) };
+      // fly over, not through the floor: arc the camera up and back mid-transition
+      const hop = Math.sin(Math.PI * e) * Math.min(from.tgt.distanceTo(target.tgt) * 0.55, 16);
+      const back = pose.cam.clone().sub(pose.tgt).setY(0);
+      if (back.lengthSq() > 1e-6) pose.cam.addScaledVector(back.normalize(), hop * 0.6);
+      pose.cam.y += hop;
     } else pose = target;
   }
   camera.position.copy(pose.cam); controls.target.copy(pose.tgt); camera.lookAt(pose.tgt);
