@@ -314,7 +314,7 @@ function digitalWI(parent, x, y, z, ry, line, st) {
   const g = group(parent, x, y, z, ry);
   cyl(0.025, 0.6, steel, g, 0, -0.35, 0, 8);
   box(0.78, 0.5, 0.05, dark, g, 0, 0.05, -0.03);
-  const steps = ['Place booster housing', 'Insert diaphragm + seal', 'Fit push rod, check torque', 'Leak test & scan QR'];
+  const steps = ['Pick part and verify model', 'Assemble as shown in the picture', 'Check and confirm the result', 'Scan QR to complete the step'];
   const s = screen(0.72, 0.44, (c, W, H, k = 0) => {
     c.fillStyle = '#f8fafc'; c.fillRect(0, 0, W, H);
     c.fillStyle = '#0f4c81'; c.fillRect(0, 0, W, 30);
@@ -537,7 +537,7 @@ const rackPos = new THREE.Vector3(-35.5, 0, -20);
     c.fillStyle = '#0f4c81'; c.fillRect(0, 0, W, 44);
     c.fillStyle = '#fff'; c.font = 'bold 26px system-ui'; c.fillText('TRACEABILITY · UNIT HISTORY', 14, 31);
     c.font = '20px system-ui';
-    const rows = [['Serial (QR)', 'BB-2-0001'], ['Line', 'Line 2'], ['Leak test', 'OK'], ['Process values (PLC)', 'OK'], ['Digital WI steps', '4 / 4'], ['Customer label', 'Printed']];
+    const rows = [['Serial (QR)', 'PN-2-0001'], ['Line', 'Line 2'], ['Leak test', 'OK'], ['Process values (PLC)', 'OK'], ['Digital WI steps', '4 / 4'], ['Customer label', 'Printed']];
     rows.forEach((r, i) => { c.fillStyle = '#94a3b8'; c.fillText(r[0], 18, 82 + i * 34); c.fillStyle = r[1] === 'OK' ? '#4ade80' : '#e2e8f0'; c.textAlign = 'right'; c.fillText(r[1], W - 18, 82 + i * 34); c.textAlign = 'left'; });
     c.fillStyle = '#64748b'; c.font = '15px system-ui'; c.fillText('Sample screen — illustrative data', 18, H - 12);
   }, scene, HALL.x0 + 0.25, 3.4, -15, Math.PI / 2, 512);
@@ -722,7 +722,7 @@ const labelPrinters = [];
     box(1.4, 0.9, 0.8, mat(C.stainless, { roughness: 0.3, metalness: 0.7 }), scene, lx + 2.4, 0.45, z);
     labelPrinters.push(printer(scene, lx + 2.4, 0.9, z, Math.PI));
     smallLabel('SATO CL4NX Plus', lx + 2.4, 1.55, z, ['label']);
-    hmi(scene, lx + 3.4, 1.7, z - 0.1, Math.PI, 'LABEL PRINT', [['Format', 'Customer'], ['Part No.', 'BB-' + (i + 1)], ['Tag card', 'Printed'], ['Verify', 'OK']]);
+    hmi(scene, lx + 3.4, 1.7, z - 0.1, Math.PI, 'LABEL PRINT', [['Format', 'Customer'], ['Part No.', 'PN-' + (i + 1)], ['Tag card', 'Printed'], ['Verify', 'OK']]);
     person(scene, lx + 2.6, z + 1.3, Math.PI, 0x3b6ea5);
   });
   // generic label sample board (no customer names)

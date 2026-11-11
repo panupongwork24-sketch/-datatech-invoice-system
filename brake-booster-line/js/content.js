@@ -7,6 +7,7 @@ export const UI = {
     tour: '▶ Auto tour', tourStop: '■ Stop tour',
     delivered: 'Delivered', roadmap: 'Roadmap (planned)', views: 'Views',
     tagDone: 'DELIVERED', tagPlan: 'PLANNED', tagMisc: 'OVERVIEW',
+    note: 'Illustrative layout · not to scale · sample data · internal use',
   },
   th: {
     title: 'โรงงานหม้อลมเบรก · Digital Solutions',
@@ -14,6 +15,7 @@ export const UI = {
     tour: '▶ ทัวร์อัตโนมัติ', tourStop: '■ หยุดทัวร์',
     delivered: 'ส่งมอบแล้ว', roadmap: 'แผนงานในอนาคต', views: 'มุมมอง',
     tagDone: 'ส่งมอบแล้ว', tagPlan: 'แผนงาน', tagMisc: 'ภาพรวม',
+    note: 'ผังจำลอง · ไม่ตามสเกล · ข้อมูลตัวอย่าง · ใช้ภายในเท่านั้น',
   },
 };
 
