@@ -475,7 +475,6 @@ const rfidPads = [];
 const rfidMat = glow(0xf59e0b, 0.9);
 const rfidPanelMat = mat(0xeef0f2, { roughness: 0.55, metalness: 0 });
 const rfidReaderMat = mat(0x3a3f47, { roughness: 0.45, metalness: 0.3 });
-let aepPrinter;
 LINES.forEach((lx, li) => {
   conveyor(lx, (LINE_Z0 + LINE_Z1) / 2, LINE_Z1 - LINE_Z0);
   sign(`LINE ${li + 1}`, 3, 0.8, '#0f4c81', '#ffffff', scene, lx, 4.6, LINE_Z0 - 1.6, 0);
@@ -603,13 +602,209 @@ const trayY = 6.2;
   });
 }
 
-/* ---------------- AEP print at Line 3 station 3 ---------------- */
+/* ---------------- AEP: one PLC drives 3 SATO printers (Line 3, station 3) ---------------- */
+const cableMat = mat(0x1f2937, { roughness: 0.7, metalness: 0 });
+function cable(pts, parent = scene, r = 0.012) {
+  const c = new THREE.CatmullRomCurve3(pts.map((p) => new THREE.Vector3(...p)));
+  const m = new THREE.Mesh(new THREE.TubeGeometry(c, 24, r, 5, false), cableMat); parent.add(m); return m;
+}
+const aepPrinters = [];
 {
-  const lx = 15, sz = -2;
-  box(0.8, 1.0, 0.8, steel, scene, lx + 1.2, 0.5, sz - 1.6);
-  aepPrinter = printer(scene, lx + 1.2, 1.0, sz - 1.6, -Math.PI / 2);
-  smallLabel('SATO · AEP Print', lx + 1.2, 1.75, sz - 1.6, ['aep']);
-  plcCabinet(scene, lx + 3.0, sz - 1.6, -Math.PI / 2);
+  const x = 16.2, zs = [-3.6, -4.6, -5.6];
+  box(0.8, 1.0, 2.9, steel, scene, x, 0.5, -4.6);
+  zs.forEach((z) => {
+    aepPrinters.push(printer(scene, x, 1.0, z, -Math.PI / 2));
+    cable([[17.72, 1.55, -4.6], [17.2, 1.75, (z - 4.6) / 2], [16.55, 1.2, z]]);           // Ethernet PLC → printer
+  });
+  smallLabel('PLC → AEP · 3 SATO printers (TCP/IP)', x, 1.95, -4.6, ['aep']);
+  plcCabinet(scene, 18.0, -4.6, -Math.PI / 2);
+}
+
+/* ---------------- small helpers for the label stations ---------------- */
+const deskMat = mat(0xe7e5e4, { roughness: 0.6, metalness: 0 });
+function desk(parent, x, z, w = 1.6, d = 0.8, ry = 0) {
+  const g = group(parent, x, 0, z, ry);
+  box(w, 0.05, d, deskMat, g, 0, 0.76, 0);
+  for (const sx of [-w / 2 + 0.05, w / 2 - 0.05]) for (const sz of [-d / 2 + 0.05, d / 2 - 0.05]) box(0.04, 0.74, 0.04, steel, g, sx, 0.37, sz);
+  return g;
+}
+function monitor(parent, x, y, z, ry, w, h, draw, px = 512) {
+  const g = group(parent, x, y, z, ry);
+  box(w + 0.05, h + 0.05, 0.04, dark, g, 0, 0, -0.025);
+  box(0.05, 0.3, 0.05, dark, g, 0, -h / 2 - 0.12, -0.05);
+  box(0.28, 0.02, 0.18, dark, g, 0, -h / 2 - 0.27, -0.05);
+  g.screen = screen(w, h, draw, g, 0, 0, 0.001, 0, px);
+  return g;
+}
+const barcode = (c, x, y, w, h) => { c.fillStyle = '#000'; for (let b = 0, bx = x; bx < x + w; b++) { const bw = (b * 7) % 3 + 1; c.fillRect(bx, y, bw, h); bx += bw + ((b * 5) % 2) + 1; } };
+const qr = (c, x, y, s) => { c.fillStyle = '#000'; const n = 11, u = s / n; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) if ((i * 7 + j * 13 + i * j) % 3 === 0 || ((i < 3 || i > 7) && (j < 3 || j > 7) && !(i % 10 && j % 10 && i !== 1 && j !== 1 && i !== 9 && j !== 9))) c.fillRect(x + i * u, y + j * u, u, u); };
+function handheld(parent, x, y, z, rugged = false) {
+  const g = group(parent, x, y, z);
+  box(0.08, 0.2, 0.035, mat(rugged ? 0x2b3138 : 0x1f2937, { roughness: 0.6, metalness: 0.1 }), g, 0, 0, 0);
+  if (rugged) { box(0.09, 0.03, 0.045, mat(0xf59e0b), g, 0, 0.1, 0); box(0.09, 0.03, 0.045, mat(0xf59e0b), g, 0, -0.1, 0); }
+  box(0.06, 0.08, 0.004, glow(0x38bdf8, 0.8), g, 0, 0.04, 0.019);
+  return g;
+}
+/** Sample label artwork (generic data only). */
+function drawLabel(c, W, H, title, rows, hdr = '#0B2A5B') {
+  c.fillStyle = '#fff'; c.fillRect(0, 0, W, H);
+  c.fillStyle = hdr; c.fillRect(0, 0, W, H * 0.16);
+  c.fillStyle = '#fff'; c.font = `bold ${Math.round(H * 0.1)}px Arial`; c.fillText(title, W * 0.05, H * 0.115);
+  c.fillStyle = '#111'; c.font = `${Math.round(H * 0.065)}px Arial`;
+  rows.forEach((r, i) => c.fillText(r, W * 0.05, H * (0.27 + i * 0.09)));
+  qr(c, W * 0.66, H * 0.21, W * 0.28);
+  barcode(c, W * 0.05, H * 0.72, W * 0.9, H * 0.2);
+  c.strokeStyle = '#111'; c.lineWidth = 3; c.strokeRect(1, 1, W - 2, H - 2);
+}
+const SAMPLE = ['Part No. 12345-AB', 'Lot No. L2026-001', 'Qty 24'];
+
+/* ---------------- 7 · Shipping label from Excel (shipping desk, left of packing) ---------------- */
+let shipPrinter, shipMon;
+{
+  const x0 = -18.6, z0 = 20.7;
+  desk(scene, x0, z0, 2.4, 0.85);
+  shipMon = monitor(scene, x0 - 0.45, 1.3, z0 + 0.1, Math.PI, 1.0, 0.58, (c, W, H, sel = 1) => {
+    c.fillStyle = '#f1f5f9'; c.fillRect(0, 0, W, H);
+    c.fillStyle = '#0B5ED7'; c.fillRect(0, 0, W, 30);
+    c.fillStyle = '#fff'; c.font = 'bold 17px Arial'; c.fillText('Label design software · Print from Excel', 10, 21);
+    // Excel table
+    const cols = ['Part Name', 'Part No.', 'Lot No.', 'Date'], cw = [92, 86, 92, 66], x = 8, y = 40;
+    c.font = 'bold 12px Arial'; c.fillStyle = '#107c41'; c.fillRect(x, y, 336, 20);
+    c.fillStyle = '#fff'; let cx = x + 4; cols.forEach((t, i) => { c.fillText(t, cx, y + 14); cx += cw[i]; });
+    c.font = '12px Arial';
+    for (let r = 0; r < 6; r++) {
+      const ry = y + 20 + r * 20;
+      c.fillStyle = r === sel ? '#cfe2ff' : r % 2 ? '#fff' : '#f8fafc'; c.fillRect(x, ry, 336, 20);
+      c.fillStyle = '#0B2A5B'; cx = x + 4;
+      [`Booster ${['A', 'B', 'C', 'D', 'E', 'F'][r]}`, `1234${r}-AB`, `L2026-00${r + 1}`, '11/11'].forEach((t, i) => { c.fillText(t, cx, ry + 14); cx += cw[i]; });
+    }
+    c.strokeStyle = '#cbd5e1'; c.strokeRect(x, y, 336, 140);
+    // preview + print
+    c.fillStyle = '#fff'; c.fillRect(356, 40, 148, 100); c.strokeStyle = '#94a3b8'; c.strokeRect(356, 40, 148, 100);
+    c.fillStyle = '#0B2A5B'; c.font = 'bold 12px Arial'; c.fillText('SHIPPING LABEL', 364, 56);
+    c.font = '11px Arial'; c.fillText(`Part No. 1234${sel}-AB`, 364, 74); c.fillText(`Lot No. L2026-00${sel + 1}`, 364, 90); c.fillText('Qty 24', 364, 106);
+    barcode(c, 364, 114, 130, 18);
+    c.fillStyle = '#e2e8f0'; c.fillRect(356, 148, 70, 22); c.fillRect(434, 148, 70, 22);
+    c.fillStyle = '#0B2A5B'; c.font = 'bold 11px Arial'; c.fillText('4 x 2 inch', 362, 163); c.fillText('4 x 6 inch ✓', 437, 163);
+    c.fillStyle = '#0B5ED7'; c.fillRect(356, 178, 148, 30); c.fillStyle = '#fff'; c.font = 'bold 15px Arial'; c.fillText('PRINT', 408, 198);
+    c.fillStyle = '#16a34a'; c.font = 'bold 12px Arial'; c.fillText('✓ User master', 10, H - 30); c.fillText('✓ Log file', 130, H - 30);
+    c.fillStyle = '#64748b'; c.font = '11px Arial'; c.fillText('Sample data', 10, H - 10);
+  });
+  box(0.45, 0.02, 0.15, dark, scene, x0 - 0.45, 0.8, z0 - 0.2);                 // keyboard
+  box(0.2, 0.42, 0.42, dark, scene, x0 - 1.0, 0.21, z0 + 0.1);                  // PC under the desk
+  shipPrinter = printer(scene, x0 + 0.65, 0.785, z0 - 0.05, Math.PI);
+  person(scene, x0 - 0.2, z0 + 0.85, Math.PI, 0x3b6ea5);
+  // pallet of cartons with 4 x 6 shipping labels, plus a small 4 x 2 label box on the desk
+  const pg = group(scene, x0 + 2.4, 0, z0 - 1.0);
+  box(1.2, 0.15, 1.0, palletMat, pg, 0, 0.075, 0);
+  const shipLbl = (() => { const cv = document.createElement('canvas'); cv.width = 200; cv.height = 300; drawLabel(cv.getContext('2d'), 200, 300, 'SHIPPING', SAMPLE); const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return new THREE.MeshBasicMaterial({ map: t, toneMapped: false }); })();
+  for (let a = 0; a < 2; a++) for (let b = 0; b < 2; b++) for (let l = 0; l < 2; l++) {
+    box(0.55, 0.42, 0.45, cardMat, pg, -0.28 + a * 0.56, 0.36 + l * 0.43, -0.23 + b * 0.46);
+    if (b === 0) { const m = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.3), shipLbl); m.position.set(-0.28 + a * 0.56, 0.36 + l * 0.43, -0.462); m.rotation.y = Math.PI; pg.add(m); }
+  }
+  smallLabel('Shipping desk · Excel → SATO', x0, 2.05, z0, ['shipping']);
+}
+
+/* ---------------- 8 · Front label for the new model (Line 1, beside station 1–2) ---------------- */
+let frontPrinter, frontHmi;
+{
+  const x0 = -18.3, z0 = -12.5;
+  box(1.5, 0.85, 0.7, mat(C.stainless, { roughness: 0.3, metalness: 0.7 }), scene, x0, 0.425, z0);
+  frontPrinter = printer(scene, x0 + 0.42, 0.85, z0, 0);
+  frontHmi = group(scene, x0 - 0.35, 1.5, z0 - 0.1);
+  cyl(0.025, 0.6, steel, frontHmi, 0, -0.33, 0, 8);
+  box(0.66, 0.46, 0.05, dark, frontHmi, 0, 0.05, -0.03);
+  frontHmi.screen = screen(0.6, 0.4, (c, W, H, k = 0) => {
+    c.fillStyle = '#f8fafc'; c.fillRect(0, 0, W, H);
+    c.fillStyle = '#0B5ED7'; c.fillRect(0, 0, W, 34);
+    c.fillStyle = '#fff'; c.font = 'bold 20px Arial'; c.fillText('FRONT LABEL', 10, 24);
+    const rows = [['Scan Kanban', k ? 'K-0012 ✓' : '— scan —'], ['Line', 'Line 1'], ['Qty', '24'], ['Shift', 'D'], ['Master check', k ? 'OK' : '…']];
+    c.font = '16px Arial';
+    rows.forEach((r, i) => { c.fillStyle = '#334155'; c.fillText(r[0], 10, 60 + i * 24); c.fillStyle = r[1] === 'OK' || r[1].includes('✓') ? '#16a34a' : '#0B2A5B'; c.textAlign = 'right'; c.fillText(r[1], W - 10, 60 + i * 24); c.textAlign = 'left'; });
+    c.fillStyle = k ? '#0B5ED7' : '#94a3b8'; c.fillRect(10, H - 40, W - 20, 30);
+    c.fillStyle = '#fff'; c.font = 'bold 16px Arial'; c.textAlign = 'center'; c.fillText(k > 1 ? 'PRINTED ✓' : 'PRINT', W / 2, H - 19); c.textAlign = 'left';
+  }, frontHmi, 0, 0.05, 0, 0, 320);
+  const op = person(scene, x0 - 0.1, z0 + 0.95, Math.PI, 0x3b6ea5);
+  handheld(op, -0.28, 1.0, 0.3);
+  box(0.12, 0.18, 0.01, mat(0xfef9c3, { roughness: 0.8, metalness: 0 }), op, 0.28, 1.0, 0.3);   // kanban card
+  smallLabel('Front label · new model', x0, 2.2, z0, ['frontlabel']);
+}
+
+/* ---------------- 9 · Reprint lot card / label (between Line 2 and Line 3) ---------------- */
+let reprintPrinter, reprintMon;
+{
+  const x0 = 7.6, z0 = 8.3;
+  desk(scene, x0, z0, 1.7, 0.8);
+  reprintMon = monitor(scene, x0 - 0.35, 1.28, z0 - 0.1, 0, 0.72, 0.44, (c, W, H, k = 0) => {
+    c.fillStyle = '#f8fafc'; c.fillRect(0, 0, W, H);
+    c.fillStyle = '#0B5ED7'; c.fillRect(0, 0, W, 34);
+    c.fillStyle = '#fff'; c.font = 'bold 19px Arial'; c.fillText('REPRINT LOT CARD', 10, 24);
+    c.font = '16px Arial';
+    const rows = [['Scanned', k ? 'L2026-001 ✓' : '— scan —'], ['Part No.', k ? '12345-AB' : ''], ['Lot No.', k ? 'L2026-001' : ''], ['Qty', k ? '24' : '']];
+    rows.forEach((r, i) => { c.fillStyle = '#334155'; c.fillText(r[0], 10, 64 + i * 28); c.fillStyle = r[1].includes('✓') ? '#16a34a' : '#0B2A5B'; c.textAlign = 'right'; c.fillText(r[1], W - 10, 64 + i * 28); c.textAlign = 'left'; });
+    c.fillStyle = k ? '#0B5ED7' : '#94a3b8'; c.fillRect(10, H - 46, W - 20, 34);
+    c.fillStyle = '#fff'; c.font = 'bold 18px Arial'; c.textAlign = 'center'; c.fillText(k > 1 ? 'REPRINTED ✓' : 'REPRINT', W / 2, H - 22); c.textAlign = 'left';
+  });
+  reprintPrinter = printer(scene, x0 + 0.5, 0.785, z0 - 0.05, 0);
+  // tote with a lot card on the side of the desk
+  tote(scene, x0 - 1.25, 0, z0 + 0.1, 0.6, 0.26, 0.42);
+  { const lc = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 0.13), (() => { const cv = document.createElement('canvas'); cv.width = 200; cv.height = 130; drawLabel(cv.getContext('2d'), 200, 130, 'LOT CARD', ['L2026-001']); const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return new THREE.MeshBasicMaterial({ map: t, toneMapped: false }); })());
+    lc.position.set(x0 - 1.25, 0.2, z0 + 0.1 + 0.215); scene.add(lc); }
+  const op = person(scene, x0 - 0.5, z0 + 0.9, Math.PI, 0x4a7fb0);
+  handheld(op, -0.28, 1.05, 0.3, true);
+  smallLabel('Reprint station · rugged handheld', x0, 2.05, z0, ['reprint']);
+}
+
+/* ---------------- 10 · OEE & NG label (Line 3, station 4) ---------------- */
+let ngPrinter, oeeBoard, ngLabel, ngBin;
+{
+  const sbx = 17.76, z = 5;                                                       // signal box on the machine side
+  box(0.12, 0.26, 0.22, mat(0xcbd5e1, { roughness: 0.5, metalness: 0.3 }), scene, sbx, 1.35, z + 0.4);
+  box(0.005, 0.03, 0.03, glow(0x22c55e, 1.6), scene, sbx + 0.062, 1.42, z + 0.4);
+  cable([[sbx, 1.5, z + 0.4], [sbx - 0.3, 2.3, z + 0.1], [16.75 + 0.75, 2.1, z - 0.8]], scene, 0.008);   // to the light tower
+  // NG print stand + reject bin
+  box(0.7, 1.0, 0.7, steel, scene, 19.3, 0.5, 4.6);
+  ngPrinter = printer(scene, 19.3, 1.0, 4.6, 0);
+  cable([[sbx + 0.06, 1.3, z + 0.4], [18.6, 1.1, 4.7], [19.0, 1.1, 4.4]], scene, 0.01);
+  ngBin = group(scene, 19.3, 0, 6.0);
+  const red = mat(0xdc2626, { roughness: 0.55, metalness: 0 });
+  box(0.8, 0.05, 0.6, red, ngBin, 0, 0.05, 0);
+  box(0.8, 0.6, 0.04, red, ngBin, 0, 0.32, 0.28); box(0.8, 0.6, 0.04, red, ngBin, 0, 0.32, -0.28);
+  box(0.04, 0.6, 0.6, red, ngBin, 0.38, 0.32, 0); box(0.04, 0.6, 0.6, red, ngBin, -0.38, 0.32, 0);
+  ngBin.parts = [0, 1, 2].map((i) => { const b = booster(); b.position.set(-0.2 + i * 0.2, 0.08, 0); b.scale.setScalar(0.6); ngBin.add(b); return b; });
+  ngLabel = screen(0.42, 0.3, (c, W, H) => {
+    drawLabel(c, W, H, 'NG', ['Part No. 12345-AB', 'Qty 1', 'Reason: Leak test'], '#dc2626');
+  }, ngBin, 0, 0.36, 0.302, 0, 300);
+  // OEE dashboard on a stand
+  const dg = group(scene, 21.4, 0, 3.6, 0.4);
+  for (const sx of [-1.0, 1.0]) box(0.07, 2.2, 0.07, alu, dg, sx, 1.1, -0.05);
+  box(2.3, 1.35, 0.06, dark, dg, 0, 2.55, -0.04);
+  oeeBoard = screen(2.2, 1.25, (c, W, H, ng = 3, alarm = false) => {
+    c.fillStyle = '#0b1f33'; c.fillRect(0, 0, W, H);
+    c.fillStyle = '#0B5ED7'; c.fillRect(0, 0, W, 40);
+    c.fillStyle = '#fff'; c.font = 'bold 24px Arial'; c.fillText('OEE · LINE 3 · ST4', 14, 28);
+    c.textAlign = 'right'; c.font = '15px Arial'; c.fillStyle = '#cbd5e1'; c.fillText('Sample data', W - 14, 27); c.textAlign = 'left';
+    // gauge
+    const gx = 120, gy = 165, r = 78;
+    c.lineWidth = 18; c.strokeStyle = '#1e3a5f'; c.beginPath(); c.arc(gx, gy, r, Math.PI, 0); c.stroke();
+    c.strokeStyle = '#22c55e'; c.beginPath(); c.arc(gx, gy, r, Math.PI, Math.PI + Math.PI * 0.85); c.stroke();
+    c.fillStyle = '#fff'; c.font = 'bold 34px Arial'; c.textAlign = 'center'; c.fillText('85%', gx, gy - 8);
+    c.font = '15px Arial'; c.fillStyle = '#94a3b8'; c.fillText('OEE', gx, gy + 16); c.textAlign = 'left';
+    // bar chart (hourly)
+    const bx = 240, by = 60, bh = 130;
+    c.fillStyle = '#94a3b8'; c.font = '13px Arial'; c.fillText('Output / hour', bx, by + 10);
+    [0.7, 0.85, 0.9, 0.6, 0.88, 0.92, 0.8].forEach((v, i) => { c.fillStyle = v < 0.7 ? '#f59e0b' : '#3b82f6'; c.fillRect(bx + i * 34, by + 20 + bh * (1 - v), 24, bh * v); });
+    // tiles
+    const tiles = [['RUN', '85%', '#16a34a'], ['STOP', '10%', '#f59e0b'], ['NG', String(ng), alarm ? '#ef4444' : '#7f1d1d']];
+    tiles.forEach((tl, i) => {
+      const tx = 14 + i * 160, ty = H - 66;
+      c.fillStyle = tl[2]; c.fillRect(tx, ty, 150, 54);
+      c.fillStyle = '#fff'; c.font = 'bold 15px Arial'; c.fillText(tl[0], tx + 10, ty + 20); c.font = 'bold 22px Arial'; c.fillText(tl[1], tx + 10, ty + 45);
+    });
+    if (alarm) { c.fillStyle = '#ef4444'; c.font = 'bold 18px Arial'; c.fillText('NG event → NG label printed', 14, H - 78); }
+  }, dg, 0, 2.55, 0.0, 0, 512);
+  smallLabel('Signal box', sbx + 0.1, 1.75, z + 0.4, ['oee']);
+  smallLabel('NG label printer + reject bin', 19.3, 1.8, 5.3, ['oee']);
 }
 
 /* ---------------- material flow (right side) ----------------
@@ -883,22 +1078,32 @@ LINES.forEach((lx) => {
   flow([[lx + 3.2, 6.2, 5.9], [lx + 3.2, 6.2, -23.5], [R[0], 6.25, -23.5], [R[0], 2.2, R[2] + 0.3]], 0x3b82f6, ['infra', 'connected']);
   flow([[lx + 2.4, 1.4, 15.2], [lx + 3.2, 6.2, 13], [lx + 3.2, 6.2, -23.4], [R[0], 6.2, -23.4], [R[0], 2.2, R[2] - 0.3]], 0xdb2777, ['label', 'connected']);
 });
-flow([[16.2, 1.6, -3.6], [18.2, 6.0, -3.6], [18.2, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0x65a30d, ['aep', 'connected']);
+flow([[18.0, 2.0, -4.6], [18.2, 6.0, -4.6], [18.2, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0x65a30d, ['aep', 'connected']);
 flow([[CK_A.x, 1.3, CK_A.z], [-11.8, 5.9, -10], [-11.8, 6.25, -23.4], [R[0], 6.25, -23.4], [R[0], 2.3, R[2] + 0.2]], 0x0d9488, ['checklist', 'connected']);
 flow([[-13.75, 1.2, -2.25], [-11.8, 6.2, -2.25], [-11.8, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0xf59e0b, ['ekanban', 'connected']);
 flow([[-36.4, 3.2, -0.2], [-36.4, 6.2, -10], [R[0], 6.2, -20], [R[0], 2.3, R[2]]], 0xf59e0b, ['esl', 'connected']);
 flow([[-8, 3.8, 22], [-8, 6.2, 14], [-12, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0xf59e0b, ['rfid', 'connected']);
 
+flow([[-18.6, 1.4, 21.0], [-18.6, 6.2, 19.5], [-18.6, 6.2, -23.4], [R[0], 6.2, -23.4], [R[0], 2.2, R[2] - 0.2]], 0x7c3aed, ['shipping', 'connected']);
+flow([[-18.3, 1.8, -12.6], [-18.3, 6.2, -13.5], [-18.3, 6.25, -23.5], [R[0], 6.25, -23.5], [R[0], 2.2, R[2] + 0.1]], 0x0891b2, ['frontlabel', 'connected']);
+flow([[7.25, 1.4, 8.2], [7.25, 6.2, 8.2], [3.2, 6.2, 8.2], [3.2, 6.2, -23.45], [R[0], 6.2, -23.45], [R[0], 2.2, R[2]]], 0xea580c, ['reprint', 'connected']);
+flow([[17.76, 1.5, 5.4], [18.2, 6.2, 5.4], [18.2, 6.2, -23.45], [R[0], 6.2, -23.45], [R[0], 2.25, R[2]]], 0xdc2626, ['oee', 'connected']);
+flow([[17.76, 1.5, 5.4], [19.6, 3.0, 4.6], [21.4, 2.6, 3.6]], 0xdc2626, ['oee']);
+
 /* ---------------- labels (numbered hotspots) ---------------- */
 label('amr', '1', 'done', 31.7, 4.0, -9);
 label('trace', '2', 'done', -15, 4.0, LINE_Z0 + 0.6);
 label('infra', '3', 'done', rackPos.x + 1, 4.4, rackPos.z + 2);
-label('aep', '4', 'done', 16.4, 3.4, -3.6);
+label('aep', '4', 'done', 16.4, 3.0, -4.6);
 label('label', '5', 'done', 0, 5.4, 18.6);
 label('checklist', '6', 'done', -7.4, 2.6, -6.4);
-label('ekanban', '7', 'plan', -13.75, 2.6, -2.25);
-label('esl', '8', 'plan', -31, 3.6, 0);
-label('rfid', '9', 'plan', -8, 3.6, HALL.z1);
+label('shipping', '7', 'done', -18.6, 2.9, 20.7);
+label('frontlabel', '8', 'done', -18.3, 2.9, -12.5);
+label('reprint', '9', 'done', 7.6, 2.9, 8.3);
+label('oee', '10', 'done', 21.4, 4.0, 3.6);
+label('ekanban', '11', 'plan', -13.75, 2.6, -2.25);
+label('esl', '12', 'plan', -31, 3.6, 0);
+label('rfid', '13', 'plan', -8, 3.6, HALL.z1);
 for (const [i, lx] of LINES.entries()) smallLabel(`Line ${i + 1}`, lx, 1.8, LINE_Z1 + 1.6, ['overview', 'label', 'connected']);
 
 /* ---------------- UI / i18n / scenes ---------------- */
@@ -1062,7 +1267,23 @@ function tick(vdt, vt, noRender) {
   const pp = (t % 3) / 3;
   tracePrinters.forEach((p, i) => feed(p, (pp + i * 0.33) % 1));
   labelPrinters.forEach((p, i) => feed(p, (pp + 0.5 + i * 0.33) % 1));
-  feed(aepPrinter, (t % 4) / 4);
+  aepPrinters.forEach((p, i) => feed(p, ((t / 4) + i / 3) % 1));
+  feed(shipPrinter, (t % 6) / 6);
+  // front label: scan → master check → print (6 s)
+  { const k = (t % 6) / 6, st = k < 0.25 ? 0 : k < 0.55 ? 1 : 2; if (st !== tick.lastFront) { tick.lastFront = st; frontHmi.screen.redraw(st); } feed(frontPrinter, st === 2 ? (k - 0.55) / 0.45 * 0.7 : 0.99); }
+  // reprint: scan lot card → data → reprint (7 s)
+  { const k = (t % 7) / 7, st = k < 0.3 ? 0 : k < 0.6 ? 1 : 2; if (st !== tick.lastRe) { tick.lastRe = st; reprintMon.screen.redraw(st); } feed(reprintPrinter, st === 2 ? (k - 0.6) / 0.4 * 0.7 : 0.99); }
+  // shipping desk: step the selected Excel row
+  { const r = Math.floor(t / 6) % 6; if (r !== tick.lastShip) { tick.lastShip = r; shipMon.screen.redraw(r); } }
+  // OEE: NG event every 10 s → tower red, NG label printed, NG count up
+  { const k = (t % 10) / 10, alarm = k < 0.35, n = 3 + Math.floor(t / 10) % 5, key = n * 2 + (alarm ? 1 : 0);
+    if (key !== tick.lastOee) { tick.lastOee = key; oeeBoard.redraw(n, alarm); }
+    const tw = towers[11];
+    if (alarm) { tw.lamps[0].material.emissiveIntensity = 0.1; tw.lamps[1].material.emissiveIntensity = 0.06; tw.lamps[2].material.emissiveIntensity = Math.sin(t * 10) > 0 ? 2.4 : 0.3; }
+    else tw.lamps[2].material.emissiveIntensity = 0.06;
+    feed(ngPrinter, alarm ? k / 0.35 * 0.7 : 0.99);
+    ngLabel.scale.setScalar(alarm && Math.sin(t * 8) > 0 ? 1.06 : 1);
+  }
   // Digital WI screens: step through the instruction (one screen redrawn per tick)
   const wk = Math.floor(t * 2);
   if (wk !== tick.lastWi) { tick.lastWi = wk; const w = wis[wk % wis.length]; w.screen.redraw(Math.floor(t / 3 + wk) % 4); }

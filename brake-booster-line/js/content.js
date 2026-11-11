@@ -20,17 +20,17 @@ export const UI = {
 };
 
 // kind: done | plan | misc.  cam: [x,y,z] camera, tgt: [x,y,z] look-at.  focus: label ids to highlight.
-const ALL = ['amr', 'trace', 'infra', 'aep', 'label', 'checklist', 'ekanban', 'esl', 'rfid'];
+const ALL = ['amr', 'trace', 'infra', 'aep', 'label', 'checklist', 'shipping', 'frontlabel', 'reprint', 'oee', 'ekanban', 'esl', 'rfid'];
 export const SCENES = [
   {
     id: 'overview', kind: 'misc', num: '◎',
     cam: [6, 70, 62], tgt: [-1, 0, 0], focus: ALL,
     en: { name: 'Plant overview', title: 'Brake booster plant — 3 production lines',
       text: 'A rectangular production hall with three brake-booster lines. Material arrives on the right by conveyor and is carried by AMRs with karakuri carts, every unit is traced from the first station, and customer labels are printed at the end of each line before packing.',
-      points: ['3 production lines (Line 1 · Line 2 · Line 3)', 'Right side: X-lift + 3 conveyor units + 3 AMRs feeding Line 2', 'End of line: 3 SATO label printers before packing', 'Amber dashed items = roadmap (not yet installed)'] },
+      points: ['3 production lines (Line 1 · Line 2 · Line 3)', 'Right side: X-lift + 3 conveyor units + 3 AMRs feeding Line 2', 'End of line: 3 SATO label printers before packing', 'Printing: AEP, shipping, front label, reprint, NG label', 'Amber dashed items = roadmap (not yet installed)'] },
     th: { name: 'ภาพรวมโรงงาน', title: 'โรงงานหม้อลมเบรก — 3 ไลน์การผลิต',
       text: 'อาคารผลิตรูปสี่เหลี่ยม มีไลน์ผลิตหม้อลมเบรก 3 ไลน์ วัตถุดิบเข้าทางขวาด้วย Conveyor และ AMR ที่แบกรถ Karakuri ทุกชิ้นถูก Trace ตั้งแต่สเตชันแรก และพิมพ์ฉลากลูกค้าที่ท้ายไลน์ก่อนแพ็คกิ้ง',
-      points: ['ไลน์ผลิต 3 ไลน์ (Line 1 · Line 2 · Line 3)', 'ฝั่งขวา: X-Lift + Conveyor 3 Unit + AMR 3 ตัว ส่งของเข้า Line 2', 'ท้ายไลน์: เครื่องพิมพ์ SATO 3 ตัว ก่อนแพ็คกิ้ง', 'สีส้มเส้นประ = แผนงานในอนาคต (ยังไม่ติดตั้ง)'] },
+      points: ['ไลน์ผลิต 3 ไลน์ (Line 1 · Line 2 · Line 3)', 'ฝั่งขวา: X-Lift + Conveyor 3 Unit + AMR 3 ตัว ส่งของเข้า Line 2', 'ท้ายไลน์: เครื่องพิมพ์ SATO 3 ตัว ก่อนแพ็คกิ้ง', 'งานพิมพ์: AEP, Shipping, Front Label, Reprint, NG Label', 'สีส้มเส้นประ = แผนงานในอนาคต (ยังไม่ติดตั้ง)'] },
   },
   {
     id: 'amr', kind: 'done', num: '1',
@@ -64,13 +64,13 @@ export const SCENES = [
   },
   {
     id: 'aep', kind: 'done', num: '4',
-    cam: [24, 7, 2], tgt: [17, 1.2, -3], focus: ['aep'],
+    cam: [21.6, 4.2, -0.4], tgt: [16.3, 1.2, -4.6], focus: ['aep'],
     en: { name: 'AEP Print (PLC-triggered)', title: 'AEP Print function — process connected to PLC',
-      text: 'For the process connected to the PLC, the AEP Print function sends the print job to a SATO printer when the PLC signals that the step is complete, so the label always matches the unit at the station.',
-      points: ['PLC signal triggers the print', 'SATO printer at the process station', 'Label data comes from the line, not typed by hand', 'Print result linked back to traceability'] },
+      text: 'For the process connected to the PLC, the AEP function inside the SATO printers takes the job straight from the PLC over TCP/IP — no PC in between. One PLC drives three printers; each prints when the PLC signals that the step is complete, so the label always matches the unit at the station.',
+      points: ['PLC → printer over TCP/IP, no PC needed', 'One PLC drives 3 SATO printers', 'Print triggered by the PLC signal in real time', 'Label data comes from the line, not typed by hand'] },
     th: { name: 'AEP Print (สั่งพิมพ์จาก PLC)', title: 'ฟังก์ชัน AEP Print — โปรเซสที่เชื่อมกับ PLC',
-      text: 'สำหรับโปรเซสที่เชื่อมกับ PLC ฟังก์ชัน AEP Print จะส่งงานพิมพ์ไปที่เครื่องพิมพ์ SATO เมื่อ PLC ส่งสัญญาณว่าขั้นตอนเสร็จ ฉลากจึงตรงกับชิ้นงานที่อยู่ในสเตชันเสมอ',
-      points: ['สัญญาณจาก PLC สั่งพิมพ์', 'เครื่องพิมพ์ SATO ที่สเตชันโปรเซส', 'ข้อมูลฉลากมาจากไลน์ ไม่ต้องพิมพ์มือ', 'ผลการพิมพ์ผูกกลับเข้า Traceability'] },
+      text: 'สำหรับโปรเซสที่เชื่อมกับ PLC ฟังก์ชัน AEP ในเครื่องพิมพ์ SATO รับงานพิมพ์จาก PLC โดยตรงผ่าน TCP/IP ไม่ต้องมี PC คั่นกลาง PLC 1 ตัวสั่งเครื่องพิมพ์ได้ 3 เครื่อง พิมพ์ทันทีเมื่อ PLC ส่งสัญญาณว่าขั้นตอนเสร็จ ฉลากจึงตรงกับชิ้นงานที่สเตชันเสมอ',
+      points: ['PLC → เครื่องพิมพ์ผ่าน TCP/IP ไม่ต้องใช้ PC', 'PLC 1 ตัว สั่งเครื่องพิมพ์ SATO 3 เครื่อง', 'สั่งพิมพ์แบบ Real-time ตามสัญญาณ PLC', 'ข้อมูลฉลากมาจากไลน์ ไม่ต้องพิมพ์มือ'] },
   },
   {
     id: 'label', kind: 'done', num: '5',
@@ -93,7 +93,47 @@ export const SCENES = [
       points: ['แท็บเล็ตถือเดินตรวจ', 'ตรวจเครื่องก่อนเริ่มกะทุกสเตชัน', 'เช็คลิสต์ 5S / Safety / Audit', 'บันทึกเข้า Server — เลิกใช้ใบเช็คกระดาษ'] },
   },
   {
-    id: 'ekanban', kind: 'plan', num: '7',
+    id: 'shipping', kind: 'done', num: '7',
+    cam: [-14.8, 3.9, 15.0], tgt: [-18.0, 1.0, 20.2], focus: ['shipping'],
+    en: { name: 'Shipping label from Excel', title: 'Shipping label printing from an Excel list',
+      text: 'At the shipping desk the shipment list is kept in Excel (part name, part no., lot no., date). The label design software imports the sheet, the user picks the rows and prints shipping labels on a SATO printer in 4 × 2 or 4 × 6 inch. A user master controls who can print, and every print is written to a log file.',
+      points: ['Import the Excel list — no retyping', 'Select rows → print, 4 × 2 / 4 × 6 inch', 'User master: only authorised users print', 'Log file of every label printed'] },
+    th: { name: 'Shipping Label จาก Excel', title: 'พิมพ์ Shipping Label จากไฟล์ Excel',
+      text: 'ที่โต๊ะ Shipping รายการส่งของเก็บใน Excel (Part Name, Part No., Lot No., Date) โปรแกรมออกแบบฉลากดึงไฟล์เข้ามา ผู้ใช้เลือกแถวแล้วสั่งพิมพ์ Shipping Label ขนาด 4 × 2 หรือ 4 × 6 นิ้ว บนเครื่องพิมพ์ SATO มี User Master กำหนดสิทธิ์ผู้พิมพ์ และบันทึก Log ทุกครั้งที่พิมพ์',
+      points: ['ดึงข้อมูลจาก Excel — ไม่ต้องพิมพ์ซ้ำ', 'เลือกแถว → พิมพ์ 4 × 2 / 4 × 6 นิ้ว', 'User Master: เฉพาะผู้มีสิทธิ์พิมพ์', 'บันทึก Log ทุกฉลากที่พิมพ์'] },
+  },
+  {
+    id: 'frontlabel', kind: 'done', num: '8',
+    cam: [-15.3, 3.0, -9.4], tgt: [-18.5, 1.2, -12.7], focus: ['frontlabel'],
+    en: { name: 'Front label (new model)', title: 'Front label printing for the new model',
+      text: 'For the new model, the operator scans the kanban card at the front-label station. The screen fills in line, quantity and shift, checks the part against the master data linked to the existing system, and prints the front label with the lot on a SATO printer.',
+      points: ['Scan kanban → job loaded automatically', 'Master data check before printing', 'Lot printed automatically on the label', 'Linked to the existing system for traceability'] },
+    th: { name: 'Front Label (โมเดลใหม่)', title: 'พิมพ์ Front Label สำหรับโมเดลใหม่',
+      text: 'สำหรับโมเดลใหม่ พนักงานสแกนการ์ด Kanban ที่สเตชัน Front Label หน้าจอดึงข้อมูล Line, จำนวน, กะ มาอัตโนมัติ ตรวจกับ Master Data ที่เชื่อมกับระบบเดิม แล้วพิมพ์ Front Label พร้อม Lot บนเครื่องพิมพ์ SATO',
+      points: ['สแกน Kanban → โหลดงานอัตโนมัติ', 'ตรวจ Master Data ก่อนพิมพ์', 'พิมพ์ Lot ลงฉลากอัตโนมัติ', 'เชื่อมระบบเดิมเพื่อ Traceability'] },
+  },
+  {
+    id: 'reprint', kind: 'done', num: '9',
+    cam: [10.4, 3.3, 13.4], tgt: [7.6, 1.1, 8.5], focus: ['reprint'],
+    en: { name: 'Reprint lot card / label', title: 'Reprint lot card and label from a handheld scan',
+      text: 'When a lot card or label is damaged or lost, the operator scans the lot barcode with a rugged handheld. The lot data is read back from the database and a new lot card with QR and barcode is reprinted on a SATO printer with one press — no retyping, no waiting.',
+      points: ['Scan the lot card with a rugged handheld', 'Lot data retrieved from the database', 'One-press reprint — same data as the original', 'Less downtime, no typing mistakes'] },
+    th: { name: 'Reprint Lot Card / Label', title: 'พิมพ์ Lot Card / ฉลากซ้ำ จากการสแกนด้วย Handheld',
+      text: 'เมื่อ Lot Card หรือฉลากเสียหายหรือหาย พนักงานสแกนบาร์โค้ด Lot ด้วย Handheld แบบทนทาน ระบบดึงข้อมูล Lot จากฐานข้อมูล แล้วกด Reprint ครั้งเดียว ได้ Lot Card ใหม่พร้อม QR และบาร์โค้ดจากเครื่องพิมพ์ SATO ไม่ต้องพิมพ์ข้อมูลใหม่',
+      points: ['สแกน Lot Card ด้วย Rugged Handheld', 'ดึงข้อมูล Lot จากฐานข้อมูล', 'กด Reprint ครั้งเดียว — ข้อมูลตรงต้นฉบับ', 'ลด Downtime ไม่มีพิมพ์ผิด'] },
+  },
+  {
+    id: 'oee', kind: 'done', num: '10',
+    cam: [24.6, 4.6, 12.4], tgt: [18.6, 1.6, 4.6], focus: ['oee'],
+    en: { name: 'OEE & NG label', title: 'OEE monitoring and automatic NG label printing',
+      text: 'A signal box on the machine reads the tower-light status and sends run / stop / NG events to the OEE dashboard in real time. When the machine rejects a unit, the NG event triggers a SATO printer to print an NG label (part no., quantity, reason, barcode) for the reject bin.',
+      points: ['Machine status read from the tower light', 'OEE dashboard updated in real time', 'NG event → NG label printed automatically', 'Data for loss and NG analysis'] },
+    th: { name: 'OEE & NG Label', title: 'ติดตาม OEE และพิมพ์ฉลาก NG อัตโนมัติ',
+      text: 'Signal Box ที่เครื่องจักรอ่านสถานะไฟ Tower Light แล้วส่งเหตุการณ์ Run / Stop / NG ขึ้น OEE Dashboard แบบ Real-time เมื่อเครื่องคัดชิ้นงานเสีย เหตุการณ์ NG จะสั่งเครื่องพิมพ์ SATO พิมพ์ฉลาก NG (Part No., จำนวน, สาเหตุ, บาร์โค้ด) ติดที่กล่องงานเสีย',
+      points: ['อ่านสถานะเครื่องจาก Tower Light', 'OEE Dashboard อัปเดต Real-time', 'เกิด NG → พิมพ์ฉลาก NG อัตโนมัติ', 'ข้อมูลสำหรับวิเคราะห์ Loss และ NG'] },
+  },
+  {
+    id: 'ekanban', kind: 'plan', num: '11',
     cam: [-9.6, 3.4, 3.4], tgt: [-14.2, 1.3, -4.5], focus: ['ekanban'],
     en: { name: 'RFID e-Kanban', title: 'Roadmap: RFID e-Kanban replaces paper production kanban',
       text: 'Planned: each production kanban card carries an RFID tag. A panel antenna and fixed reader sit at every station of all three lines — the operator taps the card at the antenna and the production order is started and tracked automatically, with no paper card.',
@@ -103,7 +143,7 @@ export const SCENES = [
       points: ['Panel antenna + Reader ทุกสเตชัน', 'แตะการ์ด Kanban → เริ่มคำสั่งผลิต', 'ติดตามคำสั่งผลิตทีละสเตชัน', 'ใช้ Network และ Traceability ที่มีอยู่'] },
   },
   {
-    id: 'esl', kind: 'plan', num: '8',
+    id: 'esl', kind: 'plan', num: '12',
     cam: [-26.4, 3, 4], tgt: [-31.6, 1.0, 0.4], focus: ['esl'],
     en: { name: 'ESL flow rack', title: 'Roadmap: Electronic Shelf Labels on a small flow rack',
       text: 'Planned for a small flow-rack area inside production: an e-paper Electronic Shelf Label on every lane shows the part, the quantity and the refill status. Tags are updated wirelessly from an ESL access point, so lane labels never need reprinting.',
@@ -113,7 +153,7 @@ export const SCENES = [
       points: ['ป้าย ESL e-paper ทุกช่องของ Flow Rack', 'เห็น Part, จำนวน, สถานะเติม ได้ทันที', 'อัปเดตไร้สายผ่าน ESL Access Point', 'เริ่มจากพื้นที่เล็ก — Flow Rack เดียว'] },
   },
   {
-    id: 'rfid', kind: 'plan', num: '9',
+    id: 'rfid', kind: 'plan', num: '13',
     cam: [-3.2, 5, 14], tgt: [-8, 1.3, 22], focus: ['rfid'],
     en: { name: 'RFID: Production → FG', title: 'Roadmap: RFID at the hand-over to the FG warehouse',
       text: 'Planned RFID gate at the point where finished goods leave production for the FG warehouse. Pallets are read automatically as they pass, so the hand-over is recorded without manual scanning.',
@@ -126,10 +166,10 @@ export const SCENES = [
     id: 'connected', kind: 'misc', num: '∞',
     cam: [-10, 48, 52], tgt: [-4, 2, -2], focus: ALL,
     en: { name: 'Everything connected', title: 'One connected line — from material to finished goods',
-      text: 'Material flow (conveyor, X-lift, AMR + karakuri), unit data (QR + PLC), operator guidance (Digital WI), checks (digital checklist) and printing (AEP + customer labels) all run on the same infrastructure. The roadmap extends the same data to RFID e-Kanban and the FG hand-over.',
+      text: 'Material flow (conveyor, X-lift, AMR + karakuri), unit data (QR + PLC), operator guidance (Digital WI), checks (digital checklist, OEE) and printing (AEP, customer, shipping, front, reprint and NG labels) all run on the same infrastructure. The roadmap extends the same data to RFID e-Kanban and the FG hand-over.',
       points: ['Material: X-lift → conveyor → AMR → Line 2', 'Data: SATO QR + PLC → traceability', 'People: Digital WI + digital checklist', 'Next: RFID e-Kanban at stations, ESL, RFID to FG'] },
     th: { name: 'ทุกอย่างเชื่อมกัน', title: 'ไลน์ที่เชื่อมต่อกันทั้งหมด — ตั้งแต่วัตถุดิบถึงสินค้าสำเร็จรูป',
-      text: 'การลำเลียง (Conveyor, X-Lift, AMR + Karakuri), ข้อมูลชิ้นงาน (QR + PLC), การแนะนำพนักงาน (Digital WI), การตรวจเช็ค (Digital Checklist) และงานพิมพ์ (AEP + ฉลากลูกค้า) ทำงานบนอินฟราเดียวกัน แผนงานถัดไปต่อยอดข้อมูลเดียวกันไปสู่ RFID e-Kanban และการส่งมอบเข้าคลัง FG',
+      text: 'การลำเลียง (Conveyor, X-Lift, AMR + Karakuri), ข้อมูลชิ้นงาน (QR + PLC), การแนะนำพนักงาน (Digital WI), การตรวจเช็ค (Digital Checklist, OEE) และงานพิมพ์ (AEP, ฉลากลูกค้า, Shipping, Front, Reprint, NG) ทำงานบนอินฟราเดียวกัน แผนงานถัดไปต่อยอดข้อมูลเดียวกันไปสู่ RFID e-Kanban และการส่งมอบเข้าคลัง FG',
       points: ['วัตถุดิบ: X-Lift → Conveyor → AMR → Line 2', 'ข้อมูล: QR SATO + PLC → Traceability', 'คน: Digital WI + Digital Checklist', 'ถัดไป: RFID e-Kanban / ESL และ RFID เข้าคลัง FG'] },
   },
 ];
