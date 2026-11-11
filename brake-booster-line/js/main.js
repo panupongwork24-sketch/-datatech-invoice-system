@@ -1360,7 +1360,34 @@ const VPART = { current: ['overview', ...DONE_IDS], future: PLAN_IDS };
 const VIDEO_FPS = 30;
 let vSegs = [], vTotal = 0, vSeg = -1, vLastT = 0;
 function sceneIndex(id) { return SCENES.findIndex((x) => x.id === id); }
-function poseOf(id, k = 0) { // k: 0..1 slow dolly-in during a hold
+const V3 = (a) => new THREE.Vector3(...a);
+const DOCK_VIEW = new THREE.Vector3(7.6, 0.8, -9);
+/** AMR + karakuri sub-shots (video Part 1). follow = camera tracks the delivering AMR. */
+const AMR_SHOTS = [
+  { dur: 7, cam: [36.6, 3.4, 12.6], tgt: [31.6, 0.9, 7.0],
+    en: ['Tail: trolley in → X-lift → lane switch', ['Totes arrive stacked 4–5 high on a trolley', 'X-lift raises the stack to belt level', 'Lane switch sends it to unit 1 / 2 / 3']],
+    th: ['ท้าย Conveyor: เข็นรถเข้า → X-Lift → Lane switch', ['กล่องซ้อน 4–5 ชั้นมาบนรถเข็น', 'X-Lift ยกกล่องขึ้นระดับสายพาน', 'Lane switch ส่งเข้า Unit 1 / 2 / 3']] },
+  { dur: 6, cam: [25.6, 3.4, 1.0], tgt: [31.7, 0.9, -2.2],
+    en: ['Three conveyor units carry the stacks to the head', ['3 belt conveyor units side by side', 'Stacks buffered on the way to the head']],
+    th: ['Conveyor 3 Unit ลำเลียงกล่องไปหัว Conveyor', ['สายพาน 3 Unit วางคู่ขนาน', 'พักกล่องระหว่างทางไปหัว Conveyor']] },
+  { dur: 7, cam: [27.2, 3.3, -14.6], tgt: [31.5, 0.8, -9.3],
+    en: ['Head: the AMR loads totes onto the karakuri cart', ['AMR parks at the conveyor head', 'Totes loaded shelf by shelf onto the cart', '3 AMRs share one loop']],
+    th: ['หัว Conveyor: AMR รับกล่องขึ้นรถ Karakuri', ['AMR จอดที่หัว Conveyor', 'รับกล่องเข้ารถทีละชั้น', 'AMR 3 ตัว วิ่งลูปเดียวกัน']] },
+  { dur: 8, follow: true,
+    en: ['AMR delivers to Line 2 — gravity unload', ['AMR docks at the Line 2 process station', 'Karakuri: totes roll off by gravity, no power', 'Line-side conveyor feeds the station']],
+    th: ['AMR ส่งของที่ Line 2 — ปล่อยกล่องด้วยแรงโน้มถ่วง', ['AMR จอดที่สเตชัน Line 2', 'Karakuri: กล่องไหลลงเอง ไม่ใช้ไฟฟ้า', 'สายพานข้างไลน์ส่งเข้าสเตชัน']] },
+];
+function poseOf(id, k = 0, sg = null) { // k: 0..1 slow dolly-in during a hold
+  if (sg && sg.shot != null) {
+    const sh = AMR_SHOTS[sg.shot];
+    if (sh.follow) {
+      const a = amrs[1].obj.position;
+      const g = new THREE.Vector3(a.x, 0.8, a.z).lerp(DOCK_VIEW, 0.45);
+      return { cam: g.clone().add(new THREE.Vector3(4.6, 3.4, 4.2)), tgt: g };
+    }
+    const c = V3(sh.cam), g = V3(sh.tgt);
+    return { cam: c.lerp(g, 0.08 * k), tgt: g };
+  }
   const sc = SCENES[sceneIndex(id)];
   const c = new THREE.Vector3(...sc.cam), g = new THREE.Vector3(...sc.tgt);
   return { cam: c.lerp(g, 0.08 * k), tgt: g };
@@ -1368,7 +1395,10 @@ function poseOf(id, k = 0) { // k: 0..1 slow dolly-in during a hold
 function buildVideo() {
   const ids = VPART[VIDEO];
   vSegs = [{ type: 'card', id: ids[0], dur: 5, end: false }];
-  ids.forEach((id) => vSegs.push({ type: 'scene', id, dur: id === 'overview' ? 7 : 9.5 }));
+  ids.forEach((id) => {
+    if (id === 'amr' && VIDEO === 'current') AMR_SHOTS.forEach((sh, k) => vSegs.push({ type: 'scene', id, shot: k, dur: sh.dur }));
+    else vSegs.push({ type: 'scene', id, dur: id === 'overview' ? 7 : 9.5 });
+  });
   vSegs.push({ type: 'scene', id: 'connected', dur: 7 });
   vSegs.push({ type: 'card', id: 'connected', dur: 4, end: true });
   let t0 = 0;
@@ -1399,6 +1429,21 @@ function applyVideoSegment(i) {
   renderUI();
   $('vchip').textContent = VCOPY[lang][VIDEO].chip;
   $('vcard').innerHTML = sg.type === 'card' ? cardHTML(sg) : '';
+  if (sg.shot != null) {
+    const [title, pts] = AMR_SHOTS[sg.shot][lang];
+    $('capTitle').textContent = title;
+    $('capPoints').innerHTML = pts.map((p) => `<li>${p}</li>`).join('');
+  }
+  if (sg.shot === 0) {
+    // stage the AMRs so the shots show a full cycle: AMR 0 reaches the head for shot 3,
+    // AMR 1 (loaded) docks at Line 2 early in shot 4
+    const toHead = AMR_SHOTS[0].dur + AMR_SHOTS[1].dur + 1;
+    const toDock = toHead + AMR_SHOTS[2].dur - 1 + 3;
+    const set = (a, u, loaded) => { a.u = (u + 1) % 1; a.dwell = 0; a.mode = ''; a.loaded = loaded; };
+    set(amrs[0], PICK_U - toHead * AMR_SPEED / AMR_LEN, 0);
+    set(amrs[1], DOCK_U - toDock * AMR_SPEED / AMR_LEN, 10);
+    set(amrs[2], DOCK_U + 0.2, 0);
+  }
 }
 function videoFrame(T, noRender = false) {
   let i = vSegs.findIndex((sg) => T < sg.t0 + sg.dur);
@@ -1407,15 +1452,15 @@ function videoFrame(T, noRender = false) {
   const sg = vSegs[i], lt = T - sg.t0;
   // camera: ease from the previous segment's end pose, then a slow dolly-in
   const TR = 2.6;
-  const endPose = (j) => poseOf(vSegs[j].id, 1);
+  const endPose = (j) => poseOf(vSegs[j].id, 1, vSegs[j]);
   let pose;
   if (sg.type === 'card') {
     const k = lt / sg.dur, a = 0.12 * (k - 0.5);
-    const p = poseOf(sg.id, 0), off = p.cam.clone().sub(p.tgt);
+    const p = poseOf(sg.id, 0, sg), off = p.cam.clone().sub(p.tgt);
     off.applyAxisAngle(new THREE.Vector3(0, 1, 0), a);
     pose = { cam: p.tgt.clone().add(off), tgt: p.tgt };
   } else {
-    const target = poseOf(sg.id, Math.max(0, (lt - TR) / (sg.dur - TR)));
+    const target = poseOf(sg.id, Math.max(0, (lt - TR) / (sg.dur - TR)), sg);
     if (i > 0 && lt < TR) {
       const from = vSegs[i - 1].type === 'card' ? (() => { const p = poseOf(vSegs[i - 1].id, 0), off = p.cam.clone().sub(p.tgt); off.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.06); return { cam: p.tgt.clone().add(off), tgt: p.tgt }; })() : endPose(i - 1);
       const e = smooth(lt / TR);
