@@ -15,7 +15,8 @@ import { UI, SCENES } from './content.js';
 
 const gsap = window.gsap;
 gsap.ticker.lagSmoothing(0); // keep camera moves time-accurate even on slow GPUs
-const isMobile = matchMedia('(max-width: 760px)').matches;
+const VIDEO = ['current', 'future'].includes(new URLSearchParams(location.search).get('video')) ? new URLSearchParams(location.search).get('video') : null;
+const isMobile = !VIDEO && matchMedia('(max-width: 760px)').matches;
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------------- palette (clean, light factory like the site photos) ---------------- */
@@ -469,6 +470,7 @@ function booster() {
 }
 
 const towers = [], wis = [], tracePrinters = [];
+const planObjs = []; // roadmap-only objects (hidden in the 'current' video part)
 const rfidPads = [];
 const rfidMat = glow(0xf59e0b, 0.9);
 const rfidPanelMat = mat(0xeef0f2, { roughness: 0.55, metalness: 0 });
@@ -488,6 +490,7 @@ LINES.forEach((lx, li) => {
     // RFID e-Kanban (planned): panel antenna on an arm facing the operator + fixed reader box on the post
     const ax = lx + os * 1.25, az = sz - 0.3;
     const pad = group(scene, ax, 0, az, os * Math.PI / 2);
+    planObjs.push(pad);
     box(0.06, 1.55, 0.06, alu, pad, 0, 0.775, -0.05);                    // aluminium profile post
     box(0.24, 0.32, 0.03, rfidReaderMat, pad, 0, 0.95, -0.02);           // fixed reader (in front of the post)
     box(0.05, 0.02, 0.005, glow(0x22c55e, 1.2), pad, -0.06, 1.06, 0.0);
@@ -549,6 +552,7 @@ const rfidCards = LINES.map(() => {
   c.castShadow = false;
   c.ring = new THREE.Mesh(new THREE.RingGeometry(0.16, 0.19, 32), new THREE.MeshBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }));
   c.ring.rotation.y = Math.PI / 2; scene.add(c.ring);
+  planObjs.push(c, c.ring);
   return c;
 });
 
@@ -778,6 +782,7 @@ const labelPrinters = [];
 }
 
 /* ---------------- ROADMAP: RFID e-Kanban + ESL flow rack (left) ---------------- */
+const planMark = scene.children.length;
 const esls = [];
 let kanbanBoard;
 {
@@ -858,6 +863,8 @@ let rfidGate, rfidPallet;
   box(0.2, 0.12, 0.02, 0xfbbf24, rfidPallet, 0, 0.35, 0.51).castShadow = false;
   rfidPallet.add(person(null, 0, -1.0, 0, 0x3b6ea5));
 }
+
+planObjs.push(...scene.children.slice(planMark));
 
 /* ---------------- data flows (shown in "connected" + relevant scenes) ---------------- */
 const flows = [];
@@ -974,9 +981,9 @@ const clock = new THREE.Clock();
 const tmp = new THREE.Vector3(), tmp2 = new THREE.Vector3();
 const smooth = (x) => x * x * (3 - 2 * x);
 const AMR_SPEED = 1.1, DWELL = 6;
-function tick() {
-  const dt = Math.min(clock.getDelta(), 0.05);
-  const t = clock.elapsedTime;
+function tick(vdt, vt, noRender) {
+  const dt = vdt ?? Math.min(clock.getDelta(), 0.05);
+  const t = vt ?? clock.elapsedTime;
   for (const r of movingTexes) r.offset.y -= dt * 0.8;
   // products on the lines
   for (const p of products) {
@@ -1115,21 +1122,127 @@ function tick() {
   });
   // data flows: fade in for the relevant scene
   for (const fl of flows) {
-    const want = fl.tags.includes(sid) ? 1 : 0;
+    const want = fl.tags.includes(sid) && !(VIDEO === 'current' && fl.tags.some((x) => PLAN_IDS.includes(x))) ? 1 : 0;
     fl.vis += (want - fl.vis) * Math.min(1, dt * 3);
     const on = fl.vis > 0.02;
     fl.line.visible = on; fl.line.material.opacity = 0.5 * fl.vis;
     fl.dots.forEach((d, i) => { d.visible = on; if (on) { fl.curve.getPointAt((t * 0.18 + i / 3) % 1, tmp); d.position.copy(tmp); } });
   }
-  controls.update();
+  if (noRender) return;
+  if (!VIDEO) controls.update();
   renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
-  requestAnimationFrame(tick);
+  if (!VIDEO) requestAnimationFrame(() => tick());
+}
+
+/* ---------------- video mode (?video=current | ?video=future [&lang=th]) ----------------
+ * Deterministic, frame-by-frame: an external recorder calls __bb.videoFrame(seconds) for every frame,
+ * so the result is smooth even when rendering is slow. No audio. */
+const PLAN_IDS = SCENES.filter((x) => x.kind === 'plan').map((x) => x.id);
+const DONE_IDS = SCENES.filter((x) => x.kind === 'done').map((x) => x.id);
+const VCOPY = {
+  en: {
+    current: { kicker: 'PART 1', title: 'Delivered solutions', sub: 'Brake booster plant · running on the shop floor today', endTitle: 'Delivered · in operation', endSub: 'Next: Part 2 — Future plan', chip: 'PART 1 · DELIVERED' },
+    future: { kicker: 'PART 2', title: 'Future plan', sub: 'Roadmap items under planning', endTitle: 'Thank you', endSub: 'Questions & discussion', chip: 'PART 2 · FUTURE PLAN' },
+  },
+  th: {
+    current: { kicker: 'PART 1', title: 'โซลูชันที่ส่งมอบแล้ว', sub: 'โรงงานหม้อลมเบรก · ใช้งานจริงในไลน์ผลิตวันนี้', endTitle: 'ส่งมอบแล้ว · ใช้งานจริง', endSub: 'ต่อไป: Part 2 — แผนงานในอนาคต', chip: 'PART 1 · ส่งมอบแล้ว' },
+    future: { kicker: 'PART 2', title: 'แผนงานในอนาคต', sub: 'รายการที่อยู่ระหว่างวางแผน', endTitle: 'ขอบคุณครับ', endSub: 'ถาม-ตอบ / พูดคุย', chip: 'PART 2 · แผนงาน' },
+  },
+};
+const VPART = { current: ['overview', ...DONE_IDS], future: PLAN_IDS };
+const VIDEO_FPS = 30;
+let vSegs = [], vTotal = 0, vSeg = -1, vLastT = 0;
+function sceneIndex(id) { return SCENES.findIndex((x) => x.id === id); }
+function poseOf(id, k = 0) { // k: 0..1 slow dolly-in during a hold
+  const sc = SCENES[sceneIndex(id)];
+  const c = new THREE.Vector3(...sc.cam), g = new THREE.Vector3(...sc.tgt);
+  return { cam: c.lerp(g, 0.08 * k), tgt: g };
+}
+function buildVideo() {
+  const ids = VPART[VIDEO];
+  vSegs = [{ type: 'card', id: ids[0], dur: 5, end: false }];
+  ids.forEach((id) => vSegs.push({ type: 'scene', id, dur: id === 'overview' ? 7 : 9.5 }));
+  vSegs.push({ type: 'scene', id: 'connected', dur: 7 });
+  vSegs.push({ type: 'card', id: 'connected', dur: 4, end: true });
+  let t0 = 0;
+  for (const sg of vSegs) { sg.t0 = t0; t0 += sg.dur; }
+  vTotal = t0;
+}
+function cardHTML(sg) {
+  const c = VCOPY[lang][VIDEO];
+  const items = VPART[VIDEO].filter((id) => id !== 'overview').map((id) => SCENES[sceneIndex(id)]);
+  const list = items.map((x) => `<li><b class="${x.kind}">${x.num}</b>${x[lang].name}</li>`).join('');
+  return sg.end
+    ? `<div class="vk">${c.kicker}</div><h1>${c.endTitle}</h1><p>${c.endSub}</p>`
+    : `<div class="vk">${c.kicker}</div><h1>${c.title}</h1><p>${c.sub}</p><ol>${list}</ol>`;
+}
+function applyVideoSegment(i) {
+  const sg = vSegs[i];
+  current = sceneIndex(sg.id);
+  const sc = SCENES[current];
+  const focus = sc.id === 'connected' ? (VIDEO === 'current' ? DONE_IDS : PLAN_IDS) : sc.focus;
+  for (const [id, l] of Object.entries(labels)) {
+    const on = focus.includes(id) && !(VIDEO === 'current' && PLAN_IDS.includes(id));
+    l.el.classList.toggle('focus', on && focus.length === 1);
+    l.el.classList.remove('dim');
+    l.el.style.visibility = on ? '' : 'hidden';
+  }
+  for (const sl of smallLabels) sl.o.visible = !sl.scenes || sl.scenes.includes(sc.id);
+  for (const o of planObjs) o.visible = VIDEO !== 'current';
+  renderUI();
+  $('vchip').textContent = VCOPY[lang][VIDEO].chip;
+  $('vcard').innerHTML = sg.type === 'card' ? cardHTML(sg) : '';
+}
+function videoFrame(T, noRender = false) {
+  let i = vSegs.findIndex((sg) => T < sg.t0 + sg.dur);
+  if (i < 0) i = vSegs.length - 1;
+  if (i !== vSeg) { vSeg = i; applyVideoSegment(i); }
+  const sg = vSegs[i], lt = T - sg.t0;
+  // camera: ease from the previous segment's end pose, then a slow dolly-in
+  const TR = 2.6;
+  const endPose = (j) => poseOf(vSegs[j].id, 1);
+  let pose;
+  if (sg.type === 'card') {
+    const k = lt / sg.dur, a = 0.12 * (k - 0.5);
+    const p = poseOf(sg.id, 0), off = p.cam.clone().sub(p.tgt);
+    off.applyAxisAngle(new THREE.Vector3(0, 1, 0), a);
+    pose = { cam: p.tgt.clone().add(off), tgt: p.tgt };
+  } else {
+    const target = poseOf(sg.id, Math.max(0, (lt - TR) / (sg.dur - TR)));
+    if (i > 0 && lt < TR) {
+      const from = vSegs[i - 1].type === 'card' ? (() => { const p = poseOf(vSegs[i - 1].id, 0), off = p.cam.clone().sub(p.tgt); off.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.06); return { cam: p.tgt.clone().add(off), tgt: p.tgt }; })() : endPose(i - 1);
+      const e = smooth(lt / TR);
+      pose = { cam: from.cam.clone().lerp(target.cam, e), tgt: from.tgt.clone().lerp(target.tgt, e) };
+    } else pose = target;
+  }
+  camera.position.copy(pose.cam); controls.target.copy(pose.tgt); camera.lookAt(pose.tgt);
+  // overlays: card fades in/out; caption + chip only on scene segments
+  const fade = (x) => Math.max(0, Math.min(1, x));
+  const cardA = sg.type === 'card' ? fade(Math.min(lt / 0.6, (sg.dur - lt) / 0.6)) : 0;
+  $('vcard').style.opacity = cardA;
+  labelRenderer.domElement.style.opacity = String(1 - cardA);
+  const capA = sg.type === 'scene' ? fade(Math.min((lt - 0.8) / 0.6, (sg.dur - lt) / 0.4)) : 0;
+  $('caption').style.opacity = capA;
+  $('vchip').style.opacity = sg.type === 'scene' ? 1 : 0;
+  const dt = Math.min(Math.max(T - vLastT, 0), 0.05);
+  vLastT = T;
+  tick(dt, T, noRender);
 }
 
 renderUI();
 resize();
-goTo(0);
-tick();
+if (VIDEO) {
+  document.body.classList.add('video');
+  controls.enabled = false;
+  const lp = new URLSearchParams(location.search).get('lang');
+  if (lp === 'th') lang = 'th';
+  buildVideo();
+  resize();
+  videoFrame(0);
+} else {
+  goTo(0);
+  tick();
+}
 $('loading').classList.add('hide');
-window.__bb = { scene, camera, controls, renderer, goTo };
+window.__bb = { scene, camera, controls, renderer, goTo, videoFrame, video: () => ({ total: vTotal, fps: VIDEO_FPS, segs: vSegs.map((sg) => [sg.type, sg.id, sg.t0, sg.dur]) }) };

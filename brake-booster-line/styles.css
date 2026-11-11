@@ -104,3 +104,25 @@ button { font: inherit; color: inherit; }
   .lbl { font-size: 10px; }
   .lbl span { display: none; }
 }
+
+/* ---------- video mode (?video=current|future): presentation overlays, no UI chrome ---------- */
+#vchip, #vcard { display: none; }
+body.video #topbar, body.video #sidebar, body.video .cap-nav, body.video #capText { display: none; }
+body.video #vchip { display: block; position: fixed; top: var(--space-6); left: var(--space-6); z-index: 6;
+  font: 600 var(--text-sm)/1 var(--font-mono); letter-spacing: 0.08em; padding: 8px 12px; border-radius: var(--radius-sm);
+  background: var(--color-paper-2); border: var(--rule-hair); color: var(--color-ink); }
+body.video #caption { left: var(--space-6); right: auto; bottom: var(--space-6); width: min(880px, calc(100% - 48px)); max-height: none;
+  padding: var(--space-4) var(--space-6); }
+body.video .cap-head h2 { font-size: 1.5rem; }
+body.video #capPoints { font-size: var(--text-base); color: var(--color-ink-2); margin-top: var(--space-3); gap: 4px var(--space-6); }
+body.video #vcard { display: flex; position: fixed; inset: 0; z-index: 7; flex-direction: column; justify-content: center;
+  padding: 0 10%; background: oklch(15% 0.02 255 / 0.82); color: var(--color-ink); pointer-events: none; }
+body.video #vcard:empty { display: none; }
+#vcard .vk { font: 600 var(--text-base)/1 var(--font-mono); letter-spacing: 0.14em; color: var(--color-accent); }
+#vcard h1 { margin: var(--space-4) 0 var(--space-2); font-size: 3.6rem; line-height: 1.1; font-weight: 600; font-style: normal; }
+#vcard p { margin: 0 0 var(--space-6); font-size: 1.35rem; color: var(--color-ink-2); }
+#vcard ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3) var(--space-6); max-width: 980px; }
+#vcard li { display: flex; align-items: center; gap: var(--space-3); font-size: 1.2rem; color: var(--color-ink); }
+#vcard li b { flex: 0 0 34px; height: 34px; border-radius: var(--radius-sm); display: grid; place-items: center; font: 600 1rem/1 var(--font-mono);
+  background: var(--color-done); color: var(--color-on-done); }
+#vcard li b.plan { background: var(--color-plan); color: var(--color-on-plan); }
