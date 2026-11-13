@@ -231,7 +231,8 @@ const HALL = { x0: -40, x1: 40, z0: -26, z1: 22 };
   box(0.4, 8, 48, wall, scene, HALL.x0, 4, -2);
   box(0.4, 1, 48, wall, scene, HALL.x1, 0.5, -2);
   box(30, 1, 0.4, wall, scene, -27, 0.5, HALL.z1);
-  box(42, 1, 0.4, wall, scene, 19, 0.5, HALL.z1);
+  box(29.9, 1, 0.4, wall, scene, 12.95, 0.5, HALL.z1);   // opening at x 27.9–31.1: personnel entrance (PPE check)
+  box(8.9, 1, 0.4, wall, scene, 35.55, 0.5, HALL.z1);
   // skirting stripe on walls
   box(80, 0.3, 0.42, mat(0x94a3b8), scene, 0, 0.15, HALL.z0);
   box(0.42, 0.3, 48, mat(0x94a3b8), scene, HALL.x0, 0.15, -2);
@@ -1051,6 +1052,144 @@ let rfidGate, rfidPallet;
   rfidPallet.add(person(null, 0, -1.0, 0, 0x3b6ea5));
 }
 
+/* ---------------- ROADMAP: AI camera PPE check at the production entrance ---------------- */
+const PPE_X = 29.5, PPE_STOP = 23.2;
+const PPE_ITEMS = ['Hair cap', 'Safety glasses', 'Mask', 'Arm covers', 'Gloves', 'Safety shoes'];
+let ppeScreen, ppeLamps, ppeFlaps, ppeWaves, ppeWorkers, ppeZone;
+/** Operator with PPE; missing = index in PPE_ITEMS that is not worn. Faces -z (walking into the hall). */
+function ppePerson(missing = -1) {
+  const g = person(null, 0, 0, 0, 0x3b6ea5);
+  scene.remove(g);
+  const white = mat(0xf8fafc, { roughness: 0.7, metalness: 0 });
+  for (const s of [-1, 1]) cyl(0.05, 0.08, skin, g, s * 0.29, 0.81, 0.05, 8);             // hands
+  box(0.25, 0.05, 0.03, mat(0x1e3a5f, { roughness: 0.2, metalness: 0.3 }), g, 0, 1.69, 0.12); // glasses
+  box(0.17, 0.09, 0.03, mat(0xdbeafe, { roughness: 0.8, metalness: 0 }), g, 0, 1.585, 0.115);  // mask
+  for (const s of [-1, 1]) {
+    cyl(0.068, 0.32, white, g, s * 0.29, 1.0, 0.05, 8);                                     // arm covers
+    if (missing !== 4) box(0.12, 0.13, 0.12, mat(0x22c55e, { roughness: 0.6, metalness: 0 }), g, s * 0.29, 0.8, 0.05); // gloves
+    box(0.21, 0.04, 0.12, mat(0xf5c400), g, s * 0.1, 0.1, 0.13);                              // safety shoe toe cap
+  }
+  g.rotation.y = Math.PI;
+  return g;
+}
+{
+  const gz = HALL.z1, gx = PPE_X;
+  const frameMat = mat(0x9aa1a9, { roughness: 0.35, metalness: 0.7 });
+  // entrance frame + header sign
+  for (const s of [-1, 1]) box(0.14, 2.9, 0.14, frameMat, scene, gx + s * 1.45, 1.45, gz);
+  box(3.04, 0.14, 0.14, frameMat, scene, gx, 2.9, gz);
+  sign('PPE CHECK · ENTRANCE (PLANNED)', 3.0, 0.32, '#f59e0b', '#1c1206', scene, gx, 3.18, gz + 0.08, 0, 'bold 28px system-ui');
+  // AI camera on the header, looking out at the check zone
+  const cam = group(scene, gx, 2.78, gz + 0.12);
+  box(0.16, 0.14, 0.3, mat(0xf1f5f9, { roughness: 0.4, metalness: 0.1 }), cam, 0, 0, 0.1).rotation.x = 0.35;
+  cyl(0.045, 0.03, glow(0x0f172a, 0.2), cam, 0, -0.06, 0.26, 16).rotation.x = Math.PI / 2 + 0.35;
+  box(0.1, 0.02, 0.005, rfidMat, cam, 0, 0.08, 0.2);
+  // detection field (dashed amber) from the camera to the check zone
+  const z0 = PPE_STOP - 0.6, z1 = PPE_STOP + 0.6, cx = gx, cy = 2.72, cz = gz + 0.3;
+  const corners = [[-0.6, 0, z0], [0.6, 0, z0], [0.6, 0, z1], [-0.6, 0, z1]];
+  const pts = [];
+  for (const [x, y, z] of corners) pts.push(cx, cy, cz, gx + x, y + 0.02, z);
+  for (let i = 0; i < 4; i++) { const a = corners[i], b = corners[(i + 1) % 4]; pts.push(gx + a[0], 0.02, a[2], gx + b[0], 0.02, b[2]); }
+  const fg = new THREE.BufferGeometry(); fg.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+  const field = new THREE.LineSegments(fg, planEdge); field.computeLineDistances(); scene.add(field);
+  ppeZone = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 1.2), new THREE.MeshBasicMaterial({ color: 0xf59e0b, transparent: true, opacity: 0.18, depthWrite: false }));
+  ppeZone.rotation.x = -Math.PI / 2; ppeZone.position.set(gx, 0.02, PPE_STOP); scene.add(ppeZone);
+  // flap barrier just inside the entrance
+  ppeFlaps = [];
+  for (const s of [-1, 1]) {
+    box(0.26, 1.0, 1.1, mat(0xd6dbe1, { roughness: 0.3, metalness: 0.6 }), scene, gx + s * 0.95, 0.5, gz - 0.9);
+    box(0.27, 0.02, 0.5, rfidMat, scene, gx + s * 0.95, 1.01, gz - 0.9);
+    const pivot = group(scene, gx + s * 0.82, 0.78, gz - 0.9);
+    box(0.62, 0.42, 0.03, glass, pivot, -s * 0.31, 0, 0);
+    pivot.userData.s = s; ppeFlaps.push(pivot);
+  }
+  // result kiosk outside the entrance: screen + AI box + tower light with buzzer
+  const k = group(scene, gx + 2.35, 0, gz + 0.9);
+  box(0.4, 0.05, 0.4, steel, k, 0, 0.025, 0);
+  box(0.08, 1.3, 0.08, frameMat, k, 0, 0.65, 0);
+  box(0.36, 0.26, 0.14, rfidReaderMat, k, 0, 0.95, 0.02);                 // AI edge box
+  box(0.26, 0.02, 0.005, rfidMat, k, 0, 1.05, 0.095);
+  box(1.28, 0.8, 0.06, dark, k, 0, 1.75, 0);
+  ppeScreen = screen(1.2, 0.72, drawPPE, k, 0, 1.75, 0.035, 0, 640);
+  const tw = group(k, 0, 2.15, 0);
+  cyl(0.025, 0.12, steel, tw, 0, 0.06, 0, 8);
+  ppeLamps = [0x22c55e, 0xef4444].map((c, i) => cyl(0.07, 0.13, glow(c, 0.08), tw, 0, 0.19 + i * 0.14, 0, 16));
+  cyl(0.075, 0.06, dark, tw, 0, 0.42, 0, 16);                              // buzzer
+  ppeWaves = [0, 1, 2].map((i) => {
+    const w = new THREE.Mesh(new THREE.TorusGeometry(0.25, 0.012, 6, 32), new THREE.MeshBasicMaterial({ color: 0xef4444, transparent: true, opacity: 0, depthWrite: false }));
+    w.position.set(0, 0.42, 0); w.rotation.x = Math.PI / 2; w.userData.phase = i / 3; tw.add(w); return w;
+  });
+  ppeWorkers = [ppePerson(-1), ppePerson(4)];
+  for (const w of ppeWorkers) { scene.add(w); w.position.set(gx, 0, 27); }
+  smallLabel('AI camera', gx - 0.9, 3.0, gz + 0.4, ['ppe']);
+  smallLabel('Result screen · log', gx + 3.3, 1.75, gz + 0.9, ['ppe']);
+  smallLabel('Red light + buzzer', gx + 2.35, 3.0, gz + 0.9, ['ppe']);
+  smallLabel('Check zone', gx - 1.1, 0.15, PPE_STOP + 0.4, ['ppe']);
+}
+/** PPE result screen. st: idle | scan | pass | fail. */
+function drawPPE(c, W, H, st = 'idle') {
+  c.fillStyle = '#0f172a'; c.fillRect(0, 0, W, H);
+  c.fillStyle = '#1e293b'; c.fillRect(0, 0, W, 38);
+  c.fillStyle = '#f1f5f9'; c.font = 'bold 20px system-ui'; c.fillText('PPE CHECK · PRODUCTION ENTRANCE', 12, 26);
+  c.textAlign = 'right'; c.fillStyle = '#fbbf24'; c.font = 'bold 15px system-ui'; c.fillText('AI CAMERA ● LIVE', W - 12, 25); c.textAlign = 'left';
+  // camera view with a figure (drawn shape, not a photo)
+  const px = 12, py = 48, pw = 290, ph = H - 84;
+  c.fillStyle = '#273449'; c.fillRect(px, py, pw, ph);
+  const ok = (i) => !(st === 'fail' && i === 4);
+  if (st === 'idle') {
+    c.fillStyle = '#94a3b8'; c.font = '17px system-ui'; c.textAlign = 'center';
+    c.fillText('Step into the check zone', px + pw / 2, py + ph / 2); c.textAlign = 'left';
+  } else {
+    const cx = px + pw / 2, s = 0.95;
+    const R2 = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(cx + x * s, py + y * s, w * s, h * s); };
+    R2(-30, 210, 24, 85, '#334155'); R2(6, 210, 24, 85, '#334155');      // legs
+    R2(-34, 292, 30, 12, '#111827'); R2(4, 292, 30, 12, '#111827');      // shoes
+    R2(-34, 300, 30, 5, '#f5c400'); R2(4, 300, 30, 5, '#f5c400');
+    R2(-38, 110, 76, 105, '#3b6ea5');                                    // body
+    R2(-54, 112, 16, 50, '#3b6ea5'); R2(38, 112, 16, 50, '#3b6ea5');     // upper arms
+    R2(-54, 160, 16, 45, '#f1f5f9'); R2(38, 160, 16, 45, '#f1f5f9');     // arm covers
+    const hand = ok(4) ? '#22c55e' : '#d9a77f';
+    R2(-56, 203, 20, 20, hand); R2(36, 203, 20, 20, hand);
+    c.fillStyle = '#d9a77f'; c.beginPath(); c.arc(cx, py + 82 * s, 24 * s, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#f8fafc'; c.beginPath(); c.arc(cx, py + 76 * s, 26 * s, Math.PI, 0); c.fill();  // hair cap
+    R2(-22, 74, 44, 9, '#1e3a5f');                                      // glasses
+    R2(-17, 88, 34, 15, '#dbeafe');                                     // mask
+    const boxes = [[[-30, 46, 60, 34]], [[-26, 70, 52, 16]], [[-20, 86, 40, 20]], [[-58, 156, 24, 52], [34, 156, 24, 52]], [[-60, 198, 28, 30], [32, 198, 28, 30]], [[-38, 286, 76, 24]]];
+    c.lineWidth = 2; c.font = 'bold 11px system-ui';
+    boxes.forEach((bs, i) => {
+      const col = st === 'scan' ? '#fbbf24' : ok(i) ? '#22c55e' : '#ef4444';
+      c.strokeStyle = col; c.setLineDash(st === 'scan' ? [5, 4] : []);
+      for (const [x, y, w, h] of bs) c.strokeRect(cx + x * s, py + y * s, w * s, h * s);
+      if (st !== 'scan') {
+        const [x, y] = bs[bs.length - 1];
+        const tx = i === 3 || i === 4 ? cx + (x + 30) * s : cx + 34 * s, ty = py + (y + 10) * s;
+        c.fillStyle = col; c.fillText(PPE_ITEMS[i].toUpperCase(), Math.min(tx, px + pw - 92), ty);
+      }
+    });
+    c.setLineDash([]);
+  }
+  // checklist
+  const lx = 316;
+  c.fillStyle = '#cbd5e1'; c.font = 'bold 15px system-ui'; c.fillText('PPE ITEMS', lx, 66);
+  PPE_ITEMS.forEach((n, i) => {
+    const y = 80 + i * 28;
+    const col = st === 'idle' ? '#475569' : st === 'scan' ? '#f59e0b' : ok(i) ? '#22c55e' : '#ef4444';
+    c.fillStyle = col; c.fillRect(lx, y, 20, 20);
+    c.fillStyle = '#0f172a'; c.font = 'bold 15px system-ui'; c.textAlign = 'center';
+    c.fillText(st === 'idle' ? '' : st === 'scan' ? '…' : ok(i) ? '✓' : '✗', lx + 10, y + 16); c.textAlign = 'left';
+    c.fillStyle = st === 'fail' && i === 4 ? '#fca5a5' : '#e2e8f0'; c.font = '16px system-ui'; c.fillText(n, lx + 30, y + 16);
+  });
+  // result banner
+  const res = { idle: ['#334155', 'WAITING'], scan: ['#b45309', 'CHECKING…'], pass: ['#15803d', 'PASS · ENTRY OK'], fail: ['#b91c1c', 'FAIL · GLOVES MISSING'] }[st];
+  c.fillStyle = res[0]; c.fillRect(lx, 254, W - lx - 12, 44);
+  c.fillStyle = '#fff'; c.font = 'bold 20px system-ui'; c.fillText(res[1], lx + 12, 283);
+  // log
+  c.fillStyle = '#94a3b8'; c.font = '13px system-ui';
+  c.fillText('LOG  07:58:12 · ID 0213 · PASS', lx, 318);
+  c.fillText('LOG  07:57:40 · ID 0198 · FAIL · Mask', lx, 336);
+  c.textAlign = 'right'; c.fillStyle = '#64748b'; c.font = '12px system-ui'; c.fillText('Sample data', W - 12, H - 10); c.textAlign = 'left';
+}
+
 planObjs.push(...scene.children.slice(planMark));
 
 /* ---------------- data flows (shown in "connected" + relevant scenes) ---------------- */
@@ -1075,6 +1214,7 @@ flow([[CK_A.x, 1.3, CK_A.z], [-11.8, 5.9, -10], [-11.8, 6.25, -23.4], [R[0], 6.2
 flow([[-13.75, 1.2, -2.25], [-11.8, 6.2, -2.25], [-11.8, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0xf59e0b, ['ekanban', 'connected']);
 flow([[-36.4, 3.2, -0.2], [-36.4, 6.2, -10], [R[0], 6.2, -20], [R[0], 2.3, R[2]]], 0xf59e0b, ['esl', 'connected']);
 flow([[-8, 3.8, 22], [-8, 6.2, 14], [-12, 6.2, -23.5], [R[0], 6.2, -23.5], [R[0], 2.2, R[2]]], 0xf59e0b, ['rfid', 'connected']);
+flow([[PPE_X + 2.35, 1.0, HALL.z1 + 0.9], [PPE_X + 2.35, 6.2, 18], [26, 6.2, -23.55], [R[0], 6.2, -23.55], [R[0], 2.2, R[2] - 0.1]], 0xf59e0b, ['ppe', 'connected']);
 
 flow([[-18.6, 1.4, 21.0], [-18.6, 6.2, 19.5], [-18.6, 6.2, -23.4], [R[0], 6.2, -23.4], [R[0], 2.2, R[2] - 0.2]], 0x7c3aed, ['shipping', 'connected']);
 flow([[-18.3, 1.8, -12.6], [-18.3, 6.2, -13.5], [-18.3, 6.25, -23.5], [R[0], 6.25, -23.5], [R[0], 2.2, R[2] + 0.1]], 0x0891b2, ['frontlabel', 'connected']);
@@ -1096,6 +1236,7 @@ label('oee', '10', 'done', 20.2, 4.3, 3.1);
 label('ekanban', '11', 'plan', -13.75, 2.6, -2.25);
 label('esl', '12', 'plan', -31, 3.6, 0);
 label('rfid', '13', 'plan', -8, 3.6, HALL.z1);
+label('ppe', '14', 'plan', PPE_X - 0.6, 4.0, HALL.z1);
 for (const [i, lx] of LINES.entries()) smallLabel(`Line ${i + 1}`, lx, 1.8, LINE_Z1 + 1.6, ['overview', 'label', 'connected']);
 
 /* ---------------- UI / i18n / scenes ---------------- */
@@ -1177,6 +1318,7 @@ new ResizeObserver(resize).observe($('caption'));
 const clock = new THREE.Clock();
 const tmp = new THREE.Vector3(), tmp2 = new THREE.Vector3();
 const smooth = (x) => x * x * (3 - 2 * x);
+let ppeT0 = 0; // PPE check cycle start (video aligns it to the segment)
 const AMR_SPEED = 1.1, DWELL = 6;
 function tick(vdt, vt, noRender) {
   const dt = vdt ?? Math.min(clock.getDelta(), 0.05);
@@ -1326,6 +1468,38 @@ function tick(vdt, vt, noRender) {
     w.scale.setScalar(0.6 + ph * 1.8); w.position.y = 1.5;
     w.material.opacity = (near ? 0.9 : 0.3) * (1 - ph);
   });
+  // AI PPE check: worker A (full PPE) passes, worker B (no gloves) is stopped with red light + buzzer
+  {
+    const pt = ((t - ppeT0) % 12 + 12) % 12, B = pt >= 5.5, lt = B ? pt - 5.5 : pt;
+    const [wa, wb] = ppeWorkers, w = B ? wb : wa;
+    wa.visible = !B; wb.visible = B;
+    let z, ry = Math.PI, st = 'idle', open = 0, walk = false;
+    if (lt < 1.8) { z = 27 - (27 - PPE_STOP) * smooth(lt / 1.8); walk = true; }
+    else if (!B) {
+      z = PPE_STOP;
+      if (lt < 2.6) st = 'scan'; else st = 'pass';
+      open = lt < 2.9 ? 0 : lt < 4.6 ? Math.min(1, (lt - 2.9) / 0.4) : Math.max(0, 1 - (lt - 4.6) / 0.4);
+      if (lt > 3.1) { z = PPE_STOP - (lt - 3.1) * 2.6; walk = true; }
+      wa.visible = z > 16;
+    } else {
+      z = PPE_STOP;
+      st = lt < 2.6 ? 'scan' : 'fail';
+      if (lt > 4.9) { st = 'fail'; ry = 0; z = PPE_STOP + smooth(Math.min(1, (lt - 4.9) / 1.6)) * 3.8; walk = true; }
+      else if (lt > 4.6) ry = Math.PI * (1 - (lt - 4.6) / 0.3);
+    }
+    w.position.set(PPE_X, walk ? Math.abs(Math.sin(t * 9)) * 0.03 : 0, z); w.rotation.y = ry;
+    if (VIDEO === 'current') wa.visible = wb.visible = false;
+    if (st !== tick.ppeSt) { tick.ppeSt = st; ppeScreen.redraw(st); }
+    ppeLamps[0].material.emissiveIntensity = st === 'pass' ? 1.8 : 0.08;
+    ppeLamps[1].material.emissiveIntensity = st === 'fail' ? (Math.sin(t * 12) > 0 ? 2.2 : 0.5) : 0.08;
+    ppeZone.material.color.setHex(st === 'pass' ? 0x22c55e : st === 'fail' ? 0xef4444 : 0xf59e0b);
+    ppeZone.material.opacity = st === 'idle' ? 0.15 : 0.35;
+    for (const f of ppeFlaps) f.rotation.y = f.userData.s * open * Math.PI / 2;
+    ppeWaves.forEach((wv) => {
+      const ph = (t * 1.6 + wv.userData.phase) % 1;
+      wv.scale.setScalar(0.5 + ph * 1.6); wv.material.opacity = st === 'fail' ? 0.85 * (1 - ph) : 0;
+    });
+  }
   // data flows: fade in for the relevant scene
   for (const fl of flows) {
     const want = fl.tags.includes(sid) && !(VIDEO === 'current' && fl.tags.some((x) => PLAN_IDS.includes(x))) ? 1 : 0;
@@ -1397,7 +1571,7 @@ function buildVideo() {
   vSegs = [{ type: 'card', id: ids[0], dur: 5, end: false }];
   ids.forEach((id) => {
     if (id === 'amr' && VIDEO === 'current') AMR_SHOTS.forEach((sh, k) => vSegs.push({ type: 'scene', id, shot: k, dur: sh.dur }));
-    else vSegs.push({ type: 'scene', id, dur: id === 'overview' ? 7 : 9.5 });
+    else vSegs.push({ type: 'scene', id, dur: id === 'overview' ? 7 : id === 'ppe' ? 13.5 : 9.5 });
   });
   vSegs.push({ type: 'scene', id: 'connected', dur: 7 });
   vSegs.push({ type: 'card', id: 'connected', dur: 4, end: true });
@@ -1434,6 +1608,7 @@ function applyVideoSegment(i) {
     $('capTitle').textContent = title;
     $('capPoints').innerHTML = pts.map((p) => `<li>${p}</li>`).join('');
   }
+  if (sg.id === 'ppe' && sg.type === 'scene') ppeT0 = sg.t0 + 1.4;
   if (sg.shot === 0) {
     // stage the AMRs so the shots show a full cycle: AMR 0 reaches the head for shot 3,
     // AMR 1 (loaded) docks at Line 2 early in shot 4
@@ -1464,12 +1639,21 @@ function videoFrame(T, noRender = false) {
     if (i > 0 && lt < TR) {
       const from = vSegs[i - 1].type === 'card' ? (() => { const p = poseOf(vSegs[i - 1].id, 0), off = p.cam.clone().sub(p.tgt); off.applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.06); return { cam: p.tgt.clone().add(off), tgt: p.tgt }; })() : endPose(i - 1);
       const e = smooth(lt / TR);
+      const d = from.tgt.distanceTo(target.tgt);
+      if (VIDEO === 'future' && d > 20) {
+        // long move (Part 2): rise over the hall through a high mid-point so the frame always shows the plant
+        const vt = from.tgt.clone().lerp(target.tgt, 0.5).lerp(new THREE.Vector3(0, 0, -2), 0.35);
+        const vc = vt.clone().add(new THREE.Vector3(0, d * 1.0, d * 0.95));
+        const bz = (p0, p1, p2) => p0.clone().multiplyScalar((1 - e) ** 2).addScaledVector(p1, 2 * e * (1 - e)).addScaledVector(p2, e * e);
+        pose = { cam: bz(from.cam, vc, target.cam), tgt: bz(from.tgt, vt, target.tgt) };
+      } else {
       pose = { cam: from.cam.clone().lerp(target.cam, e), tgt: from.tgt.clone().lerp(target.tgt, e) };
       // fly over, not through the floor: arc the camera up and back mid-transition
       const hop = Math.sin(Math.PI * e) * Math.min(from.tgt.distanceTo(target.tgt) * 0.55, 16);
       const back = pose.cam.clone().sub(pose.tgt).setY(0);
       if (back.lengthSq() > 1e-6) pose.cam.addScaledVector(back.normalize(), hop * 0.6);
       pose.cam.y += hop;
+      }
     } else pose = target;
   }
   camera.position.copy(pose.cam); controls.target.copy(pose.tgt); camera.lookAt(pose.tgt);

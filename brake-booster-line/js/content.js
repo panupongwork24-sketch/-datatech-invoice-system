@@ -20,7 +20,7 @@ export const UI = {
 };
 
 // kind: done | plan | misc.  cam: [x,y,z] camera, tgt: [x,y,z] look-at.  focus: label ids to highlight.
-const ALL = ['amr', 'trace', 'infra', 'aep', 'label', 'checklist', 'shipping', 'frontlabel', 'reprint', 'oee', 'ekanban', 'esl', 'rfid'];
+const ALL = ['amr', 'trace', 'infra', 'aep', 'label', 'checklist', 'shipping', 'frontlabel', 'reprint', 'oee', 'ekanban', 'esl', 'rfid', 'ppe'];
 export const SCENES = [
   {
     id: 'overview', kind: 'misc', num: '◎',
@@ -163,13 +163,23 @@ export const SCENES = [
       points: ['RFID Gate ที่ทางออกฝ่ายผลิต', 'อ่านพาเลทอัตโนมัติเมื่อผ่าน', 'บันทึกการส่งมอบเข้าคลัง FG', 'เชื่อมกับข้อมูลชิ้นงาน / ฉลาก'] },
   },
   {
+    id: 'ppe', kind: 'plan', num: '14',
+    cam: [36.4, 4.6, 32.4], tgt: [30.2, 1.6, 21.6], focus: ['ppe'],
+    en: { name: 'AI camera PPE check', title: 'Roadmap: AI camera checks PPE at the production entrance',
+      text: 'Planned single checkpoint at the entrance to the production area. An AI camera checks each person for six PPE items before entry: hair cap, safety glasses, mask, arm covers, gloves and safety shoes. Complete PPE turns the light green and the gate opens; a missing item turns the light red with a buzzer, and every check is saved to a log.',
+      points: ['One checkpoint at the production entrance', '6 items: hair cap, glasses, mask, arm covers, gloves, safety shoes', 'Missing item → red light + buzzer, gate stays closed', 'Every check saved to a log on the existing server'] },
+    th: { name: 'AI Camera ตรวจ PPE', title: 'แผนงาน: กล้อง AI ตรวจ PPE ที่ทางเข้าพื้นที่ผลิต',
+      text: 'แผนติดตั้งจุดตรวจเดียวที่ทางเข้าพื้นที่ผลิต กล้อง AI ตรวจ PPE 6 รายการก่อนเข้า: หมวกคลุมผม แว่นตา หน้ากาก ปลอกแขน ถุงมือ และรองเท้าเซฟตี้ ใส่ครบ ไฟเขียวและประตูเปิด ถ้าขาดรายการใด ไฟแดงพร้อมเสียงเตือน และทุกการตรวจถูกบันทึก Log',
+      points: ['จุดตรวจเดียวที่ทางเข้าพื้นที่ผลิต', '6 รายการ: หมวกคลุมผม แว่นตา หน้ากาก ปลอกแขน ถุงมือ รองเท้าเซฟตี้', 'ขาดรายการใด → ไฟแดง + เสียงเตือน ประตูไม่เปิด', 'ทุกการตรวจบันทึก Log บน Server เดิม'] },
+  },
+  {
     id: 'connected', kind: 'misc', num: '∞',
     cam: [-10, 48, 52], tgt: [-4, 2, -2], focus: ALL,
     en: { name: 'Everything connected', title: 'One connected line — from material to finished goods',
-      text: 'Material flow (conveyor, X-lift, AMR + karakuri), unit data (QR + PLC), operator guidance (Digital WI), checks (digital checklist, OEE) and printing (AEP, customer, shipping, front and reprint labels) all run on the same infrastructure. The roadmap extends the same data to RFID e-Kanban and the FG hand-over.',
-      points: ['Material: X-lift → conveyor → AMR → Line 2', 'Data: SATO QR + PLC → traceability', 'People: Digital WI + digital checklist', 'Next: RFID e-Kanban at stations, ESL, RFID to FG'] },
+      text: 'Material flow (conveyor, X-lift, AMR + karakuri), unit data (QR + PLC), operator guidance (Digital WI), checks (digital checklist, OEE) and printing (AEP, customer, shipping, front and reprint labels) all run on the same infrastructure. The roadmap extends the same data to RFID e-Kanban, the FG hand-over and an AI camera PPE check at the entrance.',
+      points: ['Material: X-lift → conveyor → AMR → Line 2', 'Data: SATO QR + PLC → traceability', 'People: Digital WI + digital checklist', 'Next: RFID e-Kanban, ESL, RFID to FG, AI PPE check'] },
     th: { name: 'ทุกอย่างเชื่อมกัน', title: 'ไลน์ที่เชื่อมต่อกันทั้งหมด — ตั้งแต่วัตถุดิบถึงสินค้าสำเร็จรูป',
-      text: 'การลำเลียง (Conveyor, X-Lift, AMR + Karakuri), ข้อมูลชิ้นงาน (QR + PLC), การแนะนำพนักงาน (Digital WI), การตรวจเช็ค (Digital Checklist, OEE) และงานพิมพ์ (AEP, ฉลากลูกค้า, Shipping, Front, Reprint) ทำงานบนอินฟราเดียวกัน แผนงานถัดไปต่อยอดข้อมูลเดียวกันไปสู่ RFID e-Kanban และการส่งมอบเข้าคลัง FG',
-      points: ['วัตถุดิบ: X-Lift → Conveyor → AMR → Line 2', 'ข้อมูล: QR SATO + PLC → Traceability', 'คน: Digital WI + Digital Checklist', 'ถัดไป: RFID e-Kanban / ESL และ RFID เข้าคลัง FG'] },
+      text: 'การลำเลียง (Conveyor, X-Lift, AMR + Karakuri), ข้อมูลชิ้นงาน (QR + PLC), การแนะนำพนักงาน (Digital WI), การตรวจเช็ค (Digital Checklist, OEE) และงานพิมพ์ (AEP, ฉลากลูกค้า, Shipping, Front, Reprint) ทำงานบนอินฟราเดียวกัน แผนงานถัดไปต่อยอดข้อมูลเดียวกันไปสู่ RFID e-Kanban, การส่งมอบเข้าคลัง FG และกล้อง AI ตรวจ PPE ที่ทางเข้า',
+      points: ['วัตถุดิบ: X-Lift → Conveyor → AMR → Line 2', 'ข้อมูล: QR SATO + PLC → Traceability', 'คน: Digital WI + Digital Checklist', 'ถัดไป: RFID e-Kanban / ESL / RFID เข้าคลัง FG / AI ตรวจ PPE'] },
   },
 ];
